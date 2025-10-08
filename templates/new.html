@@ -1,0 +1,110 @@
+<html lang="en">
+<body>
+<div class="form-section">
+    <h3 class="form-section-title">Resource Details</h3>
+    
+    <div class="form-group">
+        <label class="form-label">Select Resources Needed</label>
+        <div class="resources-grid" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));">
+            <label class="resource-option">
+                <input type="checkbox" name="resource_types" value="hardware"> Hardware
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="resource_types" value="software"> Software
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="resource_types" value="lab"> Lab Access
+            </label>
+        </div>
+    </div>
+    
+    <!-- Hardware Resources (shown/hidden based on checkbox) -->
+    <div id="hardwareOptions" style="display: none;">
+        <h4 class="form-label">Hardware Resources</h4>
+        <div class="resources-grid">
+            <label class="resource-option">
+                <input type="checkbox" name="hardware_resources" value="PC"> PC
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="hardware_resources" value="High Performance PC + GPU"> High Performance PC + GPU
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="hardware_resources" value="Simulation Tool"> Simulation Tool
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="hardware_resources" value="Pepper"> Pepper
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="hardware_resources" value="Nao"> Nao
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="hardware_resources" value="Other"> Other
+            </label>
+        </div>
+        <div id="hardwareOtherContainer" style="display: none; margin-top: 10px;">
+            <input type="text" class="form-control" name="hardware_other" placeholder="Please specify other hardware">
+        </div>
+    </div>
+    
+    <!-- Software Resources (shown/hidden based on checkbox) -->
+    <div id="softwareOptions" style="display: none;">
+        <h4 class="form-label">Software Resources</h4>
+        <div class="resources-grid">
+            <label class="resource-option">
+                <input type="checkbox" name="software_resources" value="MATLAB"> MATLAB
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="software_resources" value="Python IDEs"> Python IDEs
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="software_resources" value="Choregraphe"> Choregraphe
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="software_resources" value="TensorFlow"> TensorFlow
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="software_resources" value="PyTorch"> PyTorch
+            </label>
+            <label class="resource-option">
+                <input type="checkbox" name="software_resources" value="Other"> Other
+            </label>
+        </div>
+        <div id="softwareOtherContainer" style="display: none; margin-top: 10px;">
+            <input type="text" class="form-control" name="software_other" placeholder="Please specify other software">
+        </div>
+    </div>
+    
+    <!-- Lab Access (shown/hidden based on checkbox) -->
+    <div id="labOptions" style="display: none;">
+        <div class="form-group">
+            <h4 class="form-label">Lab Area</h4>
+            <select class="form-control" name="lab_area" id="lab_area">
+                <option value="">Select Lab Area</option>
+                <option value="AI Research Lab">AI Research Lab</option>
+                <option value="Robotics Lab">Robotics Lab</option>
+                <option value="Data Science Lab">Data Science Lab</option>
+                <option value="Aviation Simulation Lab">Aviation Simulation Lab</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+ <!-- Scripts -->
+   
+    <script>
+// Resource type selection
+document.querySelectorAll('input[name="resource_types"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        if (this.value === 'hardware') {
+            document.getElementById('hardwareOptions').style.display = this.checked ? 'block' : 'none';
+        } else if (this.value === 'software') {
+            document.getElementById('softwareOptions').style.display = this.checked ? 'block' : 'none';
+        } else if (this.value === 'lab') {
+            document.getElementById('labOptions').style.display = this.checked ? 'block' : 'none';
+        }
+    });
+});
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects Portal | IRADA Innovation Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* Projects Page Styles */
+        .projects-container {
+            position: relative;
+            z-index: 10;
+            padding: 80px 5%;
+            color: white;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Hero Section */
+        .projects-hero {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .projects-hero h1 {
+            font-size: clamp(2rem, 6vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, white, var(--gray));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .projects-hero h1 span {
+            background: linear-gradient(to right, var(--secondary), #fbbf24);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .projects-hero p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        /* Tabs Navigation */
+        .projects-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-btn {
+            padding: 12px 30px;
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 0;
+            height: 3px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: white;
+        }
+
+        .tab-btn.active::after {
+            width: 100%;
+        }
+
+        .tab-btn:hover {
+            color: white;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Projects Grid */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .project-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .project-domain {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(37, 99, 235, 0.2);
+            color: var(--primary);
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .project-title {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .project-abstract {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .project-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .project-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .project-meta-item svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--secondary);
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            position: relative;
+        }
+
+        .filter-label {
+            position: absolute;
+            top: -10px;
+            left: 15px;
+            background: var(--dark);
+            padding: 0 8px;
+            font-size: 0.8rem;
+            color: var(--gray));
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            min-width: 180px;
+        }
+
+        /* Completed Projects Specific */
+        .project-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .project-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .project-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .project-link svg {
+            width: 14px;
+            height: 14px;
+            fill: currentColor;
+        }
+
+        /* Submission Form */
+        .submission-form {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .user-info {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        .user-info a {
+            color: var(--primary);
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
+        .user-info a:hover {
+            text-decoration: underline;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--secondary);
+            color: var(--dark);
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            text-decoration: none;
+        }
+
+        .download-btn:hover {
+            background: #fbbf24;
+            transform: translateY(-2px);
+        }
+
+        .download-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+		
+		/* Add to your CSS */
+		.form-label {
+			color: #ffffff !important;
+			font-weight: 500;
+			margin-bottom: 8px;
+			display: block;
+		}
+
+		.checkbox-label {
+			display: flex;
+			align-items: center;
+			color: #ffffff;
+			margin-bottom: 15px;
+		}
+
+		.checkbox-label input[type="checkbox"] {
+			margin-right: 10px;
+			width: 18px;
+			height: 18px;
+		}
+
+		.resources-group {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 15px;
+			margin-bottom: 20px;
+		}
+
+		.resource-option {
+			display: flex;
+			align-items: center;
+			background: rgba(255, 255, 255, 0.1);
+			padding: 8px 15px;
+			border-radius: 8px;
+			transition: all 0.3s ease;
+		}
+
+		.resource-option:hover {
+			background: rgba(255, 255, 255, 0.2);
+		}
+
+		.resource-option input {
+			margin-right: 8px;
+		}
+
+        #team_members {
+            margin-top: 15px;
+        }
+
+        #team_members input {
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: white;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .submit-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 30px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+		/* Form download button width */
+    .download-btn {
+        width: 80%;
+        text-align: center;
+        justify-content: center;
+    }
+
+    /* Form labels and text visibility */
+    .form-label {
+        color: white !important;
+    }
+
+    /* Input text color */
+    .form-control {
+        color: white !important;
+    }
+
+    /* Input placeholder color */
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    /* Submit button styles */
+    .submit-btn {
+        width: 100%;
+        display: block;
+        margin: 20px auto 0;
+    }
+
+    /* Filter functionality */
+    .filter-select {
+        cursor: pointer;
+    }
+
+    /* Project links functionality */
+    .project-link {
+        transition: all 0.3s ease;
+    }
+    .project-link:hover {
+        background: var(--primary) !important;
+    }
+
+    /* Track project section */
+    .track-project {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        max-width: 800px;
+        margin: 40px auto;
+        display: none;
+    }
+
+    .track-project.active {
+        display: block;
+    }
+
+    .track-form {
+        margin-top: 20px;
+    }
+
+    /* Status message styles */
+    .status-message {
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+        text-align: center;
+        display: none;
+    }
+
+    .status-message.success {
+        background: rgba(40, 167, 69, 0.2);
+        border: 1px solid rgba(40, 167, 69, 0.5);
+        color: #28a745;
+        display: block;
+    }
+
+    .status-message.error {
+        background: rgba(220, 53, 69, 0.2);
+        border: 1px solid rgba(220, 53, 69, 0.5);
+        color: #dc3545;
+        display: block;
+    }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .projects-container {
+                padding: 60px 20px;
+            }
+            
+            .projects-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab-btn {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+            
+            .filters {
+                flex-direction: column;
+            }
+            
+            .filter-select {
+                width: 100%;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            
+            .submission-form {
+                padding: 30px 20px;
+            }
+
+            .form-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+			
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background Particles -->
+    <div id="particles-js"></div>
+    
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo">IRADA<span>INNOVATION</span>HUB</h1>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('landing') }}" class="nav-link">Home</a></li>
+                    <li><a href="{{ url_for('about') }}" class="nav-link">About</a></li>
+                    <li><a href="{{ url_for('research') }}" class="nav-link">Research</a></li>
+                    <li><a href="{{ url_for('projects') }}" class="nav-link active">Projects Portal</a></li>
+                    <li><a href="{{ url_for('events') }}" class="nav-link">Events & Training</a></li>
+                    <li><a href="{{ url_for('login') }}" class="nav-link">Login</a></li>
+                    <li><a href="{{ url_for('signup') }}" class="signup-btn">Signup</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="projects-container">
+        <!-- Hero Section -->
+        <section class="projects-hero animate__animated animate__fadeIn">
+            <h1>Projects <span>Portal</span></h1>
+            <p>Explore ongoing and completed innovation projects at IRADA. Track progress, view deliverables, and submit your own projects.</p>
+        </section>
+
+        <!-- Tabs Navigation -->
+        
+		
+		<div class="projects-tabs">
+			<button class="tab-btn active" data-tab="ongoing">Ongoing Projects</button>
+			<button class="tab-btn" data-tab="completed">Completed Projects</button>
+			<button class="tab-btn" data-tab="submit">Submit Your Project</button>
+			<button class="tab-btn" data-tab="track">Track Your Project</button>
+		</div>
+
+        <!-- Ongoing Projects Tab -->
+        <div class="tab-content active" id="ongoing">
+            <div class="filters">
+                <div class="filter-group">
+                    <span class="filter-label">Domain</span>
+                    <select class="filter-select">
+                        <option value="">All Domains</option>
+                        <option value="ai">AI & Machine Learning</option>
+                        <option value="robotics">Robotics & Automation</option>
+                        <option value="data">Data Science</option>
+                        <option value="aviation">Aviation Innovation</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Timeline</span>
+                    <select class="filter-select">
+                        <option value="">All Timelines</option>
+                        <option value="short">Short-term (0-3 months)</option>
+                        <option value="medium">Medium-term (3-6 months)</option>
+                        <option value="long">Long-term (6+ months)</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <span class="filter-label">Supervisor</span>
+                    <select class="filter-select">
+                        <option value="">All Supervisors</option>
+                        <option value="dr-hannah">Dr. Hannah Al Ali</option>
+                        <option value="dr-deepudev">Dr. Deepudev Sahadevan</option>
+                        <option value="maham">Maham Salahuddin</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="projects-grid">
+                <!-- Project 1 -->
+                <article class="project-card animate__animated animate__fadeInUp">
+                    <span class="project-domain">AI & Machine Learning</span>
+                    <h3 class="project-title">Predictive Maintenance for Aircraft Engines</h3>
+                    <p class="project-abstract">Developing machine learning models to predict potential engine failures using sensor data and maintenance logs to improve aircraft safety and reduce downtime.</p>
+                    <div class="project-meta">
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 4a4 4 0 014 4 4 4 0 01-4 4 4 4 0 01-4-4 4 4 0 014-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"/>
+                            </svg>
+                            <span>Lead: Ahmed Mohammed</span>
+                        </div>
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
+                            </svg>
+                            <span>Supervisor: Dr. Deepudev Sahadevan</span>
+                        </div>
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+                            </svg>
+                            <span>Timeline: 6 months (Jan-Jun 2025)</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 2 -->
+                <article class="project-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                    <span class="project-domain">Robotics & Automation</span>
+                    <h3 class="project-title">Autonomous Aircraft Inspection Drone</h3>
+                    <p class="project-abstract">Building an AI-powered drone system that can autonomously inspect aircraft exteriors for damage and maintenance issues using computer vision.</p>
+                    <div class="project-meta">
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 4a4 4 0 014 4 4 4 0 01-4 4 4 4 0 01-4-4 4 4 0 014-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"/>
+                            </svg>
+                            <span>Lead: Sara Al Mansoori</span>
+                        </div>
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
+                            </svg>
+                            <span>Supervisor: Maham Salahuddin</span>
+                        </div>
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+                            </svg>
+                            <span>Timeline: 4 months (Mar-Jun 2025)</span>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Project 3 -->
+                <article class="project-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+                    <span class="project-domain">Data Science</span>
+                    <h3 class="project-title">Air Traffic Flow Optimization</h3>
+                    <p class="project-abstract">Using historical flight data and machine learning to predict and optimize air traffic flows, reducing delays and improving airport efficiency.</p>
+                    <div class="project-meta">
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 4a4 4 0 014 4 4 4 0 01-4 4 4 4 0 01-4-4 4 4 0 014-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"/>
+                            </svg>
+                            <span>Lead: Khalid Al Zaabi</span>
+                        </div>
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
+                            </svg>
+                            <span>Supervisor: Dr. Deepudev Sahadevan</span>
+                        </div>
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+                            </svg>
+                            <span>Timeline: 8 months (Jan-Aug 2025)</span>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <!-- Completed Projects Tab -->
+        <div class="tab-content" id="completed">
+            <div class="projects-grid">
+                <!-- Project 1 -->
+                <article class="project-card animate__animated animate__fadeInUp">
+                    <span class="project-domain">AI & Machine Learning</span>
+                    <h3 class="project-title">Cabin Crew Fatigue Detection</h3>
+                    <p class="project-abstract">Developed a computer vision system that analyzes facial features to detect fatigue levels in cabin crew members, helping to improve flight safety.</p>
+                    <div class="project-meta">
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 4a4 4 0 014 4 4 4 0 01-4 4 4 4 0 01-4-4 4 4 0 014-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"/>
+                            </svg>
+                            <span>Lead: Fatima Al Hashimi</span>
+                        </div>
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
+                            </svg>
+                            <span>Supervisor: Dr. Hannah Al Ali</span>
+                        </div>
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+                            </svg>
+                            <span>Completed: December 2024</span>
+                        </div>
+                    </div>
+                    <div class="project-links">
+                        <a href="#" class="project-link">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM12 7c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm-1 3.5h-1v-1h1v1zm1.5 0h-1v-1h1v1zm1.5 0h-1v-1h1v1z"/>
+                            </svg>
+                            Poster
+                        </a>
+                        <a href="#" class="project-link">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                            </svg>
+                            Demo Video
+                        </a>
+                        <a href="#" class="project-link">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM8 15c0-1.66 1.34-3 3-3 .35 0 .69.07 1 .18V6h5v2h-3v7.03c-.02 1.64-1.35 2.97-3 2.97-1.66 0-3-1.34-3-3z"/>
+                            </svg>
+                            Final Report
+                        </a>
+                    </div>
+                </article>
+
+                <!-- Project 2 -->
+                <article class="project-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+                    <span class="project-domain">Robotics & Automation</span>
+                    <h3 class="project-title">Automated Baggage Handling System</h3>
+                    <p class="project-abstract">Designed and prototyped a robotic system that automates baggage sorting and loading at airports, reducing manual handling and improving efficiency.</p>
+                    <div class="project-meta">
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 4a4 4 0 014 4 4 4 0 01-4 4 4 4 0 01-4-4 4 4 0 014-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"/>
+                            </svg>
+                            <span>Lead: Omar Al Shamsi</span>
+                        </div>
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
+                            </svg>
+                            <span>Supervisor: Maham Salahuddin</span>
+                        </div>
+                        <div class="project-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+                            </svg>
+                            <span>Completed: October 2024</span>
+                        </div>
+                    </div>
+                    <div class="project-links">
+                        <a href="#" class="project-link">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM12 7c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zm-1 3.5h-1v-1h1v1zm1.5 0h-1v-1h1v1zm1.5 0h-1v-1h1v1z"/>
+                            </svg>
+                            Poster
+                        </a>
+                        <a href="#" class="project-link">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                            </svg>
+                            Demo Video
+                        </a>
+                        <a href="#" class="project-link">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM8 15c0-1.66 1.34-3 3-3 .35 0 .69.07 1 .18V6h5v2h-3v7.03c-.02 1.64-1.35 2.97-3 2.97-1.66 0-3-1.34-3-3z"/>
+                            </svg>
+                            Final Report
+                        </a>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <!-- Submit Project Tab -->
+        <div class="tab-content" id="submit">
+            <div class="submission-form animate__animated animate__fadeIn">
+                <div class="form-header">
+                    <h2>Submit Your Project Proposal</h2>
+                    {% if 'username' in session %}
+                        <div class="user-info">
+                            Welcome, {{ session['username'] }}! 
+                            <a href="{{ url_for('logout') }}">Logout</a>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <a href="/static/proposal_form.pdf" download class="download-btn">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+                    </svg>
+                    Download Proposal Form
+                </a>
+
+                <form method="POST" action="{{ url_for('submit_proposal') }}" enctype="multipart/form-data">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label" for="name">Your Name</label>
+                            <input type="text" class="form-control" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="project_title">Project Title</label>
+                        <input type="text" class="form-control" name="project_title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="team_count">Number of Team Members</label>
+                        <select class="form-control" id="team_count" name="team_count" onchange="updateTeamMembers()">
+                            {% for i in range(0, 11) %}
+                                <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                        <div id="team_members"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="file">Upload Proposal (PDF/DOC/DOCX)</label>
+                        <input type="file" class="form-control" name="file" accept=".pdf,.doc,.docx" required>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Submit Proposal</button>
+                </form>
+            </div>
+        </div>
+		
+		<!-- Track Project Tab -->
+		<div class="tab-content" id="track">
+			<div class="track-project animate__animated animate__fadeIn">
+				<h2>Track Your Project Status</h2>
+				<p>Enter your project ID or title to check the current status of your submission.</p>
+				
+				<div class="status-message" id="statusMessage"></div>
+				
+				<form class="track-form" id="trackForm">
+					<div class="form-group">
+						<label class="form-label" for="tracking_id">Project ID</label>
+						<input type="text" class="form-control" id="tracking_id" name="tracking_id" placeholder="Enter your project ID">
+					</div>
+					<div class="form-group">
+						<label class="form-label" for="tracking_email">Your Email</label>
+						<input type="email" class="form-control" id="tracking_email" name="tracking_email" placeholder="Enter your registered email">
+					</div>
+					<button type="submit" class="submit-btn">Check Status</button>
+				</form>
+				
+				<div id="projectStatus" style="display: none; margin-top: 30px;">
+					<h3>Project Status</h3>
+					<div class="project-meta">
+						<div class="project-meta-item">
+							<svg viewBox="0 0 24 24">
+								<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z"/>
+							</svg>
+							<span id="statusText">Status: Pending</span>
+						</div>
+						<div class="project-meta-item">
+							<svg viewBox="0 0 24 24">
+								<path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+							</svg>
+							<span id="submissionDate">Submitted on: 2024-03-15</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+    // Tab functionality
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active class from all buttons and contents
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked button
+            btn.classList.add('active');
+            
+            // Show corresponding content
+            const tabId = btn.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // Filter functionality
+    document.querySelectorAll('.filter-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const tab = this.closest('.tab-content').id;
+            const domainFilter = document.querySelector(`#${tab} select:nth-of-type(1)`).value.toLowerCase();
+            const timelineFilter = document.querySelector(`#${tab} select:nth-of-type(2)`).value.toLowerCase();
+            const supervisorFilter = document.querySelector(`#${tab} select:nth-of-type(3)`).value.toLowerCase();
+            
+            document.querySelectorAll(`#${tab} .project-card`).forEach(card => {
+                const domain = card.querySelector('.project-domain').textContent.toLowerCase();
+                const timeline = card.querySelector('.project-meta-item:last-child span').textContent.toLowerCase();
+                const supervisor = card.querySelector('.project-meta-item:nth-of-type(2) span').textContent.toLowerCase();
+                
+                const domainMatch = !domainFilter || domain.includes(domainFilter);
+                const timelineMatch = !timelineFilter || timeline.includes(timelineFilter);
+                const supervisorMatch = !supervisorFilter || supervisor.includes(supervisorFilter);
+                
+                if (domainMatch && timelineMatch && supervisorMatch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    });
+
+    // Team members functionality
+    function updateTeamMembers() {
+        let numMembers = document.getElementById("team_count").value;
+        let membersDiv = document.getElementById("team_members");
+        membersDiv.innerHTML = ""; // Clear previous fields
+        
+        for (let i = 1; i <= numMembers; i++) {
+            let input = document.createElement("input");
+            input.type = "text";
+            input.className = "form-control";
+            input.name = "team_member";
+            input.placeholder = "Team Member " + i + " Name";
+            input.required = true;
+            membersDiv.appendChild(input);
+            membersDiv.appendChild(document.createElement("br"));
+        }
+    }
+
+    // Track project functionality
+    document.getElementById('trackForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const projectId = document.getElementById('tracking_id').value;
+        const email = document.getElementById('tracking_email').value;
+        
+        // Here you would typically make an AJAX call to your backend
+        // For now, we'll simulate a response
+        fetch(`/track_project?id=${projectId}&email=${email}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('statusText').textContent = `Status: ${data.status}`;
+                    document.getElementById('submissionDate').textContent = `Submitted on: ${data.submission_date}`;
+                    document.getElementById('projectStatus').style.display = 'block';
+                    
+                    const statusMessage = document.getElementById('statusMessage');
+                    statusMessage.textContent = 'Project status retrieved successfully';
+                    statusMessage.className = 'status-message success';
+                } else {
+                    const statusMessage = document.getElementById('statusMessage');
+                    statusMessage.textContent = data.message || 'Error retrieving project status';
+                    statusMessage.className = 'status-message error';
+                    document.getElementById('projectStatus').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                const statusMessage = document.getElementById('statusMessage');
+                statusMessage.textContent = 'Error connecting to server';
+                statusMessage.className = 'status-message error';
+                document.getElementById('projectStatus').style.display = 'none';
+            });
+    });
+
+    // Project links functionality
+    document.querySelectorAll('.project-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const type = this.textContent.trim();
+            const projectTitle = this.closest('.project-card').querySelector('.project-title').textContent;
+            
+            // Simulate download
+            const blob = new Blob([`Sample ${type} for ${projectTitle}`], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${projectTitle.replace(/\s+/g, '_')}_${type}.${type === 'Poster' ? 'png' : type === 'Demo Video' ? 'mp4' : 'pdf'}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    });
+
+    // Initialize team members on page load if needed
+    document.addEventListener('DOMContentLoaded', function() {
+        updateTeamMembers();
+        
+        // Check for success/error messages in URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const submissionStatus = urlParams.get('submission');
+        
+        if (submissionStatus === 'success') {
+            const statusMessage = document.createElement('div');
+            statusMessage.className = 'status-message success';
+            statusMessage.textContent = 'Project submitted successfully!';
+            document.querySelector('.submission-form').prepend(statusMessage);
+        } else if (submissionStatus === 'error') {
+            const statusMessage = document.createElement('div');
+            statusMessage.className = 'status-message error';
+            statusMessage.textContent = 'Project submission failed. Please try again.';
+            document.querySelector('.submission-form').prepend(statusMessage);
+        }
+    });
+	
+	document.getElementById('needsMentorship').addEventListener('change', function() {
+    const supervisorContainer = document.getElementById('supervisorContainer');
+    if (this.checked) {
+        // Create new container after the checkbox if it doesn't exist
+        if (!supervisorContainer) {
+            const container = document.createElement('div');
+            container.id = 'supervisorContainer';
+            container.innerHTML = `
+                <label class="form-label" for="supervisor">Supervisor</label>
+                <select class="form-control" name="supervisor" required>
+                    <option value="">Select Supervisor</option>
+                    <option value="Dr. Hannah Al Ali">Dr. Hannah Al Ali</option>
+                    <option value="Dr. Deepudev Sahadevan">Dr. Deepudev Sahadevan</option>
+                    <option value="Maham Salahuddin">Maham Salahuddin</option>
+                </select>
+            `;
+            this.parentNode.parentNode.insertBefore(container, this.parentNode.nextSibling);
+        } else {
+            supervisorContainer.style.display = 'block';
+        }
+    } else {
+        if (supervisorContainer) {
+            supervisorContainer.style.display = 'none';
+        }
+    }
+});
+
+document.querySelectorAll('input[name="resources"]').forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+        if (this.value === 'Other' && this.checked) {
+            // Create or show the other resource input
+            let otherInput = document.getElementById('otherResourceInput');
+            if (!otherInput) {
+                otherInput = document.createElement('input');
+                otherInput.type = 'text';
+                otherInput.className = 'form-control';
+                otherInput.name = 'other_resource';
+                otherInput.placeholder = 'Please specify other resource';
+                otherInput.id = 'otherResourceInput';
+                otherInput.style.marginTop = '10px';
+                this.closest('.form-group').appendChild(otherInput);
+            } else {
+                otherInput.style.display = 'block';
+            }
+        } else if (this.value === 'Other' && !this.checked) {
+            const otherInput = document.getElementById('otherResourceInput');
+            if (otherInput) {
+                otherInput.style.display = 'none';
+            }
+        }
+    });
+});
+</script>
+</body>
+</html>

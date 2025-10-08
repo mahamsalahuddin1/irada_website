@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Hub | IRADA Innovation Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+       /* Resource Hub Main Styles */
+	/* Beautiful Centered Flash Messages */
+.flash-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.flash-message {
+    max-width: 500px;
+    width: 100%;
+    padding: 20px 25px;
+    margin: 10px 0;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: flashEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.flash-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.flash-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.flash-text {
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+/* Color Variants */
+.flash-success {
+    background: rgba(46, 125, 50, 0.9);
+    color: white;
+    border-left: 4px solid #81C784;
+}
+
+.flash-error {
+    background: rgba(198, 40, 40, 0.9);
+    color: white;
+    border-left: 4px solid #EF9A9A;
+}
+
+.flash-warning {
+    background: rgba(237, 108, 2, 0.9);
+    color: white;
+    border-left: 4px solid #FFCC80;
+}
+
+.flash-info {
+    background: rgba(30, 136, 229, 0.9);
+    color: white;
+    border-left: 4px solid #90CAF9;
+}
+
+/* Animations */
+@keyframes flashEnter {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes flashExit {
+    to {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+}
+
+/* Auto-dismiss animation */
+.flash-message {
+    animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
+}   
+.resource-container {
+    position: relative;
+    z-index: 10;
+    padding: 80px 5%;
+    color: white;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.resource-hero {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.resource-hero h1 {
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(to right, white, var(--gray));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.resource-hero h1 span {
+    background: linear-gradient(to right, var(--secondary), #fbbf24);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.resource-hero p {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.9);
+    max-width: 700px;
+    margin: 0 auto 2rem;
+}
+
+/* Tabs Navigation */
+.resource-tabs {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.resource-tab-btn {
+    padding: 12px 30px;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.resource-tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: var(--primary);
+    transition: width 0.3s ease;
+}
+
+.resource-tab-btn.active {
+    color: white;
+}
+
+.resource-tab-btn.active::after {
+    width: 100%;
+}
+
+.resource-tab-btn:hover {
+    color: white;
+}
+
+/* Tab Content */
+.resource-tab-content {
+    display: none;
+    animation: fadeIn 0.5s ease;
+}
+
+.resource-tab-content.active {
+    display: block;
+}
+
+/* Request Form Styling */
+.request-form {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-header h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 8px;
+}
+
+.form-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    margin: 0;
+}
+
+.form-section {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.form-section:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.form-section-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 12px;
+    color: var(--primary);
+}
+
+.form-section-title {
+    font-size: 1.3rem;
+    color: white;
+    margin: 0;
+    font-weight: 600;
+}
+
+.sub-section-title {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 20px 0 15px;
+    display: flex;
+    align-items: center;
+}
+
+.sub-section-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    color: var(--primary);
+}
+
+/* Form Controls */
+.form-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: white !important;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+select.select-input option {
+    color: black;
+    background-color: white;
+}
+
+.input-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    color: var(--primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.text-input {
+    padding-left: 38px;
+}
+
+.select-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+}
+
+.textarea-input {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.5;
+	
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    background: rgba(255, 255, 255, 0.12);
+    outline: none;
+}
+
+/* Toggle Switches */
+.toggle-group {
+    margin-bottom: 20px;
+}
+
+.custom-toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.custom-toggle input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.toggle-slider {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 24px;
+    transition: .4s;
+    margin-right: 12px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .4s;
+}
+
+.custom-toggle input:checked + .toggle-slider {
+    background-color: var(--primary);
+}
+
+.custom-toggle input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+
+.toggle-label {
+    color: white;
+    font-size: 0.95rem;
+}
+
+/* Resource Options Grid */
+.resources-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.resource-option {
+    position: relative;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 15px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.resource-option:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.resource-option input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.checkmark {
+    position: relative;
+    height: 18px;
+    width: 18px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    margin-right: 12px;
+    transition: all 0.2s ease;
+}
+
+.resource-option:hover .checkmark {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.resource-option input:checked ~ .checkmark {
+    background-color: var(--primary);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.resource-option input:checked ~ .checkmark:after {
+    display: block;
+}
+
+.option-content {
+    display: flex;
+    align-items: center;
+    color: white;
+    font-size: 0.95rem;
+}
+
+.option-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    color: var(--primary);
+}
+
+/* Submit Button */
+.submit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 30px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    width: 100%;
+    font-size: 1rem;
+}
+
+.submit-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.submit-btn:hover {
+    background: var(--primary-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+}
+
+/* Hidden Sections */
+.hidden-section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Auth Prompt */
+.auth-prompt {
+    text-align: center;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.auth-icon {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 20px;
+    color: var(--primary);
+}
+
+.auth-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
+/* Form Rows */
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    flex: 1;
+}
+
+/* Table Styles */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.requests-table {
+    width: 100%;
+    min-width: 1000px;
+    border-collapse: collapse;
+    margin: 0 auto;
+}
+
+.requests-table th, 
+.requests-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    white-space: nowrap;
+}
+
+.requests-table th {
+    background: rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+}
+
+.requests-table tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-pending {
+    background-color: rgba(234, 179, 8, 0.2);
+    color: #eab308;
+}
+
+.status-approved {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: #22c55e;
+}
+
+.status-rejected {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+/* Admin Actions */
+.admin-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.approve-btn {
+    background: #4CAF50;
+    color: white;
+}
+
+.reject-btn {
+    background: #F44336;
+    color: white;
+}
+
+.action-btn:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .resource-container {
+        padding: 60px 20px;
+    }
+    
+    .resource-tabs {
+        flex-wrap: wrap;
+    }
+    
+    .resource-tab-btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .request-form {
+        padding: 30px 20px;
+    }
+
+    .resources-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+    
+    .form-section {
+        padding: 20px;
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+    </style>
+</head>
+<body>
+    <!-- Animated Background Particles -->
+    <div id="particles-js"></div>
+    
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo">IRADA<span>INNOVATION</span>HUB</h1>
+				<nav>
+					<ul class="nav-links">
+						<li><a href="{{ url_for('landing') }}" class="nav-link {% if request.endpoint == 'landing' %}active{% endif %}">Home</a></li>
+						<li><a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">About</a></li>
+						<li><a href="{{ url_for('projects') }}" class="nav-link {% if request.endpoint == 'projects' %}active{% endif %}">Projects Portal</a></li>
+						<li><a href="{{ url_for('events') }}" class="nav-link {% if request.endpoint == 'events' %}active{% endif %}">Events & Training</a></li>
+						<li><a href="{{ url_for('resource_hub') }}" class="nav-link {% if request.endpoint == 'resource_hub' %}active{% endif %}">Resource Hub</a></li>
+						{% if 'user_id' in session %}
+							<li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+						{% else %}
+							<li><a href="{{ url_for('login') }}" class="nav-link {% if request.endpoint == 'login' %}active{% endif %}">Login</a></li>
+							<li><a href="{{ url_for('signup') }}" class="signup-btn {% if request.endpoint == 'signup' %}active{% endif %}">Signup</a></li>
+						{% endif %}
+					</ul>
+					<div class="hamburger">
+						<span></span>
+						<span></span>
+						<span></span>
+					</div>
+				</nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+	
+	
+	
+	<!-- Add this right after the opening <main> tag in your resource_hub.html -->
+	<main class="resource-container">
+		<!-- Flash Messages - Centered Beautiful Design -->
+		{% with messages = get_flashed_messages(with_categories=true) %}
+			{% if messages %}
+				<div class="flash-container">
+					{% for category, message in messages %}
+						<div class="flash-message flash-{{ category }}">
+							<div class="flash-content">
+								<svg class="flash-icon" viewBox="0 0 24 24">
+									{% if category == 'success' %}
+										<path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"/>
+									{% elif category == 'error' %}
+										<path fill="currentColor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+									{% else %}
+										<path fill="currentColor" d="M13,13H11V7H13M13,17H11V15H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+									{% endif %}
+								</svg>
+								<span class="flash-text">{{ message }}</span>
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+			{% endif %}
+		{% endwith %}
+
+  
+
+   
+
+  
+   
+        <!-- Hero Section -->
+        <section class="resource-hero animate__animated animate__fadeIn">
+            <h1>Resource <span>Hub</span></h1>
+            <p>Access our state-of-the-art hardware, software, and lab facilities for your research and innovation projects.</p>
+        </section>
+
+        <!-- Tabs Navigation -->
+        <div class="resource-tabs">
+            <button class="resource-tab-btn active" data-tab="request">Request Resources</button>
+            <button class="resource-tab-btn" data-tab="my-requests">My Requests</button>
+            
+        </div>
+
+        <!-- Request Resources Tab -->
+		<!-- Update the Request Resources Tab section with this code -->
+		<div class="resource-tab-content active" id="request">
+			<div class="request-form animate__animated animate__fadeIn">
+				<div class="form-header">
+					<h2>Resource Request Form</h2>
+					<p class="form-subtitle">Fill out the form below to request access to our resources</p>
+				</div>
+				
+				{% if 'username' not in session %}
+					<div class="form-section auth-prompt">
+						<div class="auth-icon">
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+								<path d="M18 8A6 6 0 0 0 6 8v3a6 6 0 0 0-6 6v3h12v-3a6 6 0 0 0-6-6V8a4 4 0 0 1 8 0v3a1 1 0 1 1-2 0V8z"/>
+							</svg>
+						</div>
+						<p>Please <a href="{{ url_for('login') }}" class="auth-link">login</a> to request resources.</p>
+					</div>
+				{% else %}
+					<form method="POST" action="{{ url_for('submit_resource_request') }}" class="resource-request-form">
+						<!-- Project Information Section -->
+						<div class="form-section">
+							<div class="form-section-header">
+								<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+									<path d="M3 3h18v18H3V3zm16 16V5H5v14h14zM7 7h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/>
+								</svg>
+								<h3 class="form-section-title">Project Information</h3>
+							</div>
+							
+							<div class="form-group toggle-group">
+								<label class="custom-toggle">
+									<input type="checkbox" id="hasProject" name="has_project" value="yes">
+									<span class="toggle-slider"></span>
+									<span class="toggle-label">I have a registered project with IRADA</span>
+								</label>
+							</div>
+							
+							<div id="projectSelectContainer" class="hidden-section">
+								<div class="form-group">
+									<label class="form-label" for="project_id1">
+										<svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+											<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+										</svg>
+										Select Project
+									</label>
+									<select class="form-control select-input" name="project_id1" id="project_id1">
+										<option value="">Choose your project</option>
+										{% for project in user_projects %}
+											<option value="{{ project.id }}">{{ project.project_title }}</option>
+										{% endfor %}
+									</select>
+								</div>
+							</div>
+							
+							<div id="purposeContainer">
+								<div class="form-group">
+									<label class="form-label" for="purpose">
+										<svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+											<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+										</svg>
+										Purpose of Resource Request
+									</label>
+									<textarea class="form-control textarea-input" name="purpose" id="purpose" placeholder="Describe what you need the resources for"></textarea>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Resource Details Section -->
+						<div class="form-section">
+							<div class="form-section-header">
+								<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+									<path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 16H4V8h16v12z"/>
+								</svg>
+								<h3 class="form-section-title">Resource Details</h3>
+							</div>
+							
+							<div class="form-group">
+								<label class="form-label">Select Resources Needed</label>
+								<div class="resources-grid">
+									<label class="resource-option">
+										<input type="checkbox" name="resource_types" value="hardware">
+										<span class="checkmark"></span>
+										<span class="option-content">
+											<svg class="option-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+												<path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 16H4V8h16v12z"/>
+											</svg>
+											Hardware
+										</span>
+									</label>
+									
+									<label class="resource-option">
+										<input type="checkbox" name="resource_types" value="software">
+										<span class="checkmark"></span>
+										<span class="option-content">
+											<svg class="option-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+												<path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 16H4V8h16v12z"/>
+											</svg>
+											Software
+										</span>
+									</label>
+									
+									<label class="resource-option">
+										<input type="checkbox" name="resource_types" value="lab">
+										<span class="checkmark"></span>
+										<span class="option-content">
+											<svg class="option-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+												<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 12h2v5H7zm4-7h2v12h-2zm4 4h2v8h-2z"/>
+											</svg>
+											Lab Access
+										</span>
+									</label>
+								</div>
+							</div>
+							
+							<!-- Hardware Options -->
+							
+							
+							<!-- Software Options -->
+							<!-- Hardware Options Section -->
+							<!-- Hardware Options Section -->
+<!-- Hardware Options Section -->
+<div id="hardwareOptions" class="hidden-section">
+    <h4 class="sub-section-title">
+        Hardware Resources
+    </h4>
+    <div class="resources-grid">
+        <label class="resource-option">
+            <input type="checkbox" name="hardware_resources" value="PC">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                PC
+            </span>
+        </label>
+        <label class="resource-option">
+            <input type="checkbox" name="hardware_resources" value="High Performance PC + GPU">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                High Performance PC + GPU
+            </span>
+        </label>
+        <label class="resource-option">
+            <input type="checkbox" name="hardware_resources" value="Simulation Tool">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                Simulation Tool
+            </span>
+        </label>
+        <label class="resource-option">
+            <input type="checkbox" name="hardware_resources" value="Pepper">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                Pepper
+            </span>
+        </label>
+        <label class="resource-option">
+            <input type="checkbox" name="hardware_resources" value="Nao">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                Nao
+            </span>
+        </label>
+        <label class="resource-option">
+            <input type="checkbox" name="hardware_resources" value="Other">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                Other
+            </span>
+        </label>
+    </div>
+    <div id="hardwareOtherContainer" class="hidden-section" style="margin-top: 10px;">
+        <input type="text" class="form-control text-input" name="hardware_other" placeholder="Please specify other hardware">
+    </div>
+</div>
+
+<!-- Software Options Section -->
+<div id="softwareOptions" class="hidden-section">
+    <h4 class="sub-section-title">
+        Software Resources
+    </h4>
+    <div class="resources-grid">
+        <label class="resource-option">
+            <input type="checkbox" name="software_resources" value="MATLAB">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                MATLAB
+            </span>
+        </label>
+        <label class="resource-option">
+            <input type="checkbox" name="software_resources" value="Python IDEs">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                Python IDEs
+            </span>
+        </label>
+        <label class="resource-option">
+            <input type="checkbox" name="software_resources" value="Choregraphe">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                Choregraphe
+            </span>
+        </label>
+        <label class="resource-option">
+            <input type="checkbox" name="software_resources" value="TensorFlow">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                TensorFlow
+            </span>
+        </label>
+        <label class="resource-option">
+            <input type="checkbox" name="software_resources" value="PyTorch">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                PyTorch
+            </span>
+        </label>
+        <label class="resource-option">
+            <input type="checkbox" name="software_resources" value="Other">
+            <span class="checkmark"></span>
+            <span class="option-content">
+                Other
+            </span>
+        </label>
+    </div>
+    <div id="softwareOtherContainer" class="hidden-section" style="margin-top: 10px;">
+        <input type="text" class="form-control text-input" name="software_other" placeholder="Please specify other software">
+    </div>
+</div>
+
+							
+							<!-- Lab Options -->
+							<div id="labOptions" class="hidden-section">
+								<div class="form-group">
+									<h4 class="sub-section-title">
+										<svg class="sub-section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+											<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14zM7 12h2v5H7zm4-7h2v12h-2zm4 4h2v8h-2z"/>
+										</svg>
+										Lab Area
+									</h4>
+									<select class="form-control select-input" name="lab_area" id="lab_area">
+										<option value="">Select Lab Area</option>
+										<option value="IRADA Innovation Center">IRADA Innovation Center</option>
+										<option value="PHD Lab 1">PHD Lab 1</option>
+										
+									</select>
+								</div>
+							</div>
+						</div>
+						
+						<!-- Request Details Section -->
+						<div class="form-section">
+							<div class="form-section-header">
+								<svg class="section-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+									<path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+								</svg>
+								<h3 class="form-section-title">Request Details</h3>
+							</div>
+							
+							<div class="form-group toggle-group">
+								<label class="custom-toggle">
+									<input type="checkbox" id="needsMentorship" name="needs_mentorship" value="yes">
+									<span class="toggle-slider"></span>
+									<span class="toggle-label">Mentorship Required</span>
+								</label>
+							</div>
+							
+							<div id="mentorContainer" class="hidden-section">
+								<div class="form-group">
+									<label class="form-label" for="mentor_name">
+										<svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+											<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+										</svg>
+										Supervisor Name
+									</label>
+									<input type="text" class="form-control text-input" name="mentor_name" id="mentor_name" placeholder="Enter supervisor's name">
+								</div>
+							</div>
+							
+							<div class="form-row">
+								<div class="form-group">
+									<label class="form-label" for="request_date">
+										<svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+											<path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM9 10H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm-8 4H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2z"/>
+										</svg>
+										Request Date
+									</label>
+									<input type="date" class="form-control text-input" name="request_date" id="request_date" required>
+								</div>
+								<div class="form-group">
+									<label class="form-label" for="start_time">
+										<svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+											<path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+										</svg>
+										Start Time
+									</label>
+									<input type="time" class="form-control text-input" name="start_time" id="start_time" required>
+								</div>
+								<div class="form-group">
+									<label class="form-label" for="end_time">
+										<svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+											<path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+										</svg>
+										End Time
+									</label>
+									<input type="time" class="form-control text-input" name="end_time" id="end_time" required>
+								</div>
+							</div>
+							
+							<div class="form-group">
+								<label class="form-label" for="justification">
+									<svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+										<path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+									</svg>
+									Justification
+								</label>
+								<textarea class="form-control textarea-input" name="justification" id="justification" placeholder="Explain why you need these resources" required></textarea>
+							</div>
+						</div>
+						
+						<button type="submit" class="submit-btn">
+							<svg class="submit-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+								<path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM8 15c0-1.66 1.34-3 3-3 .35 0 .69.07 1 .18V6h5v2h-3v7.03c-.02 1.64-1.35 2.97-3 2.97-1.66 0-3-1.34-3-3z"/>
+							</svg>
+							Submit Request
+						</button>
+					</form>
+				{% endif %}
+			</div>
+		</div>
+
+
+
+        <!-- My Requests Tab -->
+        <!-- Update the My Requests tab content in resource_hub.html -->
+		<div class="resource-tab-content" id="my-requests">
+    {% if 'username' not in session %}
+        <div class="request-form">
+            <div class="form-section">
+                <p>Please <a href="{{ url_for('login') }}">login</a> to view your resource requests.</p>
+            </div>
+        </div>
+    {% else %}
+        <div class="request-form animate__animated animate__fadeIn">
+            <h2>My Resource Requests</h2>
+            <p class="welcome-message">Welcome, {{ session['username'] }}!</p>
+            
+            {% if user_requests %}
+                <div class="table-container">
+                    <table class="requests-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Project</th>
+                                <th>Hardware</th>
+                                <th>Software</th>
+                                <th>Lab</th>
+                                <th>Date</th>
+                                <th>Time Slot</th>
+                                <th>Mentor</th>
+                                <th>Status</th>
+                                <th>Admin Response</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for request in user_requests %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        {% if request.project_id1 %}
+                                            {{ request.project_title or 'N/A' }}
+                                        {% else %}
+                                            {{ request.purpose or 'N/A' }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ request.hardware_resources or 'N/A' }}</td>
+                                    <td>{{ request.software_resources or 'N/A' }}</td>
+                                    <td>{{ request.lab_area or 'N/A' }}</td>
+                                    <td>{{ request.request_date.strftime('%Y-%m-%d') }}</td>
+                                    <td>{{ request.start_time }} - {{ request.end_time }}</td>
+                                    <td>{{ request.mentor_name or 'N/A' }}</td>
+                                    <td>
+                                        {% if request.status == 'pending' %}
+                                            <span class="status-badge status-pending">Pending</span>
+                                        {% elif request.status == 'approved' %}
+                                            <span class="status-badge status-approved">Approved</span>
+                                        {% else %}
+                                            <span class="status-badge status-rejected">Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ request.admin_response or 'N/A' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="form-section">
+                    <p>You haven't made any resource requests yet.</p>
+                </div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+		
+
+        
+       
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script>
+        // Tab functionality
+        const tabBtns = document.querySelectorAll('.resource-tab-btn');
+        const tabContents = document.querySelectorAll('.resource-tab-content');
+        
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class from all buttons and contents
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked button
+                btn.classList.add('active');
+                
+                // Show corresponding content
+                const tabId = btn.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+
+        // Project selection toggle
+        
+		document.getElementById('hasProject').addEventListener('change', function () {
+			const projectSelect = document.getElementById('projectSelectContainer');
+			const projectDropdown = document.getElementById('project_id1');
+			const purposeContainer = document.getElementById('purposeContainer');
+			const purposeField = document.getElementById('purpose');
+
+			if (this.checked) {
+				// Show project dropdown, hide purpose field
+				projectSelect.style.display = 'block';
+				purposeContainer.style.display = 'none';
+				projectDropdown.disabled = false;
+				purposeField.disabled = true; // ✅ Disable it to bypass required
+			} else {
+				// Show purpose field, hide project dropdown
+				projectSelect.style.display = 'none';
+				purposeContainer.style.display = 'block';
+				projectDropdown.disabled = true; // ✅ Disable project field
+				purposeField.disabled = false;
+			}
+		});
+
+		
+		 // Resource type selection
+		// Resource type selection
+		document.querySelectorAll('input[name="resource_types"]').forEach(checkbox => {
+			checkbox.addEventListener('change', function() {
+				if (this.value === 'hardware') {
+					document.getElementById('hardwareOptions').style.display = this.checked ? 'block' : 'none';
+					if (!this.checked) {
+						// Uncheck all hardware options when section is hidden
+						document.querySelectorAll('input[name="hardware_resources"]').forEach(hw => {
+							hw.checked = false;
+						});
+						document.getElementById('hardwareOtherContainer').style.display = 'none';
+					}
+				} else if (this.value === 'software') {
+					document.getElementById('softwareOptions').style.display = this.checked ? 'block' : 'none';
+					if (!this.checked) {
+						// Uncheck all software options when section is hidden
+						document.querySelectorAll('input[name="software_resources"]').forEach(sw => {
+							sw.checked = false;
+						});
+						document.getElementById('softwareOtherContainer').style.display = 'none';
+					}
+				} else if (this.value === 'lab') {
+					document.getElementById('labOptions').style.display = this.checked ? 'block' : 'none';
+					if (!this.checked) {
+						// Reset lab selection when section is hidden
+						document.getElementById('lab_area').value = '';
+					}
+				}
+			});
+		});
+
+		// Other hardware option
+		document.querySelectorAll('input[name="hardware_resources"]').forEach(checkbox => {
+			checkbox.addEventListener('change', function() {
+				if (this.value === 'Other' && this.checked) {
+					document.getElementById('hardwareOtherContainer').style.display = 'block';
+				} else if (this.value === 'Other' && !this.checked) {
+					document.getElementById('hardwareOtherContainer').style.display = 'none';
+					document.querySelector('input[name="hardware_other"]').value = '';
+				}
+			});
+		});
+
+		// Other software option
+		document.querySelectorAll('input[name="software_resources"]').forEach(checkbox => {
+			checkbox.addEventListener('change', function() {
+				if (this.value === 'Other' && this.checked) {
+					document.getElementById('softwareOtherContainer').style.display = 'block';
+				} else if (this.value === 'Other' && !this.checked) {
+					document.getElementById('softwareOtherContainer').style.display = 'none';
+					document.querySelector('input[name="software_other"]').value = '';
+				}
+			});
+		});
+
+		// Initialize form elements on page load
+		document.addEventListener('DOMContentLoaded', function() {
+			// Check if any resource types are checked and show corresponding sections
+			document.querySelectorAll('input[name="resource_types"]').forEach(checkbox => {
+				if (checkbox.checked) {
+					if (checkbox.value === 'hardware') {
+						document.getElementById('hardwareOptions').style.display = 'block';
+					} else if (checkbox.value === 'software') {
+						document.getElementById('softwareOptions').style.display = 'block';
+					} else if (checkbox.value === 'lab') {
+						document.getElementById('labOptions').style.display = 'block';
+					}
+				}
+			});
+
+			// Check if "Other" options need to be shown
+			if (document.querySelector('input[name="hardware_resources"][value="Other"]:checked')) {
+				document.getElementById('hardwareOtherContainer').style.display = 'block';
+			}
+			if (document.querySelector('input[name="software_resources"][value="Other"]:checked')) {
+				document.getElementById('softwareOtherContainer').style.display = 'block';
+			}
+		});
+
+        // Mentorship toggle
+        document.getElementById('needsMentorship').addEventListener('change', function() {
+            const mentorContainer = document.getElementById('mentorContainer');
+            mentorContainer.style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Admin request processing
+        function processRequest(requestId, action) {
+            let response = '';
+            
+            if (action === 'reject') {
+                response = prompt('Please provide a reason for rejection or suggest alternative time:');
+                if (response === null) return; // User cancelled
+            }
+            
+            fetch(`/admin/process_resource_request/${requestId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: action,
+                    response: response
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`Request ${action}ed successfully!`);
+                    location.reload();
+                } else {
+                    alert('Error processing request: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error processing request');
+            });
+        }
+
+        // Initialize form elements on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Trigger change events to set initial state
+            document.getElementById('hasProject').dispatchEvent(new Event('change'));
+            document.getElementById('resource_type').dispatchEvent(new Event('change'));
+            document.getElementById('needsMentorship').dispatchEvent(new Event('change'));
+        });
+		// Auto-hide flash messages after 5 seconds
+		document.addEventListener('DOMContentLoaded', function() {
+		  const flashMessages = document.querySelectorAll('.alert');
+		  flashMessages.forEach(msg => {
+			setTimeout(() => {
+			  msg.style.transition = 'opacity 1s';
+			  msg.style.opacity = '0';
+			  setTimeout(() => msg.remove(), 1000);
+			}, 5000);
+		  });
+		});
+		// Add this to your existing JavaScript
+		document.addEventListener('DOMContentLoaded', function() {
+			const flashMessages = document.querySelectorAll('.flash-message');
+			
+			flashMessages.forEach(message => {
+				// Remove element after animation completes
+				message.addEventListener('animationend', function(e) {
+					if (e.animationName === 'flashExit') {
+						message.remove();
+					}
+				});
+				
+				// Optional: Allow manual dismissal
+				message.addEventListener('click', () => {
+					message.style.animation = 'flashExit 0.4s forwards';
+				});
+			});
+		});
+    </script>
+	<script>
+    // Add this to your existing JavaScript in resource_hub.html
+    document.addEventListener('DOMContentLoaded', function() {
+        // Project selection toggle
+        document.getElementById('hasProject').addEventListener('change', function() {
+            const projectSelect = document.getElementById('projectSelectContainer');
+            const purposeContainer = document.getElementById('purposeContainer');
+            
+            if (this.checked) {
+                projectSelect.style.display = 'block';
+                purposeContainer.style.display = 'none';
+                loadUserProjects(); // Load projects when checkbox is checked
+            } else {
+                projectSelect.style.display = 'none';
+                purposeContainer.style.display = 'block';
+            }
+        });
+
+        // Function to load user's projects
+        async function loadUserProjects() {
+            try {
+                const response = await fetch('/get_user_projects');
+                const projects = await response.json();
+                
+                const projectSelect = document.getElementById('project_id1');
+                projectSelect.innerHTML = '<option value="">Choose your project</option>';
+                
+                projects.forEach(project => {
+                    const option = document.createElement('option');
+                    option.value = project.id;
+                    option.textContent = project.project_title;
+                    projectSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading projects:', error);
+            }
+        }
+    });
+</script>
+</body>
+</html>

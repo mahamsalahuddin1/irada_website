@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Event</title>
+    <!-- [Keep all your existing CSS styles] -->
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+        }
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+        .form-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+        .field-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .field-row input, 
+        .field-row select {
+            flex: 1;
+            padding: 8px;
+            min-width: 120px;
+        }
+        .remove-field {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .remove-field:hover {
+            background: #c82333;
+        }
+        #add-field-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #add-field-btn:hover {
+            background: #5a6268;
+        }
+        .required-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        small {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .current-image {
+            max-width: 200px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Edit Event</h2>
+        <form method="POST" enctype="multipart/form-data" id="event-form">
+            <!-- [Keep all your existing form fields] -->
+            <div class="form-group">
+                <label for="title">Event Title:</label>
+                <input type="text" id="title" name="title" value="{{ event.title }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="excerpt">Short Description:</label>
+                <textarea id="excerpt" name="excerpt" required>{{ event.excerpt }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="event_date">Event Date:</label>
+                <input type="text" id="event_date" name="event_date" value="{{ event.event_date }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="event_type">Event Type:</label>
+                <input type="text" id="event_type" name="event_type" value="{{ event.event_type }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="image">Event Image:</label>
+                <input type="file" id="image" name="image" accept="image/*">
+                {% if event.image_path %}
+                <p>Current Image:</p>
+                <img src="{{ url_for('static', filename=event.image_path.split('static/')[-1] if event.image_path.startswith('static/') else event.image_path }}" class="current-image">
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="details">Event Details (HTML allowed):</label>
+                <textarea id="details" name="details" rows="10">{{ event.details }}</textarea>
+            </div>
+            
+            <!-- ===== ADD THIS NEW SECTION HERE ===== -->
+            <!-- Custom Form Fields Section -->
+            <div class="form-section">
+                <h3>Custom Form Fields</h3>
+                <p>Add fields that attendees need to fill when registering for this event</p>
+                
+                <div id="form-fields-container">
+                    {% if event.form_fields and event.form_fields is iterable %}
+                        {% for field in event.form_fields %}
+                        <div class="field-row" data-id="field-{{ loop.index }}">
+                            <input type="text" name="field_name[]" placeholder="Field Name (e.g., full_name)" 
+                                   value="{{ field.get('name', '') }}" required>
+                            <select name="field_type[]" required>
+                                <option value="text" {% if field.get('type') == 'text' %}selected{% endif %}>Text</option>
+                                <option value="email" {% if field.get('type') == 'email' %}selected{% endif %}>Email</option>
+                                <option value="textarea" {% if field.get('type') == 'textarea' %}selected{% endif %}>Text Area</option>
+                                <option value="file" {% if field.get('type') == 'file' %}selected{% endif %}>File Upload</option>
+                                <option value="number" {% if field.get('type') == 'number' %}selected{% endif %}>Number</option>
+                                <option value="tel" {% if field.get('type') == 'tel' %}selected{% endif %}>Phone Number</option>
+                            </select>
+                            <div class="required-checkbox">
+                                <input type="checkbox" name="field_required[]" value="true" 
+                                       id="required-{{ loop.index }}" {% if field.get('required', true) %}checked{% endif %}>
+                                <label for="required-{{ loop.index }}">Required</label>
+                            </div>
+                            <button type="button" class="remove-field" onclick="this.closest('.field-row').remove()">× Remove</button>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                
+                <button type="button" id="add-field-btn">+ Add Field</button>
+            </div>
+            <!-- ===== END OF NEW SECTION ===== -->
+            
+            <button type="submit" class="submit-btn">Update Event</button>
+        </form>
+    </div>
+
+    <!-- [Keep all your existing JavaScript] -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('form-fields-container');
+            let fieldCount = container.querySelectorAll('.field-row').length;
+            
+            // If no fields exist, add one by default
+            if (fieldCount === 0) {
+                addField();
+            }
+            
+            // Add field button handler
+            document.getElementById('add-field-btn').addEventListener('click', addField);
+            
+            function addField() {
+                fieldCount++;
+                const fieldId = 'field-' + fieldCount;
+                
+                const fieldHtml = `
+                <div class="field-row" data-id="${fieldId}">
+                    <input type="text" name="field_name[]" placeholder="Field Name (e.g., full_name)" required>
+                    <select name="field_type[]" required>
+                        <option value="text">Text</option>
+                        <option value="email">Email</option>
+                        <option value="textarea">Text Area</option>
+                        <option value="file">File Upload</option>
+                        <option value="number">Number</option>
+                        <option value="tel">Phone Number</option>
+                    </select>
+                    <div class="required-checkbox">
+                        <input type="checkbox" name="field_required[]" value="true" id="required-${fieldId}" checked>
+                        <label for="required-${fieldId}">Required</label>
+                    </div>
+                    <button type="button" class="remove-field" onclick="this.closest('.field-row').remove()">× Remove</button>
+                </div>`;
+                
+                container.insertAdjacentHTML('beforeend', fieldHtml);
+            }
+            
+            // Form validation
+            document.getElementById('event-form').addEventListener('submit', function(e) {
+                const fieldNames = document.querySelectorAll('input[name="field_name[]"]');
+                const names = Array.from(fieldNames).map(f => f.value.trim().toLowerCase());
+                
+                // Check for duplicate field names
+                if (new Set(names).size !== names.length) {
+                    e.preventDefault();
+                    alert('Field names must be unique. Please use different names for each field.');
+                    return;
+                }
+                
+                // Check for empty field names
+                for (let field of fieldNames) {
+                    if (!field.value.trim()) {
+                        e.preventDefault();
+                        alert('All field names must be filled');
+                        field.focus();
+                        return;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

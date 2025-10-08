@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add New Event</title>
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+        }
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+	
+.form-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+}
+
+.field-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+}
+
+.field-row input, .field-row select {
+    flex: 1;
+    padding: 8px;
+}
+
+.remove-field {
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Add New Event</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Event Title:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="excerpt">Short Description:</label>
+                <textarea id="excerpt" name="excerpt" required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="event_date">Event Date:</label>
+                <input type="text" id="event_date" name="event_date" required placeholder="e.g. Apr 30 - Oct 2, 2025">
+            </div>
+            <div class="form-group">
+                <label for="event_type">Event Type:</label>
+                <input type="text" id="event_type" name="event_type" required placeholder="e.g. Competition, Workshop">
+            </div>
+            <div class="form-group">
+                <label for="image">Event Image:</label>
+                <input type="file" id="image" name="image" accept="image/*">
+            </div>
+            
+			
+			<div class="form-group">
+				<label for="details">Event Details (HTML allowed):</label>
+				<textarea id="details" name="details" rows="10" class="rich-text-editor"></textarea>
+				<small>Use HTML tags for formatting (e.g., &lt;h3&gt;, &lt;ul&gt;, &lt;li&gt;)</small>
+			</div>
+			
+			<!-- Add this after the "Event Details" section in add_event.html -->
+<div class="form-section">
+    <h3>Custom Form Fields</h3>
+    <div id="form-fields-container">
+        <!-- Fields will be added here dynamically -->
+    </div>
+    <button type="button" id="add-field-btn" class="btn btn-secondary">Add Field</button>
+</div>
+
+
+
+
+
+
+            <button type="submit" class="submit-btn">Add Event</button>
+        </form>
+    </div>
+
+<script>
+document.getElementById('add-field-btn').addEventListener('click', function() {
+    const container = document.getElementById('form-fields-container');
+    const fieldId = Date.now(); // Unique ID for each field
+    
+    const fieldHtml = `
+    <div class="field-row" data-id="${fieldId}">
+        <input type="text" name="field_name[]" placeholder="Field Name (e.g., student_name)" required>
+        <select name="field_type[]" required>
+            <option value="text">Text</option>
+            <option value="email">Email</option>
+            <option value="textarea">Text Area</option>
+            <option value="file">File Upload</option>
+            <option value="number">Number</option>
+        </select>
+        <label>
+            <input type="checkbox" name="field_required[]" value="true"> Required
+        </label>
+        <button type="button" class="remove-field" onclick="this.parentElement.remove()">Remove</button>
+    </div>`;
+    
+    container.insertAdjacentHTML('beforeend', fieldHtml);
+});
+</script>
+</body>
+</html>

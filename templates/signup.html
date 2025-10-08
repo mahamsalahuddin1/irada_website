@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up | IRADA Innovation Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Animated Background Particles -->
+    <div id="particles-js"></div>
+	
+	
+		{% with messages = get_flashed_messages(with_categories=true) %}
+			{% if messages %}
+				<div class="flash-container">
+					{% for category, message in messages %}
+						<div class="flash-message flash-{{ category }}">
+							<div class="flash-content">
+								<svg class="flash-icon" viewBox="0 0 24 24">
+									{% if category == 'success' %}
+										<path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"/>
+									{% elif category == 'error' %}
+										<path fill="currentColor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
+									{% else %}
+										<path fill="currentColor" d="M13,13H11V7H13M13,17H11V15H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
+									{% endif %}
+								</svg>
+								<span class="flash-text">{{ message }}</span>
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+			{% endif %}
+		{% endwith %}
+		
+    
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo animate__animated animate__fadeInDown">IRADA<span>INNOVATION</span>CENTRE</h1>
+           <nav>
+				<ul class="nav-links">
+					<li><a href="{{ url_for('landing') }}" class="nav-link {% if request.endpoint == 'landing' %}active{% endif %}">Home</a></li>
+					<li><a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">About</a></li>
+					<li><a href="{{ url_for('projects') }}" class="nav-link {% if request.endpoint == 'projects' %}active{% endif %}">Projects Portal</a></li>
+					<li><a href="{{ url_for('events') }}" class="nav-link {% if request.endpoint == 'events' %}active{% endif %}">Events & Training</a></li>
+					<li><a href="{{ url_for('resource_hub') }}" class="nav-link {% if request.endpoint == 'resource_hub' %}active{% endif %}">Resource Hub</a></li>
+					{% if 'user_id' in session %}
+						<li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
+					{% else %}
+						<li><a href="{{ url_for('login') }}" class="nav-link {% if request.endpoint == 'login' %}active{% endif %}">Login</a></li>
+						<li><a href="{{ url_for('signup') }}" class="signup-btn {% if request.endpoint == 'signup' %}active{% endif %}">Signup</a></li>
+					{% endif %}
+				</ul>
+				<div class="hamburger">
+					<span></span>
+					<span></span>
+					<span></span>
+				</div>
+			</nav>
+        </div>
+    </header>
+
+    <!-- Signup Container  -->
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="brand-mark">
+                <h1 class="logo">IRADA<span>INNOVATION</span></h1>
+            </div>
+            <h2>Create Your Account</h2>
+            <p>Join our innovation community today</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('signup') }}" class="auth-form">
+            {% if errors %}
+                <div class="alert alert-danger">
+                    {% for field, message in errors.items() %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="form-group {% if errors.username %}has-error{% endif %}">
+                <label for="username">Username</label>
+                <div class="input-with-icon">
+                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <input type="text" id="username" name="username" required placeholder="Choose a username" 
+                           class="{% if errors.username %}error-field{% endif %}" 
+                           value="{{ form_data.username if form_data.username }}">
+                </div>
+                {% if errors.username %}
+                    <div class="error-message">{{ errors.username }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group {% if errors.email %}has-error{% endif %}">
+                <label for="email">Email</label>
+                <div class="input-with-icon">
+                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                        <polyline points="22,6 12,13 2,6"></polyline>
+                    </svg>
+                    <input type="email" id="email" name="email" required placeholder="Enter your email" 
+                           class="{% if errors.email %}error-field{% endif %}" 
+                           value="{{ form_data.email if form_data.email }}">
+                </div>
+                {% if errors.email %}
+                    <div class="error-message">{{ errors.email }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group {% if errors.password %}has-error{% endif %}">
+                <label for="password">Password</label>
+                <div class="input-with-icon">
+                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" id="password" name="password" required placeholder="Create a password" 
+                           class="{% if errors.password %}error-field{% endif %}">
+                </div>
+                {% if errors.password %}
+                    <div class="error-message">{{ errors.password }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group {% if errors.confirm_password %}has-error{% endif %}">
+                <label for="confirm_password">Confirm Password</label>
+                <div class="input-with-icon">
+                    <svg class="input-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <input type="password" id="confirm_password" name="confirm_password" required placeholder="Repeat your password" 
+                           class="{% if errors.confirm_password %}error-field{% endif %}">
+                </div>
+                {% if errors.confirm_password %}
+                    <div class="error-message">{{ errors.confirm_password }}</div>
+                {% endif %}
+            </div>
+            
+            <button type="submit" class="auth-btn">
+                <span>Create Account</span>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14"></path>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+            </button>
+            
+            <div class="auth-footer">
+                <p>Already have an account? <a href="{{ url_for('login') }}" class="auth-link">Login</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    /* Add these styles to your existing CSS */
+    .has-error label {
+        color: #e74c3c;
+    }
+    
+    .error-field {
+        border-color: #e74c3c !important;
+        background-color: #fff6f6 !important;
+    }
+    
+    .error-message {
+        color: #e74c3c;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        padding-left: 5px;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        padding: 10px 15px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        border: 1px solid #f5c6cb;
+    }
+    
+    .alert-danger p {
+        margin: 5px 0;
+    }
+	/* Beautiful Centered Flash Messages */
+.flash-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.flash-message {
+    max-width: 500px;
+    width: 100%;
+    padding: 20px 25px;
+    margin: 10px 0;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: flashEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.flash-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.flash-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.flash-text {
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+/* Color Variants */
+.flash-success {
+    background: rgba(46, 125, 50, 0.9);
+    color: white;
+    border-left: 4px solid #81C784;
+}
+
+.flash-error {
+    background: rgba(198, 40, 40, 0.9);
+    color: white;
+    border-left: 4px solid #EF9A9A;
+}
+
+.flash-warning {
+    background: rgba(237, 108, 2, 0.9);
+    color: white;
+    border-left: 4px solid #FFCC80;
+}
+
+.flash-info {
+    background: rgba(30, 136, 229, 0.9);
+    color: white;
+    border-left: 4px solid #90CAF9;
+}
+
+/* Animations */
+@keyframes flashEnter {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes flashExit {
+    to {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+}
+
+/* Auto-dismiss animation */
+.flash-message {
+    animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
+}   
+</style>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+	<script>
+         
+		// Auto-hide flash messages after 5 seconds
+		document.addEventListener('DOMContentLoaded', function() {
+		  const flashMessages = document.querySelectorAll('.alert');
+		  flashMessages.forEach(msg => {
+			setTimeout(() => {
+			  msg.style.transition = 'opacity 1s';
+			  msg.style.opacity = '0';
+			  setTimeout(() => msg.remove(), 1000);
+			}, 5000);
+		  });
+		});
+		
+		document.addEventListener('DOMContentLoaded', function() {
+			const flashMessages = document.querySelectorAll('.flash-message');
+			
+			flashMessages.forEach(message => {
+				// Remove element after animation completes
+				message.addEventListener('animationend', function(e) {
+					if (e.animationName === 'flashExit') {
+						message.remove();
+					}
+				});
+				
+				
+				message.addEventListener('click', () => {
+					message.style.animation = 'flashExit 0.4s forwards';
+				});
+			});
+		});
+    </script>
+</body>
+</html>

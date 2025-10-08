@@ -1,0 +1,70 @@
+CREATE TABLE completed_projects (
+    idPrimary INT(11) NOT NULL AUTO_INCREMENT,
+    project_title VARCHAR(255) NOT NULL,
+    domain VARCHAR(100) NOT NULL,
+    abstract TEXT NOT NULL,
+    lead_researcher VARCHAR(100) NOT NULL,
+    supervisor VARCHAR(100) NOT NULL,
+    completion_date DATE NOT NULL,
+    poster_path VARCHAR(255),
+    video_path VARCHAR(255),
+    report_path VARCHAR(255),
+    faculty VARCHAR(100),
+    programme VARCHAR(100),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (idPrimary)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE ongoing_projects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_title VARCHAR(255) NOT NULL,
+    domain VARCHAR(100) NOT NULL,
+    abstract TEXT NOT NULL,
+    researcher VARCHAR(100) NOT NULL,
+    supervisor VARCHAR(100) NOT NULL,
+    timeline VARCHAR(100) NOT NULL,
+    faculty VARCHAR(100) NOT NULL,
+    programme VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE project_proposals (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    project_title VARCHAR(255) NOT NULL,
+    team_members TEXT NOT NULL,
+    domain VARCHAR(100),
+    timeline VARCHAR(100),
+    needs_mentorship BOOLEAN DEFAULT 0,
+    supervisor VARCHAR(100),
+    faculty VARCHAR(100),
+    programme VARCHAR(100),
+    start_date DATE,
+    duration VARCHAR(100),
+    resources_required TEXT,
+    file_path VARCHAR(255),
+    submission_date DATETIME NOT NULL,
+    status VARCHAR(50)
+) ENGINE=InnoDB DEFAULT 
+
+CREATE TABLE resource_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    resource_description TEXT NOT NULL,
+    quantity INT NOT NULL,
+    status VARCHAR(50) DEFAULT 'Pending',
+    requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    password_hash TEXT NOT NULL,
+    role VARCHAR(20) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+

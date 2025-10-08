@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add New Event</title>
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+        }
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+        .form-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+        .field-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .field-row input, 
+        .field-row select {
+            flex: 1;
+            padding: 8px;
+            min-width: 120px;
+        }
+        .remove-field {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .remove-field:hover {
+            background: #c82333;
+        }
+        #add-field-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #add-field-btn:hover {
+            background: #5a6268;
+        }
+        small {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .rich-text-editor {
+            min-height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Add New Event</h2>
+        <form method="POST" enctype="multipart/form-data" id="event-form">
+            <div class="form-group">
+                <label for="title">Event Title:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="excerpt">Short Description:</label>
+                <textarea id="excerpt" name="excerpt" required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="event_date">Event Date:</label>
+                <input type="text" id="event_date" name="event_date" required placeholder="e.g. Apr 30 - Oct 2, 2025">
+            </div>
+            
+            <div class="form-group">
+                <label for="event_type">Event Type:</label>
+                <input type="text" id="event_type" name="event_type" required placeholder="e.g. Competition, Workshop">
+            </div>
+            
+            <div class="form-group">
+                <label for="image">Event Image:</label>
+                <input type="file" id="image" name="image" accept="image/*">
+                <small>Recommended size: 1200x600 pixels</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="details">Event Details (HTML allowed):</label>
+                <textarea id="details" name="details" rows="10" class="rich-text-editor"></textarea>
+                <small>Use HTML tags for formatting (e.g., &lt;h3&gt;, &lt;ul&gt;, &lt;li&gt;)</small>
+            </div>
+            
+            <!-- Custom Form Fields Section -->
+            <div class="form-section">
+                <h3>Custom Form Fields</h3>
+                <p>Add fields that attendees need to fill when registering for this event</p>
+                
+                <div id="form-fields-container">
+                    <!-- Initial field will be added by JavaScript -->
+                </div>
+                
+                <button type="button" id="add-field-btn">+ Add Field</button>
+            </div>
+            
+            <button type="submit" class="submit-btn">Add Event</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('form-fields-container');
+            let fieldCount = 0;
+            
+            // Add initial field
+            addField();
+            
+            // Add field button handler
+            document.getElementById('add-field-btn').addEventListener('click', addField);
+            
+            // Function to add a new field group
+            function addField() {
+                fieldCount++;
+                const fieldId = 'field-' + fieldCount;
+                
+                const fieldHtml = `
+                <div class="field-row" data-id="${fieldId}">
+                    <input type="text" name="field_name[]" placeholder="Field Name (e.g., full_name)" required>
+                    <select name="field_type[]" required>
+                        <option value="text">Text</option>
+                        <option value="email">Email</option>
+                        <option value="textarea">Text Area</option>
+                        <option value="file">File Upload</option>
+                        <option value="number">Number</option>
+                        <option value="tel">Phone Number</option>
+                    </select>
+                    <input type="hidden" name="field_required[]" value="true">
+                    <button type="button" class="remove-field" onclick="this.closest('.field-row').remove()">× Remove</button>
+                </div>`;
+                
+                container.insertAdjacentHTML('beforeend', fieldHtml);
+            }
+            
+            // Form validation
+            document.getElementById('event-form').addEventListener('submit', function(e) {
+                const fieldNames = document.querySelectorAll('input[name="field_name[]"]');
+                const names = Array.from(fieldNames).map(f => f.value.trim().toLowerCase());
+                
+                // Check for duplicate field names
+                if (new Set(names).size !== names.length) {
+                    e.preventDefault();
+                    alert('Field names must be unique. Please use different names for each field.');
+                    return;
+                }
+                
+                // Check for empty field names
+                for (let field of fieldNames) {
+                    if (!field.value.trim()) {
+                        e.preventDefault();
+                        alert('All field names must be filled');
+                        field.focus();
+                        return;
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

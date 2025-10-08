@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Event</title>
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            min-height: 100px;
+        }
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+        .current-image {
+            max-width: 200px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Edit Event</h2>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Event Title:</label>
+                <input type="text" id="title" name="title" value="{{ event.title }}" required>
+            </div>
+            <div class="form-group">
+                <label for="excerpt">Short Description:</label>
+                <textarea id="excerpt" name="excerpt" required>{{ event.excerpt }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="event_date">Event Date:</label>
+                <input type="text" id="event_date" name="event_date" value="{{ event.event_date }}" required>
+            </div>
+            <div class="form-group">
+                <label for="event_type">Event Type:</label>
+                <input type="text" id="event_type" name="event_type" value="{{ event.event_type }}" required>
+            </div>
+            <div class="form-group">
+                <label for="image">Event Image:</label>
+                <input type="file" id="image" name="image" accept="image/*">
+                {% if event.image_path %}
+                <p>Current Image:</p>
+                <img src="{{ url_for('static', filename=event.image_path) }}" class="current-image">
+                {% endif %}
+            </div>
+            <div class="form-group">
+                <label for="details">Event Details (HTML allowed):</label>
+                <textarea id="details" name="details" rows="10">{{ event.details }}</textarea>
+            </div>
+            <button type="submit" class="submit-btn">Update Event</button>
+        </form>
+    </div>
+</body>
+</html>

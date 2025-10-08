@@ -1,0 +1,54 @@
+<!DOCTYPE html> 
+<html>
+<head>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <h2>Welcome, Admin!</h2> 
+    <a href="{{ url_for('logout') }}">Logout</a>
+
+    <h3>Project Proposals</h3>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Project Title</th>
+            <th>File</th>
+        </tr>
+        {% for proposal in proposals %}
+        <tr>
+            <td>{{ proposal.id }}</td>
+            <td>{{ proposal.name }}</td>
+            <td>{{ proposal.email }}</td>
+            <td>{{ proposal.project_title }}</td>
+            <td><a href="{{ url_for('download_file', proposal_id=proposal.id) }}">Download</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <table>
+        <tr>
+            <th>Project Title</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        {% for proposal in proposals %}
+        <tr>
+            <td>{{ proposal.project_title }}</td>
+            <td>{{ proposal.status }}</td>
+            <td>
+                <form method="POST" action="{{ url_for('update_status', proposal_id=proposal.id, status='Accepted') }}">
+                    <button type="submit">Accept</button>
+                </form>
+                <form method="POST" action="{{ url_for('update_status', proposal_id=proposal.id, status='Rejected') }}">
+                    <button type="submit">Reject</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <img src="{{ chart_url }}" alt="Proposals Chart">
+</body>
+</html>

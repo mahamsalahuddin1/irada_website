@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRADA Innovation Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Animated Background Particles -->
+    <div id="particles-js"></div>
+    
+    <!-- Navigation -->
+    <header class="navbar">
+        <div class="container">
+            <h1 class="logo animate__animated animate__fadeInDown">IRADA<span>INNOVATION</span>HUB</h1>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#" class="nav-link animate__animated animate__fadeInDown" style="--i:1">Home</a></li>
+                    <li><a href="#" class="nav-link animate__animated animate__fadeInDown" style="--i:2">About</a></li>
+                    <li><a href="#" class="nav-link animate__animated animate__fadeInDown" style="--i:3">Research</a></li>
+                    <li><a href="#" class="nav-link animate__animated animate__fadeInDown" style="--i:4">Project Proposal</a></li>
+                    <li><a href="#" class="nav-link animate__animated animate__fadeInDown" style="--i:5">Meetings</a></li>
+                    <li><a href="{{ url_for('login') }}" class="nav-link animate__animated animate__fadeInDown" style="--i:6">Login</a></li>
+                    <li><a href="{{ url_for('signup') }}" class="signup-btn animate__animated animate__fadeInDown" style="--i:7">Signup</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2 class="animate__animated animate__fadeInUp">Innovate.<span>Discover.</span>Transform.</h2>
+                <h1 class="animate__animated animate__fadeInUp animate__delay-1s">Aviation's Future, <span>Today!</span></h1>
+                <p class="animate__animated animate__fadeInUp animate__delay-2s">Empowering innovation in robotics, AI, data science, and aviation. Join us to shape tomorrow's world.</p>
+                <div class="cta-buttons animate__animated animate__fadeInUp animate__delay-3s">
+                    <a href="{{ url_for('signup') }}" class="btn-primary magnetic">
+                        <span>Explore Now</span>
+                        <svg viewBox="0 0 13 10" height="10px" width="15px">
+                            <path d="M1,5 L11,5"></path>
+                            <polyline points="8 1 12 5 8 9"></polyline>
+                        </svg>
+                    </a>
+                    <a href="#" class="btn-secondary magnetic">
+                        <span>Learn More</span>
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image animate__animated animate__fadeInRight animate__delay-1s">
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
