@@ -22,6 +22,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from flask_wtf import CSRFProtect
 from flask_wtf.csrf import generate_csrf
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 csrf = CSRFProtect()
 
@@ -41,11 +43,40 @@ COOKIE_SECURE = os.getenv("COOKIE_SECURE", "False").lower() == "true"
 
 csrf.init_app(app) 
 
+limiter = Limiter(key_func=get_remote_address)
+limiter.init_app(app)
+limiter.default_limits = ["400 per day", "50 per hour"]
+
 app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",   
     SESSION_COOKIE_SECURE=False      
 )
+
+# --- Upload limits & 303 handler (replace your current MAX_CONTENT_LENGTH and 303 handler with this) ---
+from werkzeug.exceptions import RequestEntityTooLarge
+
+# 20 MB default; override with env var MAX_CONTENT_MB if you want
+app.config['MAX_CONTENT_LENGTH'] = int(os.getenv("MAX_CONTENT_MB", 200)) * 1024 * 1024
+
+@app.errorhandler(RequestEntityTooLarge)
+def handle_413(e):
+    # Prefer JSON for XHR/fetch
+    wants_json = (
+        request.is_json
+        or request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        or (request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html)
+    )
+    max_mb = int(app.config['MAX_CONTENT_LENGTH'] / (1024 * 1024))
+    msg = f'File too large (max {max_mb} MB).'
+
+    if wants_json:
+        return jsonify(success=False, message=msg), 413
+
+    # Redirect sensibly depending on where the upload came from
+    target = url_for('admin_dashboard') if request.path.startswith('/admin') else url_for('projects')
+    flash(msg, 'error')
+    return redirect(target, code=303) 
 
 # Upload config
 app.config['UPLOAD_FOLDER'] = 'static'
@@ -197,6 +228,7 @@ def signup():
 
 # login
 # UPDATED: secure login with hashed passwords + JWT cookie, with legacy migration
+@limiter.limit("5 per minute; 20 per hour")
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     errors = {}
@@ -1113,4 +1145,9 @@ def about():
     return render_template('about.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+
+    host  = os.getenv("APP_HOST", "0.0.0.0")
+    port  = int(os.getenv("PORT") or os.getenv("APP_PORT") or 5000)
+    debug = os.getenv("DEBUG", "False").lower() in ("1","true","yes","on")
+
+    app.run(host=host, port=port, debug=debug)
