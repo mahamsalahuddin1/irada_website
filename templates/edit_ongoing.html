@@ -3,6 +3,8 @@
 <html>
 <head>
     <title>Edit Ongoing Project</title>
+    {% include "_csrf_head.html" %}
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         .form-container {
@@ -71,7 +73,9 @@
             {% endif %}
         {% endwith %}
         
-        <form method="POST">
+        <form method="POST" action="{{ url_for('edit_ongoing_project', project_id=project.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <div class="form-group">
                 <label class="form-label" for="project_title">Project Title</label>
                 <input type="text" class="form-control" name="project_title" value="{{ project.project_title }}" required>
@@ -131,5 +135,7 @@
             <button type="submit" class="submit-btn">Update Project</button>
         </form>
     </div>
+    {% include "_csrf_script.html" %}
+
 </body>
 </html>

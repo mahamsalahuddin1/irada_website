@@ -1,473 +1,566 @@
 <!-- admin.html -->
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Admin Dashboard</title>
+    {% include "_csrf_head.html" %}
+
     <style>
-	/* Gallery Tab Specific Styles */
-#gallery table img {
-    border-radius: 5px;
-    transition: transform 0.3s ease;
-}
+      /* Gallery Tab Specific Styles */
+      #gallery table img {
+        border-radius: 5px;
+        transition: transform 0.3s ease;
+      }
 
-#gallery table img:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
+      #gallery table img:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      }
 
-#gallery table td {
-    vertical-align: middle;
-}
+      #gallery table td {
+        vertical-align: middle;
+      }
 
-#gallery .action-btn {
-    margin: 5px;
-    padding: 5px 10px;
-    font-size: 0.9rem;
-}
-	/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.7);
-}
+      #gallery .action-btn {
+        margin: 5px;
+        padding: 5px 10px;
+        font-size: 0.9rem;
+      }
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+      }
 
-.modal-content {
-    background-color: #fefefe;
-    margin: 10% auto;
-    padding: 20px;
-    border-radius: 5px;
-    width: 50%;
-    max-width: 500px;
-}
+      .modal-content {
+        background-color: #fefefe;
+        margin: 10% auto;
+        padding: 20px;
+        border-radius: 5px;
+        width: 50%;
+        max-width: 500px;
+      }
 
-.close-btn {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
+      .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
 
-.close-btn:hover {
-    color: black;
-}
+      .close-btn:hover {
+        color: black;
+      }
 
-.form-group {
-    margin-bottom: 15px;
-}
+      .form-group {
+        margin-bottom: 15px;
+      }
 
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
 
-.form-group input {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-        .dashboard-container {
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .tabs {
-            display: flex;
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-        }
-        .tab-btn {
-            padding: 10px 20px;
-            cursor: pointer;
-            background: #f1f1f1;
-            border: none;
-            margin-right: 5px;
-            border-radius: 5px 5px 0 0;
-        }
-        .tab-btn.active {
-            background: #4CAF50;
-            color: white;
-        }
-        .tab-content {
-            display: none;
-            padding: 20px;
-            background: white;
-            border-radius: 0 0 5px 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        .tab-content.active {
-            display: block;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        .action-btn {
-            padding: 5px 10px;
-            margin-right: 5px;
-            border: none;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        .edit-btn {
-            background-color: #2196F3;
-            color: white;
-        }
-        .delete-btn {
-            background-color: #f44336;
-            color: white;
-        }
-        .download-btn {
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 3px;
-            display: inline-block;
-        }
-        .add-project-btn {
-            background-color: #673AB7;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            margin-bottom: 20px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-		.status-pending {
-    color: #FFA500; /* Orange */
-    font-weight: 600;
-}
+      .form-group input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      .dashboard-container {
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .tabs {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ddd;
+      }
+      .tab-btn {
+        padding: 10px 20px;
+        cursor: pointer;
+        background: #f1f1f1;
+        border: none;
+        margin-right: 5px;
+        border-radius: 5px 5px 0 0;
+      }
+      .tab-btn.active {
+        background: #4caf50;
+        color: white;
+      }
+      .tab-content {
+        display: none;
+        padding: 20px;
+        background: white;
+        border-radius: 0 0 5px 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+      .tab-content.active {
+        display: block;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+      }
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      .action-btn {
+        padding: 5px 10px;
+        margin-right: 5px;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+      .edit-btn {
+        background-color: #2196f3;
+        color: white;
+      }
+      .delete-btn {
+        background-color: #f44336;
+        color: white;
+      }
+      .download-btn {
+        background-color: #4caf50;
+        color: white;
+        text-decoration: none;
+        padding: 5px 10px;
+        border-radius: 3px;
+        display: inline-block;
+      }
+      .add-project-btn {
+        background-color: #673ab7;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 4px;
+        margin-bottom: 20px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+      }
+      .status-pending {
+        color: #ffa500; /* Orange */
+        font-weight: 600;
+      }
 
-.status-approved {
-    color: #4CAF50; /* Green */
-    font-weight: 600;
-}
+      .status-approved {
+        color: #4caf50; /* Green */
+        font-weight: 600;
+      }
 
-.status-rejected {
-    color: #F44336; /* Red */
-    font-weight: 600;
-}
+      .status-rejected {
+        color: #f44336; /* Red */
+        font-weight: 600;
+      }
 
-.approve-btn {
-    background-color: #4CAF50;
-    color: white;
-}
+      .approve-btn {
+        background-color: #4caf50;
+        color: white;
+      }
 
-.reject-btn {
-    background-color: #F44336;
-    color: white;
-}
-.logout-btn {
-    display: flex;
-    padding: 8px 20px;
-    background-color: #ff4757;
-    color: white;
-    border-radius: 4px;
-    text-decoration: none;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    margin-left: 10px;
-    height: fit-content;
-    line-height: normal;
-}
+      .reject-btn {
+        background-color: #f44336;
+        color: white;
+      }
+      .logout-btn {
+        display: flex;
+        padding: 8px 20px;
+        background-color: #ff4757;
+        color: white;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        margin-left: 10px;
+        height: fit-content;
+        line-height: normal;
+      }
 
-.logout-btn:hover {
-    background-color: #ff6b81;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-.dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+      .logout-btn:hover {
+        background-color: #ff6b81;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
 
-        .dashboard-header h2 {
-            margin: 0;
-        }
-		
-/* Beautiful Centered Flash Messages */
-.flash-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    z-index: 1000;
-    padding: 20px;
-}
+      .dashboard-header h2 {
+        margin: 0;
+      }
 
-.flash-message {
-    max-width: 500px;
-    width: 100%;
-    padding: 20px 25px;
-    margin: 10px 0;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    display: flex;
-    align-items: center;
-    transform: translateY(20px);
-    opacity: 0;
-    animation: flashEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
-}
+      /* Beautiful Centered Flash Messages */
+      .flash-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 1000;
+        padding: 20px;
+      }
 
-.flash-content {
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.flash-icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 15px;
-    flex-shrink: 0;
-}
-
-.flash-text {
-    font-size: 1rem;
-    line-height: 1.5;
-    font-weight: 500;
-}
-
-/* Color Variants */
-.flash-success {
-    background: rgba(46, 125, 50, 0.9);
-    color: white;
-    border-left: 4px solid #81C784;
-}
-
-.flash-error {
-    background: rgba(198, 40, 40, 0.9);
-    color: white;
-    border-left: 4px solid #EF9A9A;
-}
-
-.flash-warning {
-    background: rgba(237, 108, 2, 0.9);
-    color: white;
-    border-left: 4px solid #FFCC80;
-}
-
-.flash-info {
-    background: rgba(30, 136, 229, 0.9);
-    color: white;
-    border-left: 4px solid #90CAF9;
-}
-
-/* Animations */
-@keyframes flashEnter {
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-@keyframes flashExit {
-    to {
-        transform: translateY(-20px);
+      .flash-message {
+        max-width: 500px;
+        width: 100%;
+        padding: 20px 25px;
+        margin: 10px 0;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        transform: translateY(20px);
         opacity: 0;
-    }
-}
+        animation: flashEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+          forwards;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
 
-/* Auto-dismiss animation */
-.flash-message {
-    animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
-}   
+      .flash-content {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+
+      .flash-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+
+      .flash-text {
+        font-size: 1rem;
+        line-height: 1.5;
+        font-weight: 500;
+      }
+
+      /* Color Variants */
+      .flash-success {
+        background: rgba(46, 125, 50, 0.9);
+        color: white;
+        border-left: 4px solid #81c784;
+      }
+
+      .flash-error {
+        background: rgba(198, 40, 40, 0.9);
+        color: white;
+        border-left: 4px solid #ef9a9a;
+      }
+
+      .flash-warning {
+        background: rgba(237, 108, 2, 0.9);
+        color: white;
+        border-left: 4px solid #ffcc80;
+      }
+
+      .flash-info {
+        background: rgba(30, 136, 229, 0.9);
+        color: white;
+        border-left: 4px solid #90caf9;
+      }
+
+      /* Animations */
+      @keyframes flashEnter {
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes flashExit {
+        to {
+          transform: translateY(-20px);
+          opacity: 0;
+        }
+      }
+
+      /* Auto-dismiss animation */
+      .flash-message {
+        animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="dashboard-container">
-	<div class="dashboard-header">
-            <h2>Welcome, Admin!</h2>
-            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+      <div class="dashboard-header">
+        <h2>Welcome, Admin!</h2>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="proposals">
+          Project Proposals
+        </button>
+        <button class="tab-btn" data-tab="ongoing">Ongoing Projects</button>
+        <button class="tab-btn" data-tab="completed">Completed Projects</button>
+        <button class="tab-btn" data-tab="resources">Resource Requests</button>
+        <button class="tab-btn" data-tab="events">Events Management</button>
+        <button class="tab-btn" data-tab="gallery">Gallery Management</button>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+          <div class="flash-content">
+            <svg class="flash-icon" viewBox="0 0 24 24">
+              {% if category == 'success' %}
+              <path
+                fill="currentColor"
+                d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"
+              />
+              {% elif category == 'error' %}
+              <path
+                fill="currentColor"
+                d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"
+              />
+              {% else %}
+              <path
+                fill="currentColor"
+                d="M13,13H11V7H13M13,17H11V15H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
+              />
+              {% endif %}
+            </svg>
+            <span class="flash-text">{{ message }}</span>
+          </div>
         </div>
-		
-        
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
 
-        
-		<div class="tabs">
-			<button class="tab-btn active" data-tab="proposals">Project Proposals</button>
-			<button class="tab-btn" data-tab="ongoing">Ongoing Projects</button>
-			<button class="tab-btn" data-tab="completed">Completed Projects</button>
-			<button class="tab-btn" data-tab="resources">Resource Requests</button>
-			<button class="tab-btn" data-tab="events">Events Management</button>
-			<button class="tab-btn" data-tab="gallery">Gallery Management</button>
-		</div>
+      <!-- Project Proposals Tab -->
+      <div class="tab-content active" id="proposals">
+        <h3>Project Proposals</h3>
+        <table>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Project Title</th>
+            <th>Brief</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+          {% for proposal in proposals %}
+          <!-- In the table row -->
+          <tr>
+            <td>{{ proposal.id }}</td>
+            <td>{{ proposal.name }}</td>
+            <td>{{ proposal.email }}</td>
+            <td>{{ proposal.project_title }}</td>
+            <td>{{ proposal.project_brief }}</td>
+            <!-- New column -->
+            <td>{{ proposal.status }}</td>
+            <td>
+              <a
+                href="{{ url_for('download_file', proposal_id=proposal.id) }}"
+                class="download-btn"
+                >Download</a
+              >
+              <form
+                method="POST"
+                action="{{ url_for('update_status', proposal_id=proposal.id, status='Accepted') }}"
+                style="display: inline"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
 
-		{% with messages = get_flashed_messages(with_categories=true) %}
-			{% if messages %}
-				<div class="flash-container">
-					{% for category, message in messages %}
-						<div class="flash-message flash-{{ category }}">
-							<div class="flash-content">
-								<svg class="flash-icon" viewBox="0 0 24 24">
-									{% if category == 'success' %}
-										<path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"/>
-									{% elif category == 'error' %}
-										<path fill="currentColor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
-									{% else %}
-										<path fill="currentColor" d="M13,13H11V7H13M13,17H11V15H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
-									{% endif %}
-								</svg>
-								<span class="flash-text">{{ message }}</span>
-							</div>
-						</div>
-					{% endfor %}
-				</div>
-			{% endif %}
-		{% endwith %}
-		
-        <!-- Project Proposals Tab -->
-        <div class="tab-content active" id="proposals">
-            
-            
-            <h3>Project Proposals</h3>
-            <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Project Title</th>
-					<th>Brief</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-                {% for proposal in proposals %}
-                <!-- In the table row -->
-					<tr>
-						<td>{{ proposal.id }}</td>
-						<td>{{ proposal.name }}</td>
-						<td>{{ proposal.email }}</td>
-						<td>{{ proposal.project_title }}</td>
-						<td>{{ proposal.project_brief }}</td>  <!-- New column -->
-						<td>{{ proposal.status }}</td>
-						<td>
-							<a href="{{ url_for('download_file', proposal_id=proposal.id) }}" class="download-btn">Download</a>
-							<form method="POST" action="{{ url_for('update_status', proposal_id=proposal.id, status='Accepted') }}" style="display:inline;">
-								<button type="submit" class="action-btn edit-btn">Accept</button>
-							</form>
-							<form method="POST" action="{{ url_for('update_status', proposal_id=proposal.id, status='Rejected') }}" style="display:inline;">
-								<button type="submit" class="action-btn delete-btn">Reject</button>
-							</form>
-						</td>
-					</tr>
-                {% endfor %}
-            </table>
-			<img src="{{ chart_url }}" alt="Proposals Chart">
-        </div>
+                <button type="submit" class="action-btn edit-btn">
+                  Accept
+                </button>
+              </form>
+              <form
+                method="POST"
+                action="{{ url_for('update_status', proposal_id=proposal.id, status='Rejected') }}"
+                style="display: inline"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
+                <button type="submit" class="action-btn delete-btn">
+                  Reject
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+        <img src="{{ chart_url }}" alt="Proposals Chart" />
+      </div>
 
-        <!-- Ongoing Projects Tab -->
-        <div class="tab-content" id="ongoing">
-            <a href="{{ url_for('add_ongoing_project') }}" class="add-project-btn">Add Ongoing Project</a>
-            
-            <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Researcher</th>
-                    <th>Supervisor</th>
-                    <th>Domain</th>
-                    <th>Timeline</th>
-                    <th>Actions</th>
-                </tr>
-                {% for project in ongoing_projects %}
-                <tr>
-                    <td>{{ project.id }}</td>
-                    <td>{{ project.project_title }}</td>
-                    <td>{{ project.researcher }}</td>
-                    <td>{{ project.supervisor }}</td>
-                    <td>{{ project.domain }}</td>
-                    <td>{{ project.timeline }}</td>
-                    <td>
-                        <a href="{{ url_for('edit_ongoing_project', project_id=project.id) }}" class="action-btn edit-btn">Edit</a>
-                        <form method="POST" action="{{ url_for('delete_ongoing_project', project_id=project.id) }}" style="display:inline;">
-                            <button type="submit" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this project?')">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
+      <!-- Ongoing Projects Tab -->
+      <div class="tab-content" id="ongoing">
+        <a href="{{ url_for('add_ongoing_project') }}" class="add-project-btn"
+          >Add Ongoing Project</a
+        >
 
-        <!-- Completed Projects Tab -->
-        <div class="tab-content" id="completed">
-            <a href="{{ url_for('upload_completed_project') }}" class="add-project-btn">Add Completed Project</a>
-            
-            <table>
-                <tr>
-                    <th>ID</th>
-                    <th>Title</th>
-                    <th>Lead Researcher</th>
-                    <th>Supervisor</th>
-                    <th>Domain</th>
-                    <th>Completion Date</th>
-                    <th>Actions</th>
-                </tr>
-                {% for project in completed_projects %}
-                <tr>
-                    <td>{{ project.id }}</td>
-                    <td>{{ project.project_title }}</td>
-                    <td>{{ project.lead_researcher }}</td>
-                    <td>{{ project.supervisor }}</td>
-                    <td>{{ project.domain }}</td>
-                    <td>{{ project.completion_date.strftime('%Y-%m-%d') if project.completion_date else 'N/A' }}</td>
-                    <td>
-                        {% if project.poster_path %}
-                        <a href="{{ url_for('download_completed_file', path=project.poster_path) }}" class="download-btn">Poster</a>
-                        {% endif %}
-                        {% if project.video_path %}
-                        <a href="{{ url_for('download_completed_file', path=project.video_path) }}" class="download-btn">Video</a>
-                        {% endif %}
-                        {% if project.report_path %}
-                        <a href="{{ url_for('download_completed_file', path=project.report_path) }}" class="download-btn">Report</a>
-                        {% endif %}
-                        <a href="{{ url_for('edit_completed_project', project_id=project.id) }}" class="action-btn edit-btn">Edit</a>
-                        <form method="POST" action="{{ url_for('delete_completed_project', project_id=project.id) }}" style="display:inline;">
-                            <button type="submit" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this project?')">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-		
-		
+        <table>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Researcher</th>
+            <th>Supervisor</th>
+            <th>Domain</th>
+            <th>Timeline</th>
+            <th>Actions</th>
+          </tr>
+          {% for project in ongoing_projects %}
+          <tr>
+            <td>{{ project.id }}</td>
+            <td>{{ project.project_title }}</td>
+            <td>{{ project.researcher }}</td>
+            <td>{{ project.supervisor }}</td>
+            <td>{{ project.domain }}</td>
+            <td>{{ project.timeline }}</td>
+            <td>
+              <a
+                href="{{ url_for('edit_ongoing_project', project_id=project.id) }}"
+                class="action-btn edit-btn"
+                >Edit</a
+              >
+              <form
+                method="POST"
+                action="{{ url_for('delete_ongoing_project', project_id=project.id) }}"
+                style="display: inline"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
 
+                <button
+                  type="submit"
+                  class="action-btn delete-btn"
+                  onclick="return confirm('Are you sure you want to delete this project?')"
+                >
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
 
-		<!-- Add this tab content section -->
-		
-<div class="tab-content" id="resources">
-    <h3>Resource Requests</h3>
-    <table>
-        <tr>
+      <!-- Completed Projects Tab -->
+      <div class="tab-content" id="completed">
+        <a
+          href="{{ url_for('upload_completed_project') }}"
+          class="add-project-btn"
+          >Add Completed Project</a
+        >
+
+        <table>
+          <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Lead Researcher</th>
+            <th>Supervisor</th>
+            <th>Domain</th>
+            <th>Completion Date</th>
+            <th>Actions</th>
+          </tr>
+          {% for project in completed_projects %}
+          <tr>
+            <td>{{ project.id }}</td>
+            <td>{{ project.project_title }}</td>
+            <td>{{ project.lead_researcher }}</td>
+            <td>{{ project.supervisor }}</td>
+            <td>{{ project.domain }}</td>
+            <td>
+              {{ project.completion_date.strftime('%Y-%m-%d') if
+              project.completion_date else 'N/A' }}
+            </td>
+            <td>
+              {% if project.poster_path %}
+              <a
+                href="{{ url_for('download_completed_file', path=project.poster_path) }}"
+                class="download-btn"
+                >Poster</a
+              >
+              {% endif %} {% if project.video_path %}
+              <a
+                href="{{ url_for('download_completed_file', path=project.video_path) }}"
+                class="download-btn"
+                >Video</a
+              >
+              {% endif %} {% if project.report_path %}
+              <a
+                href="{{ url_for('download_completed_file', path=project.report_path) }}"
+                class="download-btn"
+                >Report</a
+              >
+              {% endif %}
+              <a
+                href="{{ url_for('edit_completed_project', project_id=project.id) }}"
+                class="action-btn edit-btn"
+                >Edit</a
+              >
+              <form
+                method="POST"
+                action="{{ url_for('delete_completed_project', project_id=project.id) }}"
+                style="display: inline"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
+
+                <button
+                  type="submit"
+                  class="action-btn delete-btn"
+                  onclick="return confirm('Are you sure you want to delete this project?')"
+                >
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <!-- Add this tab content section -->
+
+      <div class="tab-content" id="resources">
+        <h3>Resource Requests</h3>
+        <table>
+          <tr>
             <th>ID</th>
             <th>Requester</th>
             <th>Project</th>
@@ -480,21 +573,16 @@
             <th>Status</th>
             <th>Created At</th>
             <th>Actions</th>
-        </tr>
-        {% for request in all_requests %}
-        <tr>
+          </tr>
+          {% for request in all_requests %}
+          <tr>
             <td>{{ request.id }}</td>
             <td>{{ request.username }}</td>
             <td>
-				{% if request.project_id1 and request.project_title.strip() %}
-					{{ request.project_title }}
-				{% elif request.purpose %}
-					{{ request.purpose }}
-				{% else %}
-					N/A
-				{% endif %}
-			</td>
-
+              {% if request.project_id1 and request.project_title.strip() %} {{
+              request.project_title }} {% elif request.purpose %} {{
+              request.purpose }} {% else %} N/A {% endif %}
+            </td>
 
             <td>{{ request.hardware_resources or 'N/A' }}</td>
             <td>{{ request.software_resources or 'N/A' }}</td>
@@ -503,263 +591,336 @@
             <td>{{ request.start_time }} - {{ request.end_time }}</td>
             <td>{{ request.mentor_name or 'N/A' }}</td>
             <td>
-                {% if request.status == 'pending' %}
-                    <span class="status-pending">Pending</span>
-                {% elif request.status == 'approved' %}
-                    <span class="status-approved">Approved</span>
-                {% else %}
-                    <span class="status-rejected">Rejected</span>
-                {% endif %}
+              {% if request.status == 'pending' %}
+              <span class="status-pending">Pending</span>
+              {% elif request.status == 'approved' %}
+              <span class="status-approved">Approved</span>
+              {% else %}
+              <span class="status-rejected">Rejected</span>
+              {% endif %}
             </td>
-            <td>{{ request.created_at.strftime('%Y-%m-%d %H:%M') if request.created_at else 'N/A' }}</td>
             <td>
-                {% if request.status == 'pending' %}
-                <button class="action-btn approve-btn" onclick="processRequest({{ request.id }}, 'approve')">Approve</button>
-                <button class="action-btn reject-btn" onclick="processRequest({{ request.id }}, 'reject')">Reject</button>
-                {% endif %}
+              {{ request.created_at.strftime('%Y-%m-%d %H:%M') if
+              request.created_at else 'N/A' }}
             </td>
-        </tr>
-        {% endfor %}
-    </table>
-</div>
+            <td>
+              {% if request.status == 'pending' %}
+              <button
+                class="action-btn approve-btn"
+                onclick="processRequest({{ request.id }}, 'approve')"
+              >
+                Approve
+              </button>
+              <button
+                class="action-btn reject-btn"
+                onclick="processRequest({{ request.id }}, 'reject')"
+              >
+                Reject
+              </button>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
 
+      <!-- Event Management Tab -->
+      <div class="tab-content" id="events">
+        <a href="{{ url_for('add_event') }}" class="add-project-btn"
+          >Add New Event</a
+        >
 
-<!-- Event Management Tab -->
-<div class="tab-content" id="events">
-    <a href="{{ url_for('add_event') }}" class="add-project-btn">Add New Event</a>
-    
-    <h3>Upcoming Events</h3>
-    <table>
-        <tr>
+        <h3>Upcoming Events</h3>
+        <table>
+          <tr>
             <th>ID</th>
             <th>Title</th>
             <th>Date</th>
             <th>Type</th>
             <th>Actions</th>
-        </tr>
-        {% for event in events %}
-        <tr>
+          </tr>
+          {% for event in events %}
+          <tr>
             <td>{{ event.id }}</td>
             <td>{{ event.title }}</td>
             <td>{{ event.event_date }}</td>
             <td>{{ event.event_type }}</td>
-			<!-- In the events tab -->
-			<td>
-				<a href="{{ url_for('edit_event', event_id=event.id) }}" class="action-btn edit-btn">Edit</a>
-				<a href="{{ url_for('view_event_submissions', event_id=event.id) }}" class="action-btn edit-btn">Submissions</a>
-				<form method="POST" action="{{ url_for('delete_event', event_id=event.id) }}" style="display:inline;">
-					<button type="submit" class="action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this event?')">Delete</button>
-				</form>
-			</td>
-            
-        </tr>
-        {% endfor %}
-    </table>
-</div>
+            <!-- In the events tab -->
+            <td>
+              <a
+                href="{{ url_for('edit_event', event_id=event.id) }}"
+                class="action-btn edit-btn"
+                >Edit</a
+              >
+              <a
+                href="{{ url_for('view_event_submissions', event_id=event.id) }}"
+                class="action-btn edit-btn"
+                >Submissions</a
+              >
+              <form
+                method="POST"
+                action="{{ url_for('delete_event', event_id=event.id) }}"
+                style="display: inline"
+              >
+                <input
+                  type="hidden"
+                  name="csrf_token"
+                  value="{{ csrf_token() }}"
+                />
 
-<!-- Gallery Management Tab -->
-<div class="tab-content" id="gallery">
-    <a href="#" class="add-project-btn" id="add-gallery-item-btn">Add Gallery Item</a>
-    
-    <h3>Gallery Items</h3>
-    <table>
-        <tr>
+                <button
+                  type="submit"
+                  class="action-btn delete-btn"
+                  onclick="return confirm('Are you sure you want to delete this event?')"
+                >
+                  Delete
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+
+      <!-- Gallery Management Tab -->
+      <div class="tab-content" id="gallery">
+        <a href="#" class="add-project-btn" id="add-gallery-item-btn"
+          >Add Gallery Item</a
+        >
+
+        <h3>Gallery Items</h3>
+        <table>
+          <tr>
             <th>ID</th>
             <th>Title</th>
             <th>Date</th>
             <th>Image</th>
             <th>Actions</th>
-        </tr>
-        {% for item in gallery_items %}
-        <tr>
+          </tr>
+          {% for item in gallery_items %}
+          <tr>
             <td>{{ item.id }}</td>
             <td>{{ item.title }}</td>
-            <td>{{ item.event_date.strftime('%Y-%m-%d') if item.event_date else 'N/A' }}</td>
             <td>
-                {% if item.image_path %}
-                <img src="{{ url_for('static', filename='uploads/' + item.image_path.split('/')[-1]) }}" alt="{{ item.title }}" style="max-width: 100px;">
-                {% else %}
-                No Image
-                {% endif %}
+              {{ item.event_date.strftime('%Y-%m-%d') if item.event_date else
+              'N/A' }}
             </td>
             <td>
-                <button class="action-btn delete-btn" onclick="deleteGalleryItem({{ item.id }})">Delete</button>
+              {% if item.image_path %}
+              <img
+                src="{{ url_for('static', filename='uploads/' + item.image_path.split('/')[-1]) }}"
+                alt="{{ item.title }}"
+                style="max-width: 100px"
+              />
+              {% else %} No Image {% endif %}
             </td>
-        </tr>
-        {% endfor %}
-    </table>
-</div>
+            <td>
+              <button
+                class="action-btn delete-btn"
+                onclick="deleteGalleryItem({{ item.id }})"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
 
-<!-- Add Gallery Item Modal -->
-<div class="modal" id="add-gallery-modal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeModal('add-gallery-modal')">&times;</span>
-        <h3>Add Gallery Item</h3>
-        <form id="gallery-form" enctype="multipart/form-data">
+      <!-- Add Gallery Item Modal -->
+      <div class="modal" id="add-gallery-modal">
+        <div class="modal-content">
+          <span class="close-btn" onclick="closeModal('add-gallery-modal')"
+            >&times;</span
+          >
+          <h3>Add Gallery Item</h3>
+          <form
+            id="gallery-form"
+            enctype="multipart/form-data"
+            action="{{ url_for('add_gallery_item') }}"
+          >
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
             <div class="form-group">
-                <label for="gallery-title">Title</label>
-                <input type="text" id="gallery-title" name="title" required>
+              <label for="gallery-title">Title</label>
+              <input type="text" id="gallery-title" name="title" required />
             </div>
             <div class="form-group">
-                <label for="gallery-date">Event Date</label>
-                <input type="date" id="gallery-date" name="event_date" required>
+              <label for="gallery-date">Event Date</label>
+              <input type="date" id="gallery-date" name="event_date" required />
             </div>
             <div class="form-group">
-                <label for="gallery-image">Image</label>
-                <input type="file" id="gallery-image" name="image" accept="image/*" required>
+              <label for="gallery-image">Image</label>
+              <input
+                type="file"
+                id="gallery-image"
+                name="image"
+                accept="image/*"
+                required
+              />
             </div>
             <button type="submit" class="action-btn edit-btn">Submit</button>
-        </form>
+          </form>
+        </div>
+      </div>
     </div>
-</div>
-
-
-</div>
-
-<script>
-    function processRequest(requestId, action) {
-        let response = '';
-        
-        if (action === 'reject') {
-            response = prompt('Please provide a reason for rejection or suggest alternative time:');
-            if (response === null) return; // User cancelled
-        }
-        
-        fetch(`/admin/process_resource_request/${requestId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: action,
-                response: response
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(`Request ${action}ed successfully!`);
-                location.reload();
-            } else {
-                alert('Error processing request: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error processing request');
-        });
-    }
-</script>
-    
 
     <script>
-        // Tab functionality
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
-        
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                // Remove active class from all buttons and contents
-                tabBtns.forEach(b => b.classList.remove('active'));
-                tabContents.forEach(c => c.classList.remove('active'));
-                
-                // Add active class to clicked button
-                btn.classList.add('active');
-                
-                // Show corresponding content
-                const tabId = btn.getAttribute('data-tab');
-                document.getElementById(tabId).classList.add('active');
+      function processRequest(requestId, action) {
+        let response = "";
+
+        if (action === "reject") {
+          response = prompt(
+            "Please provide a reason for rejection or suggest alternative time:"
+          );
+          if (response === null) return; // User cancelled
+        }
+
+        fetch(`/admin/process_resource_request/${requestId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": document.querySelector('meta[name="csrf-token"]')
+              .content,
+          },
+          body: JSON.stringify({
+            action: action,
+            response: response,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              alert(`Request ${action}ed successfully!`);
+              location.reload();
+            } else {
+              alert("Error processing request: " + data.message);
+            }
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+            alert("Error processing request");
+          });
+      }
+    </script>
+
+    <script>
+      // Tab functionality
+      const tabBtns = document.querySelectorAll(".tab-btn");
+      const tabContents = document.querySelectorAll(".tab-content");
+
+      tabBtns.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          // Remove active class from all buttons and contents
+          tabBtns.forEach((b) => b.classList.remove("active"));
+          tabContents.forEach((c) => c.classList.remove("active"));
+
+          // Add active class to clicked button
+          btn.classList.add("active");
+
+          // Show corresponding content
+          const tabId = btn.getAttribute("data-tab");
+          document.getElementById(tabId).classList.add("active");
+        });
+      });
+    </script>
+
+    <script>
+      // Gallery Management
+      document
+        .getElementById("add-gallery-item-btn")
+        .addEventListener("click", function () {
+          document.getElementById("add-gallery-modal").style.display = "block";
+        });
+
+      function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+      }
+
+      document
+        .getElementById("gallery-form")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          const formData = new FormData(this);
+
+          fetch("/admin/add_gallery_item", {
+            method: "POST",
+            "X-CSRFToken": document.querySelector('meta[name="csrf-token"]')
+              .content,
+            body: formData,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert("Gallery item added successfully!");
+                location.reload();
+              } else {
+                alert("Error: " + data.message);
+              }
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Error submitting form");
             });
         });
-    </script>
-	
-	<script>
-    // Gallery Management
-    document.getElementById('add-gallery-item-btn').addEventListener('click', function() {
-        document.getElementById('add-gallery-modal').style.display = 'block';
-    });
 
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
-
-    document.getElementById('gallery-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        
-        fetch('/admin/add_gallery_item', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Gallery item added successfully!');
+      function deleteGalleryItem(itemId) {
+        if (confirm("Are you sure you want to delete this gallery item?")) {
+          fetch("/admin/delete_gallery_item/" + itemId, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": document.querySelector('meta[name="csrf-token"]')
+                .content,
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                alert("Gallery item deleted successfully!");
                 location.reload();
-            } else {
-                alert('Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Error submitting form');
-        });
-    });
-
-    function deleteGalleryItem(itemId) {
-        if (confirm('Are you sure you want to delete this gallery item?')) {
-            fetch('/admin/delete_gallery_item/' + itemId, {
-                method: 'POST'
+              } else {
+                alert("Error: " + data.message);
+              }
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Gallery item deleted successfully!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error deleting item');
+            .catch((error) => {
+              console.error("Error:", error);
+              alert("Error deleting item");
             });
         }
-    }
-</script>
-
-<script>
-         
-		// Auto-hide flash messages after 5 seconds
-		document.addEventListener('DOMContentLoaded', function() {
-		  const flashMessages = document.querySelectorAll('.alert');
-		  flashMessages.forEach(msg => {
-			setTimeout(() => {
-			  msg.style.transition = 'opacity 1s';
-			  msg.style.opacity = '0';
-			  setTimeout(() => msg.remove(), 1000);
-			}, 5000);
-		  });
-		});
-	
-		document.addEventListener('DOMContentLoaded', function() {
-			const flashMessages = document.querySelectorAll('.flash-message');
-			
-			flashMessages.forEach(message => {
-				// Remove element after animation completes
-				message.addEventListener('animationend', function(e) {
-					if (e.animationName === 'flashExit') {
-						message.remove();
-					}
-				});
-				
-				
-				message.addEventListener('click', () => {
-					message.style.animation = 'flashExit 0.4s forwards';
-				});
-			});
-		});
+      }
     </script>
-</body>
+
+    <script>
+      // Auto-hide flash messages after 5 seconds
+      document.addEventListener("DOMContentLoaded", function () {
+        const flashMessages = document.querySelectorAll(".alert");
+        flashMessages.forEach((msg) => {
+          setTimeout(() => {
+            msg.style.transition = "opacity 1s";
+            msg.style.opacity = "0";
+            setTimeout(() => msg.remove(), 1000);
+          }, 5000);
+        });
+      });
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const flashMessages = document.querySelectorAll(".flash-message");
+
+        flashMessages.forEach((message) => {
+          // Remove element after animation completes
+          message.addEventListener("animationend", function (e) {
+            if (e.animationName === "flashExit") {
+              message.remove();
+            }
+          });
+
+          message.addEventListener("click", () => {
+            message.style.animation = "flashExit 0.4s forwards";
+          });
+        });
+      });
+    </script>
+    {% include "_csrf_script.html" %}
+  </body>
 </html>

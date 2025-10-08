@@ -1,6 +1,6 @@
 # Controller (routes) - refactored to use models.py and db.py
 # NOTE: This file preserves your original logic and moves DB operations into models.py.
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, jsonify, make_response
 import os
 import pymysql
 from werkzeug.utils import secure_filename
@@ -14,17 +14,59 @@ from datetime import datetime
 import time
 import logging
 import json
-
+import re
+from datetime import datetime, timedelta        
 import models as m
+from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash, check_password_hash
+import jwt
+from flask_wtf import CSRFProtect
+from flask_wtf.csrf import generate_csrf
+
+csrf = CSRFProtect()
+
+load_dotenv()
 
 app = Flask(__name__, static_folder='static')
-app.secret_key = 'your_secret_key'
 app.logger.setLevel(logging.DEBUG)
+
+app.secret_key = os.getenv("SECRET_KEY", "change-me")
+JWT_SECRET = os.getenv("JWT_SECRET", "change-me")
+COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") or None
+
+# NEW: cookie settings / names
+COOKIE_NAME = "access_token"
+COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "Lax")    
+COOKIE_SECURE = os.getenv("COOKIE_SECURE", "False").lower() == "true"  
+
+csrf.init_app(app) 
+
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",   
+    SESSION_COOKIE_SECURE=False      
+)
 
 # Upload config
 app.config['UPLOAD_FOLDER'] = 'static'
 app.config['UPLOAD_FOLDER1'] = 'static/uploads/'
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
+
+@app.context_processor
+def inject_csrf():
+    return {"csrf_token": generate_csrf}
+
+# --- Security headers ---
+@app.after_request
+def set_security_headers(resp):
+    resp.headers['X-Frame-Options'] = 'DENY'
+    resp.headers['X-Content-Type-Options'] = 'nosniff'
+    resp.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    resp.headers['Content-Security-Policy'] = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'"
+    resp.headers['Permissions-Policy'] = (
+        "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+    )
+    return resp
 
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -36,19 +78,49 @@ def login_required(role=None):
     def wrapper(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            if 'user_id' not in session:
-                return redirect(url_for('login'))
-            if role and session.get('role') != role:
-                return redirect(url_for('login'))
-            return f(*args, **kwargs)
+            # 1) If Flask session exists, use it
+            if 'user_id' in session:
+                if role and session.get('role') != role:
+                    return redirect(url_for('login'))
+                return f(*args, **kwargs)
+
+            # 2) Else try JWT cookie and repopulate session
+            data = get_user_from_cookie()
+            if data:
+                session['user_id'] = data['sub']
+                session['username'] = data['username']
+                session['role'] = data['role']
+                if role and data.get('role') != role:
+                    return redirect(url_for('login'))
+                return f(*args, **kwargs)
+
+            # 3) Not authenticated
+            return redirect(url_for('login'))
         return decorated
     return wrapper
+
+# def login_required(role=None):
+#     def wrapper(f):
+#         @wraps(f)
+#         def decorated(*args, **kwargs):
+#             if 'user_id' not in session:
+#                 return redirect(url_for('login'))
+#             if role and session.get('role') != role:
+#                 return redirect(url_for('login'))
+#             return f(*args, **kwargs)
+#         return decorated
+#     return wrapper
 
 @app.route('/')
 def landing():
     return render_template('landing.html')
 
-# signup
+# NEW: strong password validator (8–64 chars, upper, lower, number, symbol)
+PASSWORD_RE = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,64}$')
+
+def password_strong(pw: str) -> bool:
+    return bool(PASSWORD_RE.match(pw or ''))
+
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     errors = {}
@@ -62,18 +134,23 @@ def signup():
             errors['username'] = 'Username is required'
         elif len(username) < 4:
             errors['username'] = 'Username must be at least 4 characters'
+
         if not email:
             errors['email'] = 'Email is required'
+
         if not password:
             errors['password'] = 'Password is required'
-        elif len(password) < 8:
-            errors['password'] = 'Password must be at least 8 characters'
+        elif not password_strong(password):
+            errors['password'] = 'Use 8–64 chars with upper, lower, number, and symbol'
+
         if password != confirm_password:
             errors['confirm_password'] = 'Passwords do not match'
 
         if not errors:
             try:
-                m.create_user(username, email, password)  # NOTE: preserves original logic (plain password)
+                # HASH the password (PBKDF2-SHA256 with salt)
+                pw_hash = generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
+                m.create_user(username, email, pw_hash)
                 flash('Account created successfully! Please login', 'success')
                 return redirect(url_for('login'))
             except pymysql.IntegrityError:
@@ -83,7 +160,43 @@ def signup():
 
     return render_template('signup.html', errors=errors, form_data=request.form)
 
+# signup
+# @app.route('/signup', methods=['GET', 'POST'])
+# def signup():
+#     errors = {}
+#     if request.method == 'POST':
+#         username = request.form.get('username', '').strip()
+#         email = request.form.get('email', '').strip()
+#         password = request.form.get('password', '').strip()
+#         confirm_password = request.form.get('confirm_password', '').strip()
+
+#         if not username:
+#             errors['username'] = 'Username is required'
+#         elif len(username) < 4:
+#             errors['username'] = 'Username must be at least 4 characters'
+#         if not email:
+#             errors['email'] = 'Email is required'
+#         if not password:
+#             errors['password'] = 'Password is required'
+#         elif len(password) < 8:
+#             errors['password'] = 'Password must be at least 8 characters'
+#         if password != confirm_password:
+#             errors['confirm_password'] = 'Passwords do not match'
+
+#         if not errors:
+#             try:
+#                 password_hash = generate_password_hash(password, method="pbkdf2:sha256", salt_length=16)
+#                 m.create_user(username, email, password_hash)
+#                 return redirect(url_for('login'))
+#             except pymysql.IntegrityError:
+#                 errors['username'] = 'Username already exists'
+#             except Exception as e:
+#                 flash(f'An error occurred: {str(e)}', 'error')
+
+#     return render_template('signup.html', errors=errors, form_data=request.form)
+
 # login
+# UPDATED: secure login with hashed passwords + JWT cookie, with legacy migration
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     errors = {}
@@ -99,23 +212,128 @@ def login():
         if not errors:
             user = m.get_user_by_username(username)
 
-            if user and user['password_hash'] == password:  # original logic
-                session['user_id'] = user['id']
-                session['username'] = user['username']
-                session['role'] = user['role']
-                flash('Login successful!', 'success')
-                if user['role'] == 'admin':
-                    return redirect(url_for('admin_dashboard'))
-                return redirect(url_for('landing'))
+            # UPDATED: handle three cases
+            # 1) Hashed password present -> verify with check_password_hash
+            # 2) Legacy plain-text match -> migrate to hash once, then proceed
+            # 3) No match -> error
+            if user:
+                ok = False
+
+                # Case 1: looks like a hash (very likely contains a colon for pbkdf2 spec)
+                if isinstance(user.get('password_hash'), str) and ':' in user['password_hash']:
+                    ok = check_password_hash(user['password_hash'], password)  # UPDATED
+
+                # Case 2: legacy plain-text stored in DB (matches exactly) -> migrate in place
+                elif user.get('password_hash') == password:
+                    new_hash = generate_password_hash(password, method="pbkdf2:sha256", salt_length=16)  # UPDATED
+                    # Add this helper in models.py if not present (see earlier message):
+                    # def update_user_password_hash(user_id: int, new_hash: str) -> None: ...
+                    try:
+                        m.update_user_password_hash(user['id'], new_hash)  # UPDATED
+                        ok = True
+                    except Exception:
+                        ok = False  # fall back to invalid on any error
+
+                if ok:
+                    # Keep your existing Flask session
+                    session['user_id'] = user['id']
+                    session['username'] = user['username']
+                    session['role'] = user['role']
+
+                    # UPDATED: issue JWT in HttpOnly cookie for API-style checks
+                    payload = {
+                        "sub": str(user['id']),
+                        "username": user['username'],
+                        "role": user['role'],
+                        "iat": int(time.time()),
+                        "exp": int(time.time()) + 60*60*8  # 8 hours
+                    }
+                    token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")  # UPDATED
+
+                    # UPDATED: set cookie and redirect as before
+                    resp = redirect(url_for('admin_dashboard' if user['role'] == 'admin' else 'landing'))
+                    resp.set_cookie(
+                        "access_token", token,
+                        httponly=True,         # UPDATED
+                        secure=False,          # set True in production (HTTPS)
+                        samesite="Lax",        # use "None" only if you need cross-site
+                        path="/",
+                        domain=COOKIE_DOMAIN   # None on localhost
+                    )
+                    flash('Login successful!', 'success')
+                    return resp
+
+            # If we get here, auth failed
             errors['auth'] = 'Invalid username or password'
 
         return render_template('login.html', errors=errors, username=username)
     return render_template('login.html', errors=errors)
 
+def create_jwt(user_id: int, username: str, role: str) -> str:
+    payload = {
+        'sub': user_id,
+        'username': username,
+        'role': role,
+        'iat': datetime.utcnow(),
+        'exp': datetime.utcnow() + timedelta(hours=8)  # 8h session
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
+
+def decode_jwt(token: str):
+    try:
+        return jwt.decode(token, JWT_SECRET, algorithms=['HS256'])
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None
+
+def get_user_from_cookie():
+    token = request.cookies.get(COOKIE_NAME)
+    if not token:
+        return None
+    data = decode_jwt(token)
+    return data
+
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     errors = {}
+#     if request.method == 'POST':
+#         username = request.form.get('username', '').strip()
+#         password = request.form.get('password', '').strip()
+
+#         if not username:
+#             errors['username'] = 'Username is required'
+#         if not password:
+#             errors['password'] = 'Password is required'
+
+#         if not errors:
+#             user = m.get_user_by_username(username)
+
+#             if user and user['password_hash'] == password:  # original logic
+#                 session['user_id'] = user['id']
+#                 session['username'] = user['username']
+#                 session['role'] = user['role']
+#                 flash('Login successful!', 'success')
+#                 if user['role'] == 'admin':
+#                     return redirect(url_for('admin_dashboard'))
+#                 return redirect(url_for('landing'))
+#             errors['auth'] = 'Invalid username or password'
+
+#         return render_template('login.html', errors=errors, username=username)
+#     return render_template('login.html', errors=errors)
+
+# @app.route('/logout')
+# def logout():
+#     session.clear()
+#     return redirect(url_for('login'))
+
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    resp = make_response(redirect(url_for('login')))
+    # Delete the cookie
+    resp.set_cookie(COOKIE_NAME, '', expires=0, path='/', domain=COOKIE_DOMAIN, samesite=COOKIE_SAMESITE, secure=COOKIE_SECURE, httponly=True)
+    return resp
 
 @app.route('/proposal', methods=['GET', 'POST'])
 @login_required('user')

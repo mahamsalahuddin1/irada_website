@@ -2,6 +2,8 @@
 <html>
 <head>
     <title>Edit Event</title>
+        {% include "_csrf_head.html" %}
+
     <style>
         .form-container {
             max-width: 800px;
@@ -106,7 +108,11 @@
 <body>
     <div class="form-container">
         <h2>Edit Event</h2>
-        <form method="POST" enctype="multipart/form-data" id="event-form">
+        <form method="POST" enctype="multipart/form-data"
+      id="event-form"
+      action="{{ url_for('edit_event', event_id=event.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
             <div class="form-group">
                 <label for="title">Event Title:</label>
                 <input type="text" id="title" name="title" value="{{ event.title }}" required>
@@ -232,5 +238,7 @@
             });
         });
     </script>
+    {% include "_csrf_script.html" %}
+
 </body>
 </html>

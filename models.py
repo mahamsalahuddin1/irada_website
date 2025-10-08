@@ -26,6 +26,16 @@ def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
         cursor.close()
         conn.close()
 
+# UPDATED: add this in models.py if missing
+def update_user_password_hash(user_id: int, new_hash: str) -> None:
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("UPDATE users SET password_hash=%s WHERE id=%s", (new_hash, user_id))
+        conn.commit()
+    finally:
+        cur.close(); conn.close()
+
+
 # ---------- Proposals ----------
 def insert_project_proposal(values: Tuple) -> None:
     conn = get_db_connection()
