@@ -24,6 +24,7 @@ from flask_wtf import CSRFProtect
 from flask_wtf.csrf import generate_csrf
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_talisman import Talisman
 
 csrf = CSRFProtect()
 
@@ -87,16 +88,33 @@ app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 
 def inject_csrf():
     return {"csrf_token": generate_csrf}
 
+
+CSP = {
+    'default-src': ["'self'"],
+    'script-src': ["'self'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
+    'style-src':  ["'self'", 'https://fonts.googleapis.com', "'unsafe-inline'"],  # drop 'unsafe-inline' later
+    'img-src':    ["'self'", 'data:'],
+    'font-src':   ["'self'", 'https://fonts.gstatic.com'],
+    'frame-ancestors': "'none'",
+    'object-src': "'none'",
+    'base-uri':   "'self'",
+    'form-action': "'self'",
+}
+
+Talisman(
+    app,
+    content_security_policy=CSP,
+    content_security_policy_nonce_in=['script-src', 'style-src'],  # enables {{ csp_nonce() }} in templates
+    frame_options='DENY',
+    referrer_policy='strict-origin-when-cross-origin',
+    force_https=False,  # set True in production behind HTTPS/terminator
+)
+
 # --- Security headers ---
 @app.after_request
 def set_security_headers(resp):
-    resp.headers['X-Frame-Options'] = 'DENY'
     resp.headers['X-Content-Type-Options'] = 'nosniff'
-    resp.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    resp.headers['Content-Security-Policy'] = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval'"
-    resp.headers['Permissions-Policy'] = (
-        "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
-    )
+    resp.headers['Permissions-Policy'] = "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
     return resp
 
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
