@@ -25,59 +25,121 @@ from flask_wtf.csrf import generate_csrf
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
+from werkzeug.exceptions import HTTPException
+from flask_wtf.csrf import generate_csrf, CSRFError 
 
 csrf = CSRFProtect()
 
 load_dotenv()
 
 app = Flask(__name__, static_folder='static')
-app.logger.setLevel(logging.DEBUG)
 
-app.secret_key = os.getenv("SECRET_KEY", "change-me")
-JWT_SECRET = os.getenv("JWT_SECRET", "change-me")
-COOKIE_DOMAIN = os.getenv("COOKIE_DOMAIN") or None
+IS_PROD = os.getenv("ENV", "development").lower() in ("prod", "production", "live")
 
-# NEW: cookie settings / names
-COOKIE_NAME = "access_token"
-COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "Lax")    
-COOKIE_SECURE = os.getenv("COOKIE_SECURE", "False").lower() == "true"  
+# ---- Content Security Policy (minimal-change, safe-by-default) ----
+CSP = {
+    # Block everything by default
+    "default-src": ["'self'"],
+
+    # Keep your current inline JS working (no template edits),
+    # while allowing only your site + common CDNs.
+    # If you don't use a CDN below, remove it.
+    "script-src": [
+        "'self'",
+        "'unsafe-inline'",           # <-- keeps existing inline scripts working
+        "https://cdn.jsdelivr.net",
+        "https://cdnjs.cloudflare.com",
+        "https://unpkg.com"
+    ],
+
+    # Allow inline styles & common CSS CDNs + Google Fonts
+    "style-src": [
+        "'self'",
+        "'unsafe-inline'",
+        "https://fonts.googleapis.com",
+        "https://cdn.jsdelivr.net",
+        "https://cdnjs.cloudflare.com"
+    ],
+
+    # Fonts & images (include data: for inlined svgs/base64 logos)
+    "font-src":  ["'self'", "https://fonts.gstatic.com", "data:"],
+    "img-src":   ["'self'", "data:", "https:"],
+
+    # XHR/fetch/websocket destinations (tighten if you call APIs elsewhere)
+    "connect-src": ["'self'"],
+
+    # Clickjacking & legacy objects
+    "frame-ancestors": "'none'",
+    "object-src": "'none'",
+
+    # Misc hardening
+    "base-uri": "'self'",
+    "form-action": "'self'",
+}
+
+from flask_talisman import Talisman
+Talisman(
+    app,
+    content_security_policy=CSP,
+    frame_options='DENY',
+    referrer_policy='strict-origin-when-cross-origin',
+    force_https=IS_PROD,  # True in prod, False in local/dev
+)
+
 
 csrf.init_app(app) 
 
-limiter = Limiter(key_func=get_remote_address)
-limiter.init_app(app)
-limiter.default_limits = ["400 per day", "50 per hour"]
+
+app.config["RATELIMIT_HEADERS_ENABLED"] = True
+
+# IS_PROD = os.getenv("ENV", "production").lower() in ("prod", "production", "live")
+
+
+# --- Cookie/Sessions hardening ---
+COOKIE_DOMAIN  = os.getenv("COOKIE_DOMAIN") or None
+COOKIE_NAME    = "access_token"
+
+# Prod defaults; allow env overrides for local/dev
+COOKIE_SECURE  = IS_PROD or (os.getenv("COOKIE_SECURE", "False").lower() == "true")
+COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "Lax")
+
 
 app.config.update(
+    DEBUG=False,                   
+    TESTING=False,
+    PROPAGATE_EXCEPTIONS=False,    
+    TRAP_HTTP_EXCEPTIONS=False,    
+
+    # Cookies (use your computed values)
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE="Lax",   
-    SESSION_COOKIE_SECURE=False      
+    SESSION_COOKIE_SAMESITE=COOKIE_SAMESITE,  
+    SESSION_COOKIE_SECURE=COOKIE_SECURE,     
 )
 
-# --- Upload limits & 303 handler (replace your current MAX_CONTENT_LENGTH and 303 handler with this) ---
-from werkzeug.exceptions import RequestEntityTooLarge
+
+app.logger.setLevel(logging.INFO if IS_PROD else logging.DEBUG)
+
+app.secret_key = os.getenv("SECRET_KEY", "change-me")
+JWT_SECRET = os.getenv("JWT_SECRET", "change-me")
+
+
+
+
+
+
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    app=app,  # attach here
+    storage_uri=os.getenv("RATELIMIT_STORAGE_URI", "memory://"),  # fine for local tests
+    default_limits=["400 per day", "50 per hour"],  # global limits
+)
+
+
 
 # 20 MB default; override with env var MAX_CONTENT_MB if you want
-app.config['MAX_CONTENT_LENGTH'] = int(os.getenv("MAX_CONTENT_MB", 200)) * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = int(os.getenv("MAX_CONTENT_MB", 20)) * 1024 * 1024
 
-@app.errorhandler(RequestEntityTooLarge)
-def handle_413(e):
-    # Prefer JSON for XHR/fetch
-    wants_json = (
-        request.is_json
-        or request.headers.get('X-Requested-With') == 'XMLHttpRequest'
-        or (request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html)
-    )
-    max_mb = int(app.config['MAX_CONTENT_LENGTH'] / (1024 * 1024))
-    msg = f'File too large (max {max_mb} MB).'
-
-    if wants_json:
-        return jsonify(success=False, message=msg), 413
-
-    # Redirect sensibly depending on where the upload came from
-    target = url_for('admin_dashboard') if request.path.startswith('/admin') else url_for('projects')
-    flash(msg, 'error')
-    return redirect(target, code=303) 
 
 # Upload config
 app.config['UPLOAD_FOLDER'] = 'static'
@@ -89,26 +151,7 @@ def inject_csrf():
     return {"csrf_token": generate_csrf}
 
 
-CSP = {
-    'default-src': ["'self'"],
-    'script-src': ["'self'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
-    'style-src':  ["'self'", 'https://fonts.googleapis.com', "'unsafe-inline'"],  # drop 'unsafe-inline' later
-    'img-src':    ["'self'", 'data:'],
-    'font-src':   ["'self'", 'https://fonts.gstatic.com'],
-    'frame-ancestors': "'none'",
-    'object-src': "'none'",
-    'base-uri':   "'self'",
-    'form-action': "'self'",
-}
 
-Talisman(
-    app,
-    content_security_policy=CSP,
-    content_security_policy_nonce_in=['script-src', 'style-src'],  # enables {{ csp_nonce() }} in templates
-    frame_options='DENY',
-    referrer_policy='strict-origin-when-cross-origin',
-    force_https=False,  # set True in production behind HTTPS/terminator
-)
 
 # --- Security headers ---
 @app.after_request
@@ -116,6 +159,53 @@ def set_security_headers(resp):
     resp.headers['X-Content-Type-Options'] = 'nosniff'
     resp.headers['Permissions-Policy'] = "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
     return resp
+
+# ---------- Generic error responses (keep messages consistent) ----------
+def _wants_json():
+    return (
+        request.is_json
+        or request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+        or (request.accept_mimetypes.accept_json and not request.accept_mimetypes.accept_html)
+    )
+
+GENERIC_MSG = {
+    400: "Bad request.",
+    401: "Not authorized.",
+    403: "Access denied.",
+    404: "We couldn't find that.",
+    405: "Method not allowed.",
+    413: "File too large.",
+    415: "Unsupported media type.",
+    429: "Too many requests. Please try again later.",
+    500: "Something went wrong. Please try again.",
+}
+
+def _render_error(status_code, original_error=None):
+    # Log real problem, don't leak details to users
+    if status_code >= 500:
+        app.logger.exception("Unhandled server error", exc_info=original_error)
+    else:
+        app.logger.warning("Handled error %s at %s", status_code, request.path)
+
+    message = GENERIC_MSG.get(status_code, "Something went wrong.")
+    if _wants_json():
+        return jsonify(success=False, message=message), status_code
+    return render_template("error.html", status_code=status_code, message=message), status_code
+
+# All Werkzeug HTTP errors (404/405/413/429/…)
+@app.errorhandler(HTTPException)
+def handle_http_exception(e: HTTPException):
+    return _render_error(e.code or 500, original_error=e)
+
+# Anything else -> 500
+@app.errorhandler(Exception)
+def handle_uncaught(e: Exception):
+    return _render_error(500, original_error=e)
+
+@app.errorhandler(CSRFError)              
+def handle_csrf(e):
+    return _render_error(403, original_error=e)
+
 
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -246,8 +336,9 @@ def signup():
 
 # login
 # UPDATED: secure login with hashed passwords + JWT cookie, with legacy migration
-@limiter.limit("5 per minute; 20 per hour")
+#@limiter.limit("5 per minute; 20 per hour")
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("3 per minute; 20 per hour")
 def login():
     errors = {}
     if request.method == 'POST':
@@ -303,13 +394,14 @@ def login():
                     # UPDATED: set cookie and redirect as before
                     resp = redirect(url_for('admin_dashboard' if user['role'] == 'admin' else 'landing'))
                     resp.set_cookie(
-                        "access_token", token,
-                        httponly=True,         # UPDATED
-                        secure=False,          # set True in production (HTTPS)
-                        samesite="Lax",        # use "None" only if you need cross-site
+                        COOKIE_NAME, token,
+                        httponly=True,
+                        secure=COOKIE_SECURE,       
+                        samesite=COOKIE_SAMESITE,   
                         path="/",
-                        domain=COOKIE_DOMAIN   # None on localhost
+                        domain=COOKIE_DOMAIN
                     )
+
                     flash('Login successful!', 'success')
                     return resp
 
@@ -446,8 +538,8 @@ def submit_proposal():
             return redirect(url_for('projects'))
 
         except Exception as e:
-            flash(f'Error submitting proposal: {str(e)}', 'error')
-            app.logger.error(f"Error submitting proposal: {str(e)}")
+            app.logger.exception("submit_proposal: unexpected error")
+            flash('Something went wrong. Please try again.', 'error')
             return redirect(url_for('projects'))
 
     flash('Invalid file type. Only PDF, DOC, DOCX allowed.', 'error')
@@ -553,7 +645,8 @@ def upload_completed_project():
             ))
             flash('Completed project uploaded successfully!', 'success')
         except Exception as e:
-            flash(f'Error uploading project: {str(e)}', 'error')
+            app.logger.exception("Error uploading request")
+            flash('Something went wrong. Please try again.', 'error')
 
         return redirect(url_for('admin_dashboard'))
     return render_template('upload_completed.html')
@@ -622,7 +715,8 @@ def add_ongoing_project():
             flash('Ongoing project added successfully!', 'success')
             return redirect(url_for('admin_dashboard'))
         except Exception as e:
-            flash(f'Error adding project: {str(e)}', 'error')
+            app.logger.exception("Error adding ongoing project")
+            flash('Something went wrong. Please try again.', 'error')
     return render_template('add_ongoing_project.html')
 
 @app.route('/get_ongoing_projects')
@@ -657,7 +751,8 @@ def edit_ongoing_project(project_id):
             flash('Ongoing project updated successfully!', 'success')
             return redirect(url_for('admin_dashboard'))
         except Exception as e:
-            flash(f'Error updating project: {str(e)}', 'error')
+            app.logger.exception("Error updating request")
+            flash('Something went wrong. Please try again.', 'error')
 
     try:
         project = m.get_ongoing_project(project_id)
@@ -666,7 +761,8 @@ def edit_ongoing_project(project_id):
             return redirect(url_for('admin_dashboard'))
         return render_template('edit_ongoing.html', project=project)
     except Exception as e:
-        flash(f'Error retrieving project: {str(e)}', 'error')
+        app.logger.exception("Error retrieveing request")
+        flash('Something went wrong. Please try again.', 'error')
         return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete_ongoing/<int:project_id>', methods=['POST'])
@@ -676,7 +772,8 @@ def delete_ongoing_project(project_id):
         m.delete_ongoing_project(project_id)
         flash('Ongoing project deleted successfully!', 'success')
     except Exception as e:
-        flash(f'Error deleting project: {str(e)}', 'error')
+        app.logger.exception("Error deleting request")
+        flash('Something went wrong. Please try again.', 'error')
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/edit_completed/<int:project_id>', methods=['GET', 'POST'])
@@ -731,7 +828,8 @@ def edit_completed_project(project_id):
             flash('Completed project updated successfully!', 'success')
             return redirect(url_for('admin_dashboard'))
         except Exception as e:
-            flash(f'Error updating project: {str(e)}', 'error')
+            app.logger.exception("Error updating project")
+            flash('Something went wrong. Please try again.', 'error')
 
     try:
         project = m.get_completed_project_by_id(project_id)
@@ -742,7 +840,8 @@ def edit_completed_project(project_id):
             project['completion_date'] = project['completion_date'].strftime('%Y-%m-%d')
         return render_template('edit_completed.html', project=project)
     except Exception as e:
-        flash(f'Error retrieving project: {str(e)}', 'error')
+        app.logger.exception("Error retrieving project")
+        flash('Something went wrong. Please try again.', 'error')
         return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/delete_completed/<int:project_id>', methods=['POST'])
@@ -759,7 +858,8 @@ def delete_completed_project(project_id):
         m.delete_completed_project(project_id)
         flash('Completed project deleted successfully!', 'success')
     except Exception as e:
-        flash(f'Error deleting project: {str(e)}', 'error')
+        app.logger.exception("Error deleting project")
+        flash('Something went wrong. Please try again.', 'error')
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/dashboard')
@@ -893,7 +993,9 @@ def submit_resource_request():
             ))
             flash('Resource request submitted successfully!', 'success')
         except Exception as e:
-            flash(f'Error submitting request: {str(e)}', 'error')
+            app.logger.exception("Error submitting request")
+            flash('Something went wrong. Please try again.', 'error')
+            
             app.logger.error(f"Error submitting resource request: {str(e)}")
 
     return redirect(url_for('resource_hub'))
@@ -908,15 +1010,19 @@ def process_resource_request(request_id):
             response = data.get('response', '')
 
             if action not in ['approve', 'reject']:
-                return jsonify({'success': False, 'message': 'Invalid action'})
+                return jsonify({'success': False, 'message': 'Invalid action'}), 400
+
 
             status = 'approved' if action == 'approve' else 'rejected'
             m.update_resource_request_status(request_id, status, response)
             return jsonify({'success': True})
-        except Exception as e:
-            return jsonify({'success': False, 'message': str(e)})
+        except Exception:
+            app.logger.exception("process_resource_request: unexpected error")
+            return jsonify({'success': False, 'message': GENERIC_MSG[500]}), 500
 
-    return jsonify({'success': False, 'message': 'Invalid request method'})
+    return jsonify({'success': False, 'message': 'Invalid request method'}), 405
+
+    
 
 @app.route('/admin/add_event', methods=['GET', 'POST'])
 @login_required('admin')
@@ -962,7 +1068,8 @@ def add_event():
             return redirect(url_for('admin_dashboard'))
 
         except Exception as e:
-            flash(f'Error adding event: {str(e)}', 'error')
+            app.logger.exception("Error adding event")
+            flash('Something went wrong. Please try again.', 'error')
             app.logger.error(f"Error adding event: {str(e)}", exc_info=True)
 
     return render_template('add_event.html')
@@ -1015,8 +1122,8 @@ def edit_event(event_id):
             flash('Event updated successfully!', 'success')
             return redirect(url_for('admin_dashboard'))
         except Exception as e:
-            flash(f'Error updating event: {str(e)}', 'error')
-            app.logger.error(f"Error updating event: {str(e)}", exc_info=True)
+            app.logger.exception("Error updating event")
+            flash('Something went wrong. Please try again.', 'error')
             return redirect(url_for('edit_event', event_id=event_id))
 
     event = m.get_event_by_id(event_id)
@@ -1074,8 +1181,12 @@ def submit_event_form(event_id):
 
         m.insert_event_submission(event_id, session['user_id'], json.dumps(submission_data))
         return jsonify({'success': True, 'message': 'Submission saved successfully'})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)}), 500
+    
+    except Exception:
+        app.logger.exception("submit_event_form: unexpected error")
+        return jsonify({'success': False, 'message': GENERIC_MSG[500]}), 500
+
+
 
 @app.route('/admin/delete_event/<int:event_id>', methods=['POST'])
 @login_required('admin')
@@ -1087,7 +1198,8 @@ def delete_event(event_id):
         m.delete_event(event_id)
         flash('Event deleted successfully!', 'success')
     except Exception as e:
-        flash(f'Error deleting event: {str(e)}', 'error')
+        app.logger.exception("Error deleting event")
+        flash('Something went wrong. Please try again.', 'error')
     return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/event_submissions/<int:event_id>')
@@ -1111,10 +1223,10 @@ def add_gallery_item():
             event_date = request.form.get('event_date')
 
             if 'image' not in request.files:
-                return jsonify({'success': False, 'message': 'No image file provided'})
+                return jsonify({'success': False, 'message': 'No image file provided'}), 400
             image = request.files['image']
             if image.filename == '':
-                return jsonify({'success': False, 'message': 'No selected image'})
+                return jsonify({'success': False, 'message': 'No selected image'}), 400
             if image and allowed_file(image.filename):
                 filename = secure_filename(f"gallery_{datetime.now().timestamp()}_{image.filename}")
                 image_path = os.path.join(app.config['UPLOAD_FOLDER1'], filename)
@@ -1122,9 +1234,11 @@ def add_gallery_item():
                 m.insert_gallery_item(title, event_date, image_path)
                 return jsonify({'success': True})
             else:
-                return jsonify({'success': False, 'message': 'Invalid file type'})
-        except Exception as e:
-            return jsonify({'success': False, 'message': str(e)})
+                return jsonify({'success': False, 'message': 'Invalid file type'}), 400
+        except Exception:
+            app.logger.exception("add_gallery_item: unexpected error")
+            return jsonify({'success': False, 'message': GENERIC_MSG[500]}), 500
+
 
     return jsonify({'success': False, 'message': 'Invalid request'})
 
@@ -1137,8 +1251,9 @@ def delete_gallery_item(item_id):
             os.remove(image_path)
         m.delete_gallery_item(item_id)
         return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+    except Exception:
+        app.logger.exception("delete_gallery_item: unexpected error")
+        return jsonify({'success': False, 'message': GENERIC_MSG[500]}), 500
 
 @app.route('/get_gallery_items')
 def get_gallery_items():
@@ -1149,8 +1264,7 @@ def get_gallery_items():
         if 'event_date' in item_dict and item_dict['event_date']:
             item_dict['event_date'] = item_dict['event_date'].strftime('%Y-%m-%d')
         result.append(item_dict)
-    # NOTE: original code didn't return jsonify(result); preserving logic (no return)
-    # If you want to fix it, add: return jsonify(result)
+    #return jsonify(result)
 
 @app.route('/get_user_projects')
 @login_required('user')
