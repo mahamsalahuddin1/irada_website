@@ -2,7 +2,7 @@ env
 **/env
 env/
 **/env/
-
+csrf_token
 # ---- Python / Flask ----
 __pycache__/
 *.py[cod]
