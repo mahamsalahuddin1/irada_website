@@ -2,3 +2,53 @@ env
 **/env
 env/
 **/env/
+
+# ---- Python / Flask ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.eggs/
+*.egg-info/
+dist/
+build/
+.mypy_cache/
+.pytest_cache/
+.coverage*
+htmlcov/
+.cache/
+.ipynb_checkpoints/
+
+# ---- App data / logs / DB ----
+instance/
+logs/
+*.log
+*.sqlite*
+
+# ---- Secrets / env ----
+.env
+.env.*
+*.pem
+*.key
+
+# ---- Virtual envs ----
+.venv/
+venv/
+env/
+ENV/
+
+# ---- Frontend/tooling (safe even if you don't use them) ----
+node_modules/
+bower_components/
+tmp/
+.tmp/
+
+
+# ---- Editors / OS junk ----
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+desktop.ini
