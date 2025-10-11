@@ -27,6 +27,8 @@ from flask_limiter.util import get_remote_address
 from flask_talisman import Talisman
 from werkzeug.exceptions import HTTPException
 from flask_wtf.csrf import generate_csrf, CSRFError 
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, jsonify, make_response, abort
+
 
 csrf = CSRFProtect()
 
@@ -132,7 +134,9 @@ limiter = Limiter(
     key_func=get_remote_address,
     app=app,  # attach here
     storage_uri=os.getenv("RATELIMIT_STORAGE_URI", "memory://"),  # fine for local tests
-    default_limits=["400 per day", "50 per hour"],  # global limits
+    #default_limits=["400 per day", "50 per hour"],  # global limits
+    default_limits=["5 per minute"],
+    headers_enabled=True, 
 )
 
 
@@ -212,7 +216,7 @@ if not os.path.exists(app.config['UPLOAD_FOLDER']):
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
+"""
 def login_required(role=None):
     def wrapper(f):
         @wraps(f)
@@ -237,24 +241,38 @@ def login_required(role=None):
             return redirect(url_for('login'))
         return decorated
     return wrapper
+"""
+def login_required(role=None):
+    def wrapper(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            # 1) If not authenticated, try to restore from JWT cookie
+            if 'user_id' not in session:
+                data = get_user_from_cookie()
+                if data:
+                    session['user_id'] = data['sub']
+                    session['username'] = data['username']
+                    session['role'] = data['role']
+                else:
+                    # unauthenticated → go to login
+                    session['next'] = request.path
+                    return redirect(url_for('login'))
 
-# def login_required(role=None):
-#     def wrapper(f):
-#         @wraps(f)
-#         def decorated(*args, **kwargs):
-#             if 'user_id' not in session:
-#                 return redirect(url_for('login'))
-#             if role and session.get('role') != role:
-#                 return redirect(url_for('login'))
-#             return f(*args, **kwargs)
-#         return decorated
-#     return wrapper
+            # 2) Authenticated: enforce role
+            if role and session.get('role') != role:
+                # logged-in but not authorized → 403 (this is what the audit expects)
+                abort(403)
+
+            return f(*args, **kwargs)
+        return decorated
+    return wrapper
+
 
 @app.route('/')
 def landing():
     return render_template('landing.html')
 
-# NEW: strong password validator (8–64 chars, upper, lower, number, symbol)
+# strong password validator 
 PASSWORD_RE = re.compile(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,64}$')
 
 def password_strong(pw: str) -> bool:
@@ -280,22 +298,27 @@ def signup():
         if not password:
             errors['password'] = 'Password is required'
         elif not password_strong(password):
-            errors['password'] = 'Use 8–64 chars with upper, lower, number, and symbol'
+            errors['password'] = 'Use 8–64 chars with upper, lower, and number'
 
         if password != confirm_password:
             errors['confirm_password'] = 'Passwords do not match'
 
-        if not errors:
-            try:
-                # HASH the password (PBKDF2-SHA256 with salt)
-                pw_hash = generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
-                m.create_user(username, email, pw_hash)
-                flash('Account created successfully! Please login', 'success')
-                return redirect(url_for('login'))
-            except pymysql.IntegrityError:
-                errors['username'] = 'Username already exists'
-            except Exception as e:
-                flash(f'An error occurred: {str(e)}', 'error')
+        if errors:
+            # <— SERVER-SIDE REJECTION (HTTP 400 proves enforcement)
+            return render_template('signup.html', errors=errors, form_data=request.form), 400
+
+        try:
+            pw_hash = generate_password_hash(password, method='pbkdf2:sha256', salt_length=16)
+            m.create_user(username, email, pw_hash)
+            flash('Account created successfully! Please login', 'success')
+            return redirect(url_for('login'))
+        except pymysql.IntegrityError:
+            errors['username'] = 'Username already exists'
+            return render_template('signup.html', errors=errors, form_data=request.form), 400
+        except Exception:
+            # avoid leaking stack traces/messages to users
+            flash('An unexpected error occurred. Please try again later.', 'error')
+            return render_template('signup.html', errors=errors, form_data=request.form), 500
 
     return render_template('signup.html', errors=errors, form_data=request.form)
 
@@ -362,13 +385,12 @@ def login():
 
                 # Case 1: looks like a hash (very likely contains a colon for pbkdf2 spec)
                 if isinstance(user.get('password_hash'), str) and ':' in user['password_hash']:
-                    ok = check_password_hash(user['password_hash'], password)  # UPDATED
+                    ok = check_password_hash(user['password_hash'], password)  
 
-                # Case 2: legacy plain-text stored in DB (matches exactly) -> migrate in place
                 elif user.get('password_hash') == password:
-                    new_hash = generate_password_hash(password, method="pbkdf2:sha256", salt_length=16)  # UPDATED
-                    # Add this helper in models.py if not present (see earlier message):
-                    # def update_user_password_hash(user_id: int, new_hash: str) -> None: ...
+                    new_hash = generate_password_hash(password, method="pbkdf2:sha256", salt_length=16)  
+              
+               
                     try:
                         m.update_user_password_hash(user['id'], new_hash)  # UPDATED
                         ok = True
@@ -376,12 +398,12 @@ def login():
                         ok = False  # fall back to invalid on any error
 
                 if ok:
-                    # Keep your existing Flask session
+                  
                     session['user_id'] = user['id']
                     session['username'] = user['username']
                     session['role'] = user['role']
 
-                    # UPDATED: issue JWT in HttpOnly cookie for API-style checks
+                
                     payload = {
                         "sub": str(user['id']),
                         "username": user['username'],
@@ -1275,6 +1297,8 @@ def get_user_projects():
 @app.route('/about')
 def about():
     return render_template('about.html')
+
+
 
 if __name__ == '__main__':
 
