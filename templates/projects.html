@@ -1133,10 +1133,12 @@
                 <span>Completed: {{ project.completion_date }}</span>
               </div>
             </div>
+
             <div class="project-links">
-              {% if project.poster_path %}
+              {% if project.poster_path %} {# poster_path is
+              'static/uploads/posters/...'; serve directly from /static #}
               <a
-                href="{{ url_for('download_completed_file', path=project.poster_path) }}"
+                href="{{ url_for('static', filename=project.poster_path[7:] if project.poster_path.startswith('static/') else project.poster_path) }}"
                 class="project-link"
               >
                 <svg viewBox="0 0 24 24">
@@ -1148,7 +1150,7 @@
               </a>
               {% endif %} {% if project.video_path %}
               <a
-                href="{{ url_for('download_completed_file', path=project.video_path) }}"
+                href="{{ url_for('download_completed_file', project_id=project.id, kind='video') }}"
                 class="project-link"
               >
                 <svg viewBox="0 0 24 24">
@@ -1160,7 +1162,7 @@
               </a>
               {% endif %} {% if project.report_path %}
               <a
-                href="{{ url_for('download_completed_file', path=project.report_path) }}"
+                href="{{ url_for('download_completed_file', project_id=project.id, kind='report') }}"
                 class="project-link"
               >
                 <svg viewBox="0 0 24 24">

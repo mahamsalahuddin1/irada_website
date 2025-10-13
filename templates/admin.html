@@ -507,24 +507,21 @@
             </td>
             <td>
               {% if project.poster_path %}
-              <a
-                href="{{ url_for('download_completed_file', path=project.poster_path) }}"
-                class="download-btn"
-                >Poster</a
-              >
-              {% endif %} {% if project.video_path %}
-              <a
-                href="{{ url_for('download_completed_file', path=project.video_path) }}"
-                class="download-btn"
-                >Video</a
-              >
-              {% endif %} {% if project.report_path %}
-              <a
-                href="{{ url_for('download_completed_file', path=project.report_path) }}"
-                class="download-btn"
-                >Report</a
-              >
+              {# Completed Projects actions #}
+              
+                {# Poster is public under /static — just link to static to view or download #}
+                <a href="{{ url_for('static', filename=project.poster_path[7:]) }}" class="download-btn" target="_blank">Poster</a>
               {% endif %}
+
+              {% if project.video_path %}
+                <a href="{{ url_for('download_completed_file', project_id=project.id, kind='video') }}" class="download-btn">Video</a>
+              {% endif %}
+
+              {% if project.report_path %}
+                <a href="{{ url_for('download_completed_file', project_id=project.id, kind='report') }}" class="download-btn">Report</a>
+              {% endif %}
+
+            
               <a
                 href="{{ url_for('edit_completed_project', project_id=project.id) }}"
                 class="action-btn edit-btn"

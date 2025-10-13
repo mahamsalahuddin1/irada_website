@@ -4,6 +4,9 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import os
 import pymysql
 from werkzeug.utils import secure_filename
+from datetime import datetime, date, timedelta
+
+from werkzeug.exceptions import abort
 from functools import wraps
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -28,7 +31,7 @@ from flask_talisman import Talisman
 from werkzeug.exceptions import HTTPException
 from flask_wtf.csrf import generate_csrf, CSRFError 
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, jsonify, make_response, abort
-
+from uuid import uuid4
 
 csrf = CSRFProtect()
 
@@ -146,9 +149,33 @@ app.config['MAX_CONTENT_LENGTH'] = int(os.getenv("MAX_CONTENT_MB", 20)) * 1024 *
 
 
 # Upload config
-app.config['UPLOAD_FOLDER'] = 'static'
-app.config['UPLOAD_FOLDER1'] = 'static/uploads/'
+# app.config['UPLOAD_FOLDER'] = 'static'
+# app.config['UPLOAD_FOLDER1'] = 'static/uploads/'
+#app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
+
+
+# ---- Upload roots ----
+# Private (non-web) storage for proposals/reports/videos
+PRIVATE_UPLOAD_ROOT = os.path.join(app.instance_path, "uploads")
+os.makedirs(PRIVATE_UPLOAD_ROOT, exist_ok=True)
+
+# Public images that must be embeddable on pages (gallery/event posters)
+PUBLIC_UPLOAD_ROOT = os.path.join(app.root_path, "static", "uploads")
+os.makedirs(PUBLIC_UPLOAD_ROOT, exist_ok=True)
+
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
+
+# MIME allow-lists
+ALLOWED_MIME_DOC = {
+    "application/pdf",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+}
+ALLOWED_MIME_IMG = {"image/png", "image/jpeg", "image/gif"}
+ALLOWED_MIME_VIDEO = {"video/mp4", "video/quicktime", "video/x-msvideo"}
+
+
+
 
 @app.context_processor
 def inject_csrf():
@@ -211,37 +238,42 @@ def handle_csrf(e):
     return _render_error(403, original_error=e)
 
 
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
+#if not os.path.exists(app.config['UPLOAD_FOLDER']):
+#    os.makedirs(app.config['UPLOAD_FOLDER'])
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-"""
-def login_required(role=None):
-    def wrapper(f):
-        @wraps(f)
-        def decorated(*args, **kwargs):
-            # 1) If Flask session exists, use it
-            if 'user_id' in session:
-                if role and session.get('role') != role:
-                    return redirect(url_for('login'))
-                return f(*args, **kwargs)
 
-            # 2) Else try JWT cookie and repopulate session
-            data = get_user_from_cookie()
-            if data:
-                session['user_id'] = data['sub']
-                session['username'] = data['username']
-                session['role'] = data['role']
-                if role and data.get('role') != role:
-                    return redirect(url_for('login'))
-                return f(*args, **kwargs)
+def _randomized_name(original: str) -> str:
+    base = secure_filename(original) or "file"
+    return f"{uuid4().hex}_{base}"
 
-            # 3) Not authenticated
-            return redirect(url_for('login'))
-        return decorated
-    return wrapper
-"""
+def _save_upload(file_storage, root_dir: str, allowed_mime: set, subdir: str = "") -> str:
+    # Quick MIME filter (add python-magic later if you want stronger checks)
+    if file_storage.mimetype not in allowed_mime:
+        raise ValueError("Invalid file type")
+    target_dir = os.path.join(root_dir, subdir) if subdir else root_dir
+    os.makedirs(target_dir, exist_ok=True)
+    rand_name = _randomized_name(file_storage.filename)
+    file_path = os.path.join(target_dir, rand_name)
+    file_storage.save(file_path)
+    return file_path  # Full path on disk
+
+def _is_under(path: str, directory: str) -> bool:
+    try:
+        return os.path.commonpath([os.path.realpath(path), os.path.realpath(directory)]) == os.path.realpath(directory)
+    except ValueError:
+        return False
+
+
+def _to_static_rel(full_path: str) -> str:
+    rel = os.path.relpath(full_path, app.root_path).replace("\\", "/")
+    if not rel.startswith("static/"):
+        raise ValueError("Public path must resolve under /static")
+    return rel
+
+
+
 def login_required(role=None):
     def wrapper(f):
         @wraps(f)
@@ -507,65 +539,80 @@ def proposal():
 @app.route('/submit_proposal', methods=['POST'])
 @login_required('user')
 def submit_proposal():
-    if request.method == 'GET':
-        flash('Invalid request method', 'error')
-        return redirect(url_for('projects'))
-
-    if 'file' not in request.files:
-        flash('No file part in form', 'error')
-        return redirect(url_for('projects'))
-
-    file = request.files['file']
-    if file.filename == '':
+    file = request.files.get('file')
+    if not file or file.filename == '':
         flash('No file selected', 'error')
         return redirect(url_for('projects'))
 
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    # Extension + MIME must both pass
+    if not allowed_file(file.filename) or file.mimetype not in ALLOWED_MIME_DOC:
+        flash('Invalid file type. Only PDF/DOC/DOCX allowed.', 'error')
+        return redirect(url_for('projects'))
 
-        try:
-            file.save(file_path)
+    try:
+        # Save OUTSIDE web root
+        file_path = _save_upload(file, PRIVATE_UPLOAD_ROOT, ALLOWED_MIME_DOC, subdir="proposals")
+        db_path = file_path.replace("\\", "/")  # store full private path
 
-            name = request.form.get("name")
-            email = request.form.get("email")
-            project_title = request.form.get("project_title")
-            project_brief = request.form.get("project_brief")
-            team_members = request.form.getlist("team_member")
-            domain = request.form.get("domain")
-            timeline = request.form.get("timeline")
-            faculty = request.form.get("faculty")
-            if faculty == "Other":
-                faculty = request.form.get("other_faculty", faculty)
-            programme = request.form.get("programme")
-            if programme == "Other":
-                programme = request.form.get("other_programme", programme)
-            needs_mentorship = request.form.get("needs_mentorship") == "yes"
-            supervisor = request.form.get("supervisor") if needs_mentorship else None
-            start_date = request.form.get("start_date")
-            duration = request.form.get("duration")
-            resources = request.form.getlist("resources")
-            if "Other" in resources and request.form.get("other_resource"):
-                resources.append(request.form.get("other_resource"))
-            resources_str = ', '.join(resources)
-            team_members_str = ', '.join(team_members)
-            submission_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # ------- your existing form fields -------
+        name = request.form.get("name")
+        email = request.form.get("email")
+        project_title = request.form.get("project_title")
+        project_brief = request.form.get("project_brief")
+        team_members = request.form.getlist("team_member")
+        domain = request.form.get("domain")
+        timeline = request.form.get("timeline")
+        faculty = request.form.get("faculty")
+        if faculty == "Other":
+            faculty = request.form.get("other_faculty", faculty)
+        programme = request.form.get("programme")
+        if programme == "Other":
+            programme = request.form.get("other_programme", programme)
+        needs_mentorship = request.form.get("needs_mentorship") == "yes"
+        supervisor = request.form.get("supervisor") if needs_mentorship else None
+        start_date = request.form.get("start_date")
+        duration = request.form.get("duration")
+        resources = request.form.getlist("resources")
+        if "Other" in resources and request.form.get("other_resource"):
+            resources.append(request.form.get("other_resource"))
+        resources_str = ', '.join(resources)
+        team_members_str = ', '.join(team_members)
+        submission_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # ----------------------------------------
 
-            m.insert_project_proposal((
-                name, email, project_title, project_brief, team_members_str, domain, timeline,
-                supervisor, faculty, programme, 'Pending', file_path.replace("\\", "/"),
-                submission_date, start_date, duration, resources_str, needs_mentorship, session['user_id']
-            ))
-            flash('Project proposal submitted successfully! Our team will review it shortly.', 'success')
-            return redirect(url_for('projects'))
+        m.insert_project_proposal((
+            name,
+            email,
+            project_title,
+            project_brief,
+            team_members_str,
+            domain,
+            timeline,
+            needs_mentorship,   # ✅ here
+            supervisor,
+            faculty,
+            programme,
+            start_date,
+            duration,
+            resources_str,
+            db_path,            # ✅ file_path
+            submission_date,
+            'Pending',          # ✅ status
+            session['user_id']
+        ))
 
-        except Exception as e:
-            app.logger.exception("submit_proposal: unexpected error")
-            flash('Something went wrong. Please try again.', 'error')
-            return redirect(url_for('projects'))
 
-    flash('Invalid file type. Only PDF, DOC, DOCX allowed.', 'error')
-    return redirect(url_for('projects'))
+        flash('Project proposal submitted successfully! Our team will review it shortly.', 'success')
+        return redirect(url_for('projects'))
+
+    except ValueError:
+        flash('Invalid file type', 'error')
+        return redirect(url_for('projects'))
+    except Exception:
+        app.logger.exception("submit_proposal: unexpected error")
+        flash('Something went wrong. Please try again.', 'error')
+        return redirect(url_for('projects'))
+
 
 @app.route('/user/dashboard')
 @login_required('user')
@@ -605,15 +652,81 @@ def admin_charts():
     plot_url = base64.b64encode(img.getvalue()).decode()
     return render_template('admin_charts.html', plot_url=plot_url)
 
+@app.route('/download_file')
+@login_required()
+def legacy_download():
+    raw = (request.args.get('path') or '').strip()
+    if not raw:
+        flash('No file specified', 'error')
+        return redirect(url_for('projects'))
+
+    # Normalize: allow both relative (e.g., "static/…") and absolute paths
+    if os.path.isabs(raw):
+        abs_path = os.path.abspath(raw)
+    else:
+        # treat as relative to the app root (so old "static/..." continues to work)
+        abs_path = os.path.abspath(os.path.join(app.root_path, raw.lstrip('/\\')))
+
+    # Allow old 'static/**', old 'static/uploads/**', and new private store
+    allowed_roots = [
+        PRIVATE_UPLOAD_ROOT,
+        os.path.join(app.root_path, 'static'),
+        os.path.join(app.root_path, 'static', 'uploads'),
+    ]
+    if not any(_is_under(abs_path, root) for root in allowed_roots):
+        app.logger.warning("Blocked download outside allowed roots: %s", abs_path)
+        return _render_error(404)  # stay consistent with your error handling
+
+    if not os.path.exists(abs_path):
+        return _render_error(404)
+
+    return send_file(abs_path, as_attachment=True)
+
+
+# # before - maham
+# @app.route('/download_file')
+# @login_required()
+# def download_completed_file():
+#     file_path = request.args.get('path')
+#     if not file_path:
+#         flash('No file specified')
+#         return redirect(url_for('projects'))
+#     if not os.path.exists(file_path):
+#         flash('File not found')
+#         return redirect(url_for('projects'))
+#     return send_file(file_path, as_attachment=True)
+
+# after - maham
 @app.route('/download/<int:proposal_id>')
 @login_required('admin')
 def download_file(proposal_id):
     file_path = m.get_file_path_for_proposal(proposal_id)
-    if file_path:
-        return send_file(file_path, as_attachment=True)
-    else:
-        flash("File not found.")
-        return redirect(url_for('admin_dashboard'))
+    if not file_path:
+        abort(404)
+    abs_path = os.path.abspath(file_path)
+    if not _is_under(abs_path, PRIVATE_UPLOAD_ROOT) or not os.path.exists(abs_path):
+        abort(404)
+    return send_file(abs_path, as_attachment=True)
+
+# after - maham
+@app.route('/completed/<int:project_id>/download/<kind>')
+@login_required('admin')
+def download_completed_file(project_id, kind):
+    if kind not in ('video', 'report'):
+        abort(400)
+
+    files = m.get_completed_files(project_id) or {}
+    path = files.get(f'{kind}_path')
+    if not path:
+        abort(404)
+
+    abs_path = os.path.abspath(path)
+    base_dir = os.path.join(PRIVATE_UPLOAD_ROOT, f"{kind}s")
+    if not _is_under(abs_path, base_dir) or not os.path.exists(abs_path):
+        abort(404)
+
+    return send_file(abs_path, as_attachment=True)
+
 
 @app.route('/admin/update_status/<int:proposal_id>/<status>', methods=['POST'])
 @login_required('admin')
@@ -641,83 +754,110 @@ def upload_completed_project():
         video_file = request.files.get('video')
         report_file = request.files.get('report')
 
-        poster_path = None
-        video_path = None
-        report_path = None
+        poster_path = None   # public (static-relative)
+        video_path = None    # private (absolute)
+        report_path = None   # private (absolute)
 
         try:
+            # Poster (IMAGE) — must be embeddable on pages → save under static/uploads/posters/
             if poster_file and allowed_file(poster_file.filename):
-                poster_filename = secure_filename(f"poster_{datetime.now().timestamp()}_{poster_file.filename}")
-                poster_path = os.path.join(app.config['UPLOAD_FOLDER'], poster_filename)
-                poster_file.save(poster_path)
+                p_fs = _save_upload(poster_file, PUBLIC_UPLOAD_ROOT, ALLOWED_MIME_IMG, subdir="posters")
+                poster_path = _to_static_rel(p_fs)  # e.g., 'static/uploads/posters/uuid_name.png'
 
+            # Video (PRIVATE) — sensitive → save under instance/uploads/videos/
             if video_file and allowed_file(video_file.filename):
-                video_filename = secure_filename(f"video_{datetime.now().timestamp()}_{video_file.filename}")
-                video_path = os.path.join(app.config['UPLOAD_FOLDER'], video_filename)
-                video_file.save(video_path)
+                video_path = _save_upload(video_file, PRIVATE_UPLOAD_ROOT, ALLOWED_MIME_VIDEO, subdir="videos")
+                # keep full absolute path in DB for private downloads
 
+            # Report (PRIVATE) — sensitive → save under instance/uploads/reports/
             if report_file and allowed_file(report_file.filename):
-                report_filename = secure_filename(f"report_{datetime.now().timestamp()}_{report_file.filename}")
-                report_path = os.path.join(app.config['UPLOAD_FOLDER'], report_filename)
-                report_file.save(report_path)
+                report_path = _save_upload(report_file, PRIVATE_UPLOAD_ROOT, ALLOWED_MIME_DOC, subdir="reports")
+                # keep full absolute path in DB for private downloads
 
             m.insert_completed_project((
                 project_title, domain, abstract, lead_researcher, supervisor,
                 completion_date, poster_path, video_path, report_path, faculty, programme
             ))
             flash('Completed project uploaded successfully!', 'success')
-        except Exception as e:
+
+        except ValueError:
+            # Raised by _save_upload when MIME is not allowed
+            flash('Invalid file type', 'error')
+        except Exception:
             app.logger.exception("Error uploading request")
             flash('Something went wrong. Please try again.', 'error')
 
         return redirect(url_for('admin_dashboard'))
+
     return render_template('upload_completed.html')
+
 
 @app.route('/get_completed_projects')
 def get_completed_projects():
     projects = m.list_completed_projects_desc_by_date()
-    # Format dates
     result = []
     for project in projects:
-        project_dict = dict(project)
-        if 'completion_date' in project_dict and project_dict['completion_date']:
-            project_dict['completion_date'] = project_dict['completion_date'].strftime('%Y-%m-%d')
-        result.append(project_dict)
+        d = dict(project)
+        if d.get('completion_date'):
+            d['completion_date'] = d['completion_date'].strftime('%Y-%m-%d')
+        # Hide private paths; expose booleans instead
+        d['has_video'] = bool(d.pop('video_path', None))
+        d['has_report'] = bool(d.pop('report_path', None))
+        result.append(d)
     return jsonify(result)
 
-@app.route('/download_file')
-@login_required()
-def download_completed_file():
-    file_path = request.args.get('path')
-    if not file_path:
-        flash('No file specified')
-        return redirect(url_for('projects'))
-    if not os.path.exists(file_path):
-        flash('File not found')
-        return redirect(url_for('projects'))
-    return send_file(file_path, as_attachment=True)
+
+
+
+
+def _fmt_month(val):
+    # Accept datetime/date → format; strings/None → return as-is
+    if isinstance(val, (datetime, date)):
+        return val.strftime('%B %Y')
+    return val or None
 
 @app.route('/projects')
 def projects():
-    completed_projects = m.list_completed_projects_ordered()
-    ongoing_projects = m.list_ongoing_projects_ordered()
+    completed_projects = m.list_completed_projects_ordered() or []
+    ongoing_projects   = m.list_ongoing_projects_ordered() or []
 
-    for project in completed_projects:
-        if 'completion_date' in project and project['completion_date']:
-            project['completion_date'] = project['completion_date'].strftime('%B %Y')
-    for project in ongoing_projects:
-        if 'created_at' in project and project['created_at']:
-            project['created_at'] = project['created_at'].strftime('%B %Y')
+    # Safely format month labels
+    for p in completed_projects:
+        if 'completion_date' in p:
+            p['completion_date'] = _fmt_month(p.get('completion_date'))
 
+    for p in ongoing_projects:
+        if 'created_at' in p:
+            p['created_at'] = _fmt_month(p.get('created_at'))
+
+    # Load user proposals (if logged in)
     proposals = []
-    if 'user_id' in session:
-        proposals = m.get_user_proposals_brief(session['user_id'])
+    if session.get('user_id'):
+        try:
+            proposals = m.get_user_proposals_brief(session['user_id']) or []
+            # Normalize submission_date so Jinja .strftime() won't crash
+            for pr in proposals:
+                sd = pr.get('submission_date')
+                if isinstance(sd, str):
+                    for fmt in ('%Y-%m-%d %H:%M:%S', '%Y-%m-%d'):
+                        try:
+                            pr['submission_date'] = datetime.strptime(sd, fmt)
+                            break
+                        except ValueError:
+                            continue
+                # If sd is None, leave it; template should handle empty
+        except Exception:
+            app.logger.exception("get_user_proposals_brief failed")
+            proposals = []
 
-    return render_template('projects.html',
-                         completed_projects=completed_projects,
-                         ongoing_projects=ongoing_projects,
-                         proposals=proposals,
-                         logged_in='user_id' in session)
+    return render_template(
+        'projects.html',
+        completed_projects=completed_projects,
+        ongoing_projects=ongoing_projects,
+        proposals=proposals,
+        logged_in=bool(session.get('user_id'))
+    )
+
 
 @app.route('/admin/add_ongoing_project', methods=['GET', 'POST'])
 @login_required('admin')
@@ -815,38 +955,43 @@ def edit_completed_project(project_id):
             poster_file = request.files.get('poster')
             video_file = request.files.get('video')
             report_file = request.files.get('report')
+            
 
             current_files = m.get_completed_files(project_id)
             poster_path = current_files['poster_path'] if current_files else None
-            video_path = current_files['video_path'] if current_files else None
+            video_path  = current_files['video_path']  if current_files else None
             report_path = current_files['report_path'] if current_files else None
 
+            # Poster (public under static/)
             if poster_file and allowed_file(poster_file.filename):
-                if poster_path and os.path.exists(poster_path):
-                    os.remove(poster_path)
-                poster_filename = secure_filename(f"poster_{datetime.now().timestamp()}_{poster_file.filename}")
-                poster_path = os.path.join(app.config['UPLOAD_FOLDER'], poster_filename)
-                poster_file.save(poster_path)
-
+                base_posters = os.path.join(PUBLIC_UPLOAD_ROOT, "posters")
+                if poster_path:
+                    old_abs = poster_path if os.path.isabs(poster_path) else os.path.join(app.root_path, poster_path)
+                    if _is_under(old_abs, base_posters) and os.path.exists(old_abs):
+                        os.remove(old_abs)
+                new_fs = _save_upload(poster_file, PUBLIC_UPLOAD_ROOT, ALLOWED_MIME_IMG, subdir="posters")
+                poster_path = _to_static_rel(new_fs)  # store 'static/...'
+            
+            # Video (private)
             if video_file and allowed_file(video_file.filename):
-                if video_path and os.path.exists(video_path):
+                base_videos = os.path.join(PRIVATE_UPLOAD_ROOT, "videos")
+                if video_path and _is_under(video_path, base_videos) and os.path.exists(video_path):
                     os.remove(video_path)
-                video_filename = secure_filename(f"video_{datetime.now().timestamp()}_{video_file.filename}")
-                video_path = os.path.join(app.config['UPLOAD_FOLDER'], video_filename)
-                video_file.save(video_path)
+                video_path = _save_upload(video_file, PRIVATE_UPLOAD_ROOT, ALLOWED_MIME_VIDEO, subdir="videos")
 
+            # Report (private)
             if report_file and allowed_file(report_file.filename):
-                if report_path and os.path.exists(report_path):
+                base_reports = os.path.join(PRIVATE_UPLOAD_ROOT, "reports")
+                if report_path and _is_under(report_path, base_reports) and os.path.exists(report_path):
                     os.remove(report_path)
-                report_filename = secure_filename(f"report_{datetime.now().timestamp()}_{report_file.filename}")
-                report_path = os.path.join(app.config['UPLOAD_FOLDER'], report_filename)
-                report_file.save(report_path)
+                report_path = _save_upload(report_file, PRIVATE_UPLOAD_ROOT, ALLOWED_MIME_DOC, subdir="reports")
 
             m.update_completed_project((
                 project_title, domain, abstract, lead_researcher, supervisor,
                 completion_date, poster_path, video_path, report_path,
                 faculty, programme, project_id
             ))
+
             flash('Completed project updated successfully!', 'success')
             return redirect(url_for('admin_dashboard'))
         except Exception as e:
@@ -866,23 +1011,37 @@ def edit_completed_project(project_id):
         flash('Something went wrong. Please try again.', 'error')
         return redirect(url_for('admin_dashboard'))
 
+
+
 @app.route('/admin/delete_completed/<int:project_id>', methods=['POST'])
 @login_required('admin')
 def delete_completed_project(project_id):
     try:
         files = m.get_completed_files(project_id) or {}
-        if files.get('poster_path') and os.path.exists(files['poster_path']):
-            os.remove(files['poster_path'])
-        if files.get('video_path') and os.path.exists(files['video_path']):
-            os.remove(files['video_path'])
-        if files.get('report_path') and os.path.exists(files['report_path']):
-            os.remove(files['report_path'])
+
+        def _safe_delete(stored_path: str, base_dir: str):
+            """Delete only if the resolved path is under base_dir."""
+            if not stored_path:
+                return
+            abs_p = stored_path if os.path.isabs(stored_path) else os.path.join(app.root_path, stored_path)
+            if _is_under(abs_p, base_dir) and os.path.exists(abs_p):
+                try:
+                    os.remove(abs_p)
+                except Exception:
+                    app.logger.warning("Failed to remove file: %s", abs_p, exc_info=True)
+
+        # Limit each deletion to its expected root
+        _safe_delete(files.get('poster_path'), os.path.join(PUBLIC_UPLOAD_ROOT, "posters"))
+        _safe_delete(files.get('video_path'),  os.path.join(PRIVATE_UPLOAD_ROOT, "videos"))
+        _safe_delete(files.get('report_path'), os.path.join(PRIVATE_UPLOAD_ROOT, "reports"))
+
         m.delete_completed_project(project_id)
         flash('Completed project deleted successfully!', 'success')
-    except Exception as e:
+    except Exception:
         app.logger.exception("Error deleting project")
         flash('Something went wrong. Please try again.', 'error')
     return redirect(url_for('admin_dashboard'))
+
 
 @app.route('/admin/dashboard')
 @login_required('admin')
@@ -899,25 +1058,51 @@ def admin_dashboard():
     statuses = [row['status'] for row in data]
     counts = [row['count'] for row in data]
 
-    plt.figure(figsize=(6, 4))
-    sns.barplot(x=statuses, y=counts, hue=statuses, palette='crest', legend=False)
+    # plt.figure(figsize=(6, 4))
+    # sns.barplot(x=statuses, y=counts, hue=statuses, palette='crest', legend=False)
+    # plt.xlabel("Status")
+    # plt.ylabel("Count")
+    # plt.title("Proposals by Status")
+
+    # img = io.BytesIO()
+    # plt.savefig(img, format='png')
+    # img.seek(0)
+    # chart_url = base64.b64encode(img.getvalue()).decode()
+
+    # draw chart with seaborn if available, otherwise fallback to plain matplotlib
+    img = io.BytesIO()
+    try:
+        import seaborn as sns  # imported lazily so the app starts even if seaborn is missing
+        plt.figure(figsize=(6, 4))
+        # Tip: dropping `palette='crest'` reduces chance of palette errors. Add it back if you really want it.
+        sns.barplot(x=statuses, y=counts, hue=statuses, legend=False)
+        plt.legend().remove() if plt.gca().get_legend() else None
+    except Exception:
+        plt.figure(figsize=(6, 4))
+        plt.bar(statuses, counts)
+
     plt.xlabel("Status")
     plt.ylabel("Count")
     plt.title("Proposals by Status")
+    plt.grid(axis='y')
+    plt.tight_layout()
 
-    img = io.BytesIO()
     plt.savefig(img, format='png')
+    plt.close()              # free the figure
     img.seek(0)
     chart_url = base64.b64encode(img.getvalue()).decode()
 
+
     return render_template('admin.html',
-                         proposals=proposals,
-                         chart_url=f"data:image/png;base64,{chart_url}",
-                         ongoing_projects=ongoing_projects,
-                         completed_projects=completed_projects,
-                         all_requests=all_requests,
-                         events=events,
-                         gallery_items=gallery_items)
+                        proposals=proposals,
+                        chart_url=f"data:image/png;base64,{chart_url}",
+                        ongoing_projects=ongoing_projects,
+                        completed_projects=completed_projects,
+                        pending_requests=_pending_requests,   # ✅ add this if template uses it
+                        all_requests=all_requests,
+                        events=events,
+                        gallery_items=gallery_items
+                    )
 
 @app.route('/events')
 def events():
@@ -1075,14 +1260,14 @@ def add_event():
                         'required': is_required,
                         'label': name.strip().replace('_', ' ').title()
                     })
+            
 
             image_path = None
-            if 'image' in request.files:
-                image = request.files['image']
-                if image and image.filename and allowed_file(image.filename):
-                    filename = secure_filename(f"event_{datetime.now().timestamp()}_{image.filename}")
-                    image_path = os.path.join(app.config['UPLOAD_FOLDER1'], filename)
-                    image.save(image_path)
+            img = request.files.get('image')
+            if img and img.filename and allowed_file(img.filename):
+                img_fs = _save_upload(img, PUBLIC_UPLOAD_ROOT, ALLOWED_MIME_IMG, subdir="events")
+                image_path = _to_static_rel(img_fs)  # 'static/...'
+
 
             form_fields_json = json.dumps(form_fields) if form_fields else None
             m.insert_event((title, excerpt, event_date, event_type, image_path, details, form_fields_json))
@@ -1119,21 +1304,24 @@ def edit_event(event_id):
                         'required': True,
                         'label': name.strip().replace('_', ' ').title()
                     })
-
+        
             image_path = None
-            if 'image' in request.files:
-                image = request.files['image']
-                if image and image.filename and allowed_file(image.filename):
-                    current_image_path = m.get_event_image_path(event_id)
-                    if current_image_path and os.path.exists(current_image_path):
-                        os.remove(current_image_path)
-                    filename = secure_filename(f"event_{event_id}_{datetime.now().timestamp()}_{image.filename}")
-                    image_path = os.path.join(app.config['UPLOAD_FOLDER1'], filename)
-                    image.save(image_path)
+            img = request.files.get('image')
+            if img and img.filename and allowed_file(img.filename):
+                base_events = os.path.join(PUBLIC_UPLOAD_ROOT, "events")
+                current_image_path = m.get_event_image_path(event_id)
+                if current_image_path:
+                    old_abs = current_image_path if os.path.isabs(current_image_path) else os.path.join(app.root_path, current_image_path)
+                    if _is_under(old_abs, base_events) and os.path.exists(old_abs):
+                        os.remove(old_abs)
+                img_fs = _save_upload(img, PUBLIC_UPLOAD_ROOT, ALLOWED_MIME_IMG, subdir="events")
+                image_path = _to_static_rel(img_fs)
+
 
             if not image_path:
                 existing = m.get_event_image_path(event_id)
                 image_path = existing if existing else None
+
 
             m.update_event((
                 title, excerpt, event_date, event_type,
@@ -1171,6 +1359,8 @@ def edit_event(event_id):
 
     return render_template('edit_event.html', event=event)
 
+
+
 @app.route('/submit_event_form/<int:event_id>', methods=['POST'])
 @login_required()
 def submit_event_form(event_id):
@@ -1186,37 +1376,45 @@ def submit_event_form(event_id):
         submission_data = {}
         for field in form_fields:
             field_name = field['name']
+
             if field['type'] == 'file':
                 file = request.files.get(field_name)
                 if file and allowed_file(file.filename):
-                    filename = secure_filename(f"submission_{event_id}_{session['user_id']}_{datetime.now().timestamp()}_{file.filename}")
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER1'], filename)
-                    file.save(file_path)
-                    submission_data[field_name] = file_path
-                elif field['required']:
+                    # allow all three families (doc/img/video)
+                    allowed_all = ALLOWED_MIME_DOC | ALLOWED_MIME_IMG | ALLOWED_MIME_VIDEO
+                    saved = _save_upload(
+                        file,
+                        PRIVATE_UPLOAD_ROOT,
+                        allowed_all,
+                        subdir=f"event_submissions/{event_id}"
+                    )
+                    submission_data[field_name] = saved  # absolute private path
+                elif field.get('required'):
                     return jsonify({'success': False, 'message': f'{field_name} is required'}), 400
             else:
                 value = request.form.get(field_name)
-                if not value and field['required']:
+                if (not value) and field.get('required'):
                     return jsonify({'success': False, 'message': f'{field_name} is required'}), 400
                 submission_data[field_name] = value
 
         m.insert_event_submission(event_id, session['user_id'], json.dumps(submission_data))
         return jsonify({'success': True, 'message': 'Submission saved successfully'})
-    
     except Exception:
         app.logger.exception("submit_event_form: unexpected error")
         return jsonify({'success': False, 'message': GENERIC_MSG[500]}), 500
-
 
 
 @app.route('/admin/delete_event/<int:event_id>', methods=['POST'])
 @login_required('admin')
 def delete_event(event_id):
     try:
+        base_events = os.path.join(PUBLIC_UPLOAD_ROOT, "events")
         image_path = m.get_event_image_path(event_id)
-        if image_path and os.path.exists(image_path):
-            os.remove(image_path)
+        if image_path:
+            abs_p = image_path if os.path.isabs(image_path) else os.path.join(app.root_path, image_path)
+            if _is_under(abs_p, base_events) and os.path.exists(abs_p):
+                os.remove(abs_p)
+
         m.delete_event(event_id)
         flash('Event deleted successfully!', 'success')
     except Exception as e:
@@ -1246,32 +1444,43 @@ def add_gallery_item():
 
             if 'image' not in request.files:
                 return jsonify({'success': False, 'message': 'No image file provided'}), 400
-            image = request.files['image']
-            if image.filename == '':
+
+            image = request.files.get('image')
+            if not image or image.filename == '':
                 return jsonify({'success': False, 'message': 'No selected image'}), 400
-            if image and allowed_file(image.filename):
-                filename = secure_filename(f"gallery_{datetime.now().timestamp()}_{image.filename}")
-                image_path = os.path.join(app.config['UPLOAD_FOLDER1'], filename)
-                image.save(image_path)
+            if not allowed_file(image.filename):
+                return jsonify({'success': False, 'message': 'Invalid file type'}), 400
+
+            try:
+                img_fs = _save_upload(image, PUBLIC_UPLOAD_ROOT, ALLOWED_MIME_IMG, subdir="gallery")
+                image_path = _to_static_rel(img_fs)  # 'static/...'
                 m.insert_gallery_item(title, event_date, image_path)
                 return jsonify({'success': True})
-            else:
+            except ValueError:
                 return jsonify({'success': False, 'message': 'Invalid file type'}), 400
+            except Exception:
+                app.logger.exception("add_gallery_item: unexpected error (inner)")
+                return jsonify({'success': False, 'message': GENERIC_MSG[500]}), 500
+
         except Exception:
-            app.logger.exception("add_gallery_item: unexpected error")
+            app.logger.exception("add_gallery_item: unexpected error (outer)")
             return jsonify({'success': False, 'message': GENERIC_MSG[500]}), 500
 
+    return jsonify({'success': False, 'message': 'Method not allowed'}), 405
 
-    return jsonify({'success': False, 'message': 'Invalid request'})
 
 @app.route('/admin/delete_gallery_item/<int:item_id>', methods=['POST'])
 @login_required('admin')
 def delete_gallery_item(item_id):
     try:
+        base_gallery = os.path.join(PUBLIC_UPLOAD_ROOT, "gallery")
         image_path = m.get_gallery_item_image_path(item_id)
-        if image_path and os.path.exists(image_path):
-            os.remove(image_path)
-        m.delete_gallery_item(item_id)
+        if image_path:
+            abs_p = image_path if os.path.isabs(image_path) else os.path.join(app.root_path, image_path)
+            if _is_under(abs_p, base_gallery) and os.path.exists(abs_p):
+                os.remove(abs_p)
+
+        m.delete_gallery_item(item_id)  
         return jsonify({'success': True})
     except Exception:
         app.logger.exception("delete_gallery_item: unexpected error")
@@ -1286,7 +1495,8 @@ def get_gallery_items():
         if 'event_date' in item_dict and item_dict['event_date']:
             item_dict['event_date'] = item_dict['event_date'].strftime('%Y-%m-%d')
         result.append(item_dict)
-    #return jsonify(result)
+    return jsonify(result)
+
 
 @app.route('/get_user_projects')
 @login_required('user')
