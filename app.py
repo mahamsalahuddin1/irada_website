@@ -7,7 +7,10 @@ from werkzeug.utils import secure_filename
 from datetime import datetime, date, timedelta
 
 from werkzeug.exceptions import abort
+ 
 from functools import wraps
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 import io
@@ -544,15 +547,17 @@ def submit_proposal():
         flash('No file selected', 'error')
         return redirect(url_for('projects'))
 
+    # Extension + MIME must both pass
     if not allowed_file(file.filename) or file.mimetype not in ALLOWED_MIME_DOC:
         flash('Invalid file type. Only PDF/DOC/DOCX allowed.', 'error')
         return redirect(url_for('projects'))
 
     try:
+        # Save OUTSIDE web root
         file_path = _save_upload(file, PRIVATE_UPLOAD_ROOT, ALLOWED_MIME_DOC, subdir="proposals")
-        db_path = file_path.replace("\\", "/")
+        db_path = file_path.replace("\\", "/")  # store full private path
 
-        # ------- existing fields (unchanged) -------
+        # ------- your existing form fields -------
         name = request.form.get("name")
         email = request.form.get("email")
         project_title = request.form.get("project_title")
@@ -566,36 +571,15 @@ def submit_proposal():
         programme = request.form.get("programme")
         if programme == "Other":
             programme = request.form.get("other_programme", programme)
+        needs_mentorship = request.form.get("needs_mentorship") == "yes"
+        supervisor = request.form.get("supervisor") if needs_mentorship else None
         start_date = request.form.get("start_date")
         duration = request.form.get("duration")
-
-        # === FIX 1: mentorship + supervisor ===
-        # Checkbox sends value "yes" only when checked
-        needs_mentorship = (request.form.get("needs_mentorship") == "yes")
-
-        # If multiple <select name="supervisor"> are posted (hidden + dynamic),
-        # pick the last non-empty one so we get the user's actual selection.
-        if needs_mentorship:
-            sup_candidates = request.form.getlist("supervisor")  # may be ["", "Prof. ..."]
-            supervisor = next((s.strip() for s in reversed(sup_candidates) if s and s.strip()), None)
-        else:
-            supervisor = None
-
-        # === FIX 2: resources + "Other" text ===
-        # Get all selected checkboxes, trim, and replace "Other" with the free-text value.
-        resources = [r.strip() for r in request.form.getlist("resources") if r and r.strip()]
-        other_resource = (request.form.get("other_resource") or "").strip()
-        if "Other" in resources:
-            # Remove placeholder and append actual text if provided
-            resources = [r for r in resources if r != "Other"]
-            if other_resource:
-                resources.append(other_resource)
-
-        # De-duplicate while preserving order (in case of odd repeats)
-        resources_dedup = list(dict.fromkeys(resources))
-        resources_str = ', '.join(resources_dedup)
-
-        team_members_str = ', '.join([m.strip() for m in team_members if m and m.strip()])
+        resources = request.form.getlist("resources")
+        if "Other" in resources and request.form.get("other_resource"):
+            resources.append(request.form.get("other_resource"))
+        resources_str = ', '.join(resources)
+        team_members_str = ', '.join(team_members)
         submission_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         # ----------------------------------------
 
@@ -607,18 +591,19 @@ def submit_proposal():
             team_members_str,
             domain,
             timeline,
-            needs_mentorship,   # unchanged type; still a bool
+            needs_mentorship,   # ✅ here
             supervisor,
             faculty,
             programme,
             start_date,
             duration,
             resources_str,
-            db_path,
+            db_path,            # ✅ file_path
             submission_date,
-            'Pending',
+            'Pending',          # ✅ status
             session['user_id']
         ))
+
 
         flash('Project proposal submitted successfully! Our team will review it shortly.', 'success')
         return redirect(url_for('projects'))
@@ -666,6 +651,7 @@ def admin_charts():
 
     img = io.BytesIO()
     plt.savefig(img, format='png')
+    plt.close()
     img.seek(0)
     plot_url = base64.b64encode(img.getvalue()).decode()
     return render_template('admin_charts.html', plot_url=plot_url)
