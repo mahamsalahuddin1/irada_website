@@ -37,24 +37,61 @@ def update_user_password_hash(user_id: int, new_hash: str) -> None:
 
 
 # ---------- Proposals ----------
-def insert_project_proposal(values: Tuple) -> None:
+
+# def insert_project_proposal(values: Tuple) -> None:
+#     conn = get_db_connection()
+#     cursor = conn.cursor()
+#     try:
+#         cursor.execute(
+#             """
+#             INSERT INTO project_proposals 
+#             (name, email, project_title, project_brief, team_members, domain, timeline, 
+#              supervisor, faculty, programme, status, file_path, submission_date,
+#              start_date, duration, resources_required, needs_mentorship, user_id)
+#             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+#             """,
+#             values
+#         )
+#         conn.commit()
+#     finally:
+#         cursor.close()
+#         conn.close()
+
+
+# new
+# models.py
+from db import get_db_connection  # or however you import your connection
+# from pymysql.cursors import DictCursor  # if you need DictCursor
+
+def insert_project_proposal(values):
+    """
+    VALUES must be in this exact order:
+    name, email, project_title, project_brief, team_members,
+    domain, timeline, needs_mentorship, supervisor,
+    faculty, programme, start_date, duration,
+    resources_required, file_path, submission_date, status, user_id
+    """
+    sql = """
+        INSERT INTO project_proposals
+        (name, email, project_title, project_brief, team_members,
+         domain, timeline, needs_mentorship, supervisor,
+         faculty, programme, start_date, duration,
+         resources_required, file_path, submission_date, status, user_id)
+        VALUES
+        (%s, %s, %s, %s, %s,
+         %s, %s, %s, %s,
+         %s, %s, %s, %s,
+         %s, %s, %s, %s, %s)
+    """
     conn = get_db_connection()
-    cursor = conn.cursor()
     try:
-        cursor.execute(
-            """
-            INSERT INTO project_proposals 
-            (name, email, project_title, project_brief, team_members, domain, timeline, 
-             supervisor, faculty, programme, status, file_path, submission_date,
-             start_date, duration, resources_required, needs_mentorship, user_id)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """,
-            values
-        )
+        with conn.cursor() as cursor:
+            cursor.execute(sql, values)
         conn.commit()
     finally:
-        cursor.close()
         conn.close()
+
+
 
 def get_user_proposals(user_id: int) -> List[Dict[str, Any]]:
     conn = get_db_connection()

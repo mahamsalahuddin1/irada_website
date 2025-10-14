@@ -1136,7 +1136,7 @@
             <div class="project-links">
               {% if project.poster_path %}
               <a
-                href="{{ url_for('legacy_download', path=project.poster_path) }}"
+                href="{{ url_for('download_completed_file', path=project.poster_path) }}"
                 class="project-link"
               >
                 <svg viewBox="0 0 24 24">
@@ -1148,7 +1148,7 @@
               </a>
               {% endif %} {% if project.video_path %}
               <a
-                href="{{ url_for('legacy_download', path=project.video_path) }}"
+                href="{{ url_for('download_completed_file', path=project.video_path) }}"
                 class="project-link"
               >
                 <svg viewBox="0 0 24 24">
@@ -1160,7 +1160,7 @@
               </a>
               {% endif %} {% if project.report_path %}
               <a
-                href="{{ url_for('legacy_download', path=project.report_path) }}"
+                href="{{ url_for('download_completed_file', path=project.report_path) }}"
                 class="project-link"
               >
                 <svg viewBox="0 0 24 24">
@@ -1211,8 +1211,6 @@
             </svg>
             Download Proposal Form
           </a>
-          
-
 
           <form
             method="POST"
@@ -2555,40 +2553,6 @@
         flashMessages.forEach((message) => {
           // Remove element after animation completes
           message.addEventListener("animationend", function (e) {
-            if (e.animationName === "flashExit") {
-              message.remove();
-            }
-          });
-
-          // Optional: Allow manual dismissal
-          message.addEventListener("click", () => {
-            message.style.animation = "flashExit 0.4s forwards";
-          });
-        });
-      });
-
-      // Function to get the final faculty value (either selected or other input)
-      function getFacultyValue() {
-        const facultySelect = document.getElementById("faculty");
-        if (facultySelect.value === "Other") {
-          return document.getElementById("otherFacultyInput").value;
-        }
-        return facultySelect.value;
-      }
-
-      // Function to get the final programme value (either selected or other input)
-      function getProgrammeValue() {
-        const programmeSelect = document.getElementById("programme");
-        if (programmeSelect.value === "Other") {
-          return document.getElementById("otherProgrammeInput").value;
-        }
-        return programmeSelect.value;
-      }
-    </script>
-    {% include "_csrf_script.html" %}
-  </body>
-</html>
-addEventListener("animationend", function (e) {
             if (e.animationName === "flashExit") {
               message.remove();
             }

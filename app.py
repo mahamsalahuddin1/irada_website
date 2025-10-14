@@ -552,55 +552,70 @@ def submit_proposal():
     try:
         # Save OUTSIDE web root
         file_path = _save_upload(file, PRIVATE_UPLOAD_ROOT, ALLOWED_MIME_DOC, subdir="proposals")
-        db_path = file_path.replace("\\", "/")  # store full private path
+        db_path = file_path.replace("\\", "/")
 
-        # ------- your existing form fields -------
-        name = request.form.get("name")
-        email = request.form.get("email")
-        project_title = request.form.get("project_title")
-        project_brief = request.form.get("project_brief")
-        team_members = request.form.getlist("team_member")
-        domain = request.form.get("domain")
-        timeline = request.form.get("timeline")
+        # ------- fields -------
+        name           = (request.form.get("name") or "").strip()
+        email          = (request.form.get("email") or "").strip()
+        project_title  = (request.form.get("project_title") or "").strip()
+        project_brief  = (request.form.get("project_brief") or "").strip()
+
+        # supports new & old field names
+        team_members = request.form.getlist("team_members[]") or request.form.getlist("team_member")
+        team_members = [t.strip() for t in team_members if t and t.strip()]
+        team_members_str = ", ".join(team_members)
+
+        domain    = request.form.get("domain")
+        timeline  = request.form.get("timeline")
+        start_date = request.form.get("start_date")
+
+        # No duration input in the form → derive something non-null from timeline
+        timeline_to_duration = {
+            "Short-term (0-3 months)": "0-3 months",
+            "Medium-term (3-6 months)": "3-6 months",
+            "Long-term (6+ months)": "6+ months",
+        }
+        duration = request.form.get("duration") or timeline_to_duration.get(timeline, "")
+
         faculty = request.form.get("faculty")
         if faculty == "Other":
             faculty = request.form.get("other_faculty", faculty)
+
         programme = request.form.get("programme")
         if programme == "Other":
             programme = request.form.get("other_programme", programme)
+
         needs_mentorship = request.form.get("needs_mentorship") == "yes"
         supervisor = request.form.get("supervisor") if needs_mentorship else None
-        start_date = request.form.get("start_date")
-        duration = request.form.get("duration")
-        resources = request.form.getlist("resources")
-        if "Other" in resources and request.form.get("other_resource"):
-            resources.append(request.form.get("other_resource"))
-        resources_str = ', '.join(resources)
-        team_members_str = ', '.join(team_members)
+
+        resources = request.form.getlist("resources")  # ["PC", "Other", ...]
+        # replace "Other" with the typed value (don’t just append)
+        if "Other" in resources:
+            other_val = (request.form.get("other_resource") or "").strip()
+            idx = resources.index("Other")
+            resources[idx] = other_val if other_val else "Other"
+        resources = [r for r in resources if r]  # drop empties if any
+        resources_str = ", ".join(resources)
+
         submission_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        # ----------------------------------------
 
-        m.insert_project_proposal((
-            name,
-            email,
-            project_title,
-            project_brief,
-            team_members_str,
-            domain,
-            timeline,
-            needs_mentorship,   # ✅ here
-            supervisor,
-            faculty,
-            programme,
-            start_date,
-            duration,
-            resources_str,
-            db_path,            # ✅ file_path
-            submission_date,
-            'Pending',          # ✅ status
-            session['user_id']
-        ))
-
+        # ---- insert: try WITH mentorship column first; fall back if models/DB not migrated ----
+        try:
+            m.insert_project_proposal((
+                name, email, project_title, project_brief, team_members_str,
+                domain, timeline, needs_mentorship, supervisor,
+                faculty, programme, start_date, duration,
+                resources_str, db_path, submission_date, 'Pending', session['user_id']
+            ))
+        except Exception as e:
+            # If your INSERT still doesn't have the needs_mentorship column, retry without it
+            app.logger.warning("Insert with needs_mentorship failed, retrying legacy insert: %s", e)
+            m.insert_project_proposal((
+                name, email, project_title, project_brief, team_members_str,
+                domain, timeline, supervisor,
+                faculty, programme, start_date, duration,
+                resources_str, db_path, submission_date, 'Pending', session['user_id']
+            ))
 
         flash('Project proposal submitted successfully! Our team will review it shortly.', 'success')
         return redirect(url_for('projects'))
@@ -608,7 +623,7 @@ def submit_proposal():
     except ValueError:
         flash('Invalid file type', 'error')
         return redirect(url_for('projects'))
-    except Exception:
+    except Exception as e:
         app.logger.exception("submit_proposal: unexpected error")
         flash('Something went wrong. Please try again.', 'error')
         return redirect(url_for('projects'))
@@ -710,7 +725,8 @@ def download_file(proposal_id):
 
 # after - maham
 @app.route('/completed/<int:project_id>/download/<kind>')
-@login_required('admin')
+# @login_required('admin')
+@login_required()
 def download_completed_file(project_id, kind):
     if kind not in ('video', 'report'):
         abort(400)
@@ -825,6 +841,9 @@ def projects():
     for p in completed_projects:
         if 'completion_date' in p:
             p['completion_date'] = _fmt_month(p.get('completion_date'))
+
+        p['has_video']  = bool(p.get('video_path'))
+        p['has_report'] = bool(p.get('report_path'))
 
     for p in ongoing_projects:
         if 'created_at' in p:
