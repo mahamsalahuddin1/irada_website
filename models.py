@@ -591,18 +591,19 @@ def get_event_submissions_with_user(event_id: int) -> List[Dict[str, Any]]:
     try:
         cursor.execute(
             """
-            SELECT es.*, u.username 
+            SELECT es.*, u.username
             FROM event_submissions es
             JOIN users u ON es.user_id = u.id
             WHERE es.event_id = %s
-            ORDER BY es.created_at DESC
-            """ ,
+            ORDER BY es.id DESC
+            """,
             (event_id,)
         )
         return cursor.fetchall()
     finally:
         cursor.close()
         conn.close()
+
 
 # ---------- Gallery ----------
 def insert_gallery_item(title: str, event_date: str, image_path: str) -> None:

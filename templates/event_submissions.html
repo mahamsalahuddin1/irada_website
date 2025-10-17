@@ -24,28 +24,34 @@
                 <th>Submitted At</th>
             </tr>
         </thead>
-        <tbody>
-            {% for submission in submissions %}
-            <tr>
-                <td>{{ submission.id }}</td>
-                <td>{{ submission.username }}</td>
-                <td>
-                    <ul>
-                        {% for key, value in submission.data.items() %}
-                        <li><strong>{{ key }}:</strong> 
-                            {% if value and value.startswith('static/uploads/') %}
-                                <a href="{{ url_for('static', filename='uploads/' + value.split('/')[-1]) }}" target="_blank">Download File</a>
-                            {% else %}
-                                {{ value }}
-                            {% endif %}
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </td>
-                <td>{{ submission.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
-            </tr>
+<tbody>
+  {% if submissions %}
+    {% for sub in submissions %}
+      <tr>
+        <td>{{ sub.id }}</td>
+        <td>{{ sub.username }}</td>
+        <td>
+          <ul>
+            {% for key, val in sub.data.items() %}
+              {% if key in sub.files %}
+                <li><strong>{{ key }}:</strong>
+                  <a href="{{ sub.files[key] }}" target="_blank" rel="noopener">Download</a>
+                </li>
+              {% else %}
+                <li><strong>{{ key }}:</strong> {{ val }}</li>
+              {% endif %}
             {% endfor %}
-        </tbody>
+          </ul>
+        </td>
+        <td>{{ sub.created_at_display }}</td>
+      </tr>
+    {% endfor %}
+  {% else %}
+    <tr><td colspan="4">No submissions yet.</td></tr>
+  {% endif %}
+</tbody>
+
+
     </table>
     
     <a href="{{ url_for('admin_dashboard') }}" class="back-btn">Back to Dashboard</a>

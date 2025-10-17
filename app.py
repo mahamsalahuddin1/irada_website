@@ -85,13 +85,14 @@ CSP = {
     "form-action": "'self'",
 }
 
-from flask_talisman import Talisman
 Talisman(
     app,
     content_security_policy=CSP,
     frame_options='DENY',
     referrer_policy='strict-origin-when-cross-origin',
-    force_https=IS_PROD,  # True in prod, False in local/dev
+    permissions_policy="geolocation=(), microphone=(), camera=(), payment=(), usb=(), browsing-topics=()",
+    force_https=IS_PROD,
+    #force_https=IS_PROD,  # True in prod, False in local/dev
 )
 
 
@@ -187,11 +188,12 @@ def inject_csrf():
 
 
 
-# --- Security headers ---
+
+# Security headers 
 @app.after_request
 def set_security_headers(resp):
     resp.headers['X-Content-Type-Options'] = 'nosniff'
-    resp.headers['Permissions-Policy'] = "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+    #resp.headers['Permissions-Policy'] = "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
     return resp
 
 # ---------- Generic error responses (keep messages consistent) ----------
@@ -1430,6 +1432,7 @@ def delete_event(event_id):
         flash('Something went wrong. Please try again.', 'error')
     return redirect(url_for('admin_dashboard'))
 
+
 @app.route('/admin/event_submissions/<int:event_id>')
 @login_required('admin')
 def view_event_submissions(event_id):
@@ -1437,10 +1440,42 @@ def view_event_submissions(event_id):
     if not title:
         flash('Event not found', 'error')
         return redirect(url_for('admin_dashboard'))
-    submissions = m.get_event_submissions_with_user(event_id)
+
+    submissions = m.get_event_submissions_with_user(event_id) or []
+
+    safe = []
     for sub in submissions:
-        sub['data'] = json.loads(sub['submission_data'])
-    return render_template('event_submissions.html', event={'title': title}, submissions=submissions)
+        raw = sub.get('submission_data') if isinstance(sub, dict) else None
+        try:
+            parsed = json.loads(raw) if raw else {}
+        except Exception:
+            parsed = {}
+
+        # Build file links for any uploaded files saved privately
+        files = {}
+        for k, v in list(parsed.items()):
+            if isinstance(v, str) and v and (os.path.isabs(v) or v.startswith('static/')):
+                files[k] = url_for('legacy_download', path=v)
+
+        # Create a printable timestamp string (avoid .strftime in Jinja)
+        created_at_display = ''
+        ca = sub.get('created_at')
+        if hasattr(ca, 'strftime'):
+            created_at_display = ca.strftime('%Y-%m-%d %H:%M')
+        elif isinstance(ca, str):
+            created_at_display = ca
+
+        sub['data'] = parsed
+        sub['files'] = files
+        sub['created_at_display'] = created_at_display
+        safe.append(sub)
+
+    return render_template(
+        'event_submissions.html',
+        event={'id': event_id, 'title': title},
+        submissions=safe
+    )
+
 
 @app.route('/admin/add_gallery_item', methods=['POST'])
 @login_required('admin')
