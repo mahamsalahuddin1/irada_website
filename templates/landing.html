@@ -103,7 +103,7 @@
 .flash-message {
     animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
 }   
-</style
+</style>
 </head>
 <body>
 
@@ -111,34 +111,8 @@
     <div id="particles-js"></div>
     
     <!-- Navigation -->
-    <header class="navbar">
-        <div class="container">
-            <h1 class="logo animate__animated animate__fadeInDown">IRADA<span>INNOVATION</span>CENTRE</h1>
-            
-			
-			
-			<nav>
-				<ul class="nav-links">
-					<li><a href="{{ url_for('landing') }}" class="nav-link {% if request.endpoint == 'landing' %}active{% endif %}">Home</a></li>
-					<li><a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">About</a></li>
-					<li><a href="{{ url_for('projects') }}" class="nav-link {% if request.endpoint == 'projects' %}active{% endif %}">Projects Portal</a></li>
-					<li><a href="{{ url_for('events') }}" class="nav-link {% if request.endpoint == 'events' %}active{% endif %}">Events & Training</a></li>
-					<li><a href="{{ url_for('resource_hub') }}" class="nav-link {% if request.endpoint == 'resource_hub' %}active{% endif %}">Resource Hub</a></li>
-					{% if 'user_id' in session %}
-						<li><a href="{{ url_for('logout') }}" class="logout-btn">Logout</a></li>
-					{% else %}
-						<li><a href="{{ url_for('login') }}" class="nav-link {% if request.endpoint == 'login' %}active{% endif %}">Login</a></li>
-						<li><a href="{{ url_for('signup') }}" class="signup-btn {% if request.endpoint == 'signup' %}active{% endif %}">Signup</a></li>
-					{% endif %}
-				</ul>
-				<div class="hamburger">
-					<span></span>
-					<span></span>
-					<span></span>
-				</div>
-			</nav>
-        </div>
-    </header>
+    {% include "_navbar.html" %}
+    
 	<!-- Flash Messages - Centered Beautiful Design -->
 		{% with messages = get_flashed_messages(with_categories=true) %}
 			{% if messages %}

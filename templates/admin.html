@@ -305,14 +305,78 @@
       .flash-message {
         animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
       }
+      
+/* --- Admin header layout --- */
+.dashboard-header{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; padding:16px 24px; background:#fff;
+  border-bottom:1px solid rgba(17,24,39,.08);
+}
+.dash-title{ margin:0; font-size:1.5rem; font-weight:800; color:#111827; }
+
+.admin-actions{ display:flex; align-items:center; gap:12px; }
+
+/* --- Buttons (scoped to the header) --- */
+.dashboard-header .btn-ghost,
+.dashboard-header .btn-danger{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:10px 14px; border-radius:12px; font-weight:700;
+  text-decoration:none; line-height:1;
+  transition:transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+  box-shadow:0 1px 0 rgba(17,24,39,.04);
+}
+.dashboard-header .btn-ghost svg,
+.dashboard-header .btn-danger svg{ pointer-events:none }
+
+/* Neutral “Home” */
+.dashboard-header .btn-ghost{
+  background:#fff; color:#111827; border:1px solid #e5e7eb;
+}
+.dashboard-header .btn-ghost:hover{
+  background:#f9fafb; transform:translateY(-1px);
+  box-shadow:0 6px 18px rgba(2,6,23,.06);
+}
+
+/* Accent “Logout” */
+.dashboard-header .btn-danger{
+  background:#ef4444; color:#fff; border:1px solid #ef4444;
+}
+.dashboard-header .btn-danger:hover{
+  background:#dc2626; border-color:#dc2626; transform:translateY(-1px);
+  box-shadow:0 10px 24px rgba(220,38,38,.25);
+}
+
+
     </style>
   </head>
   <body>
-    <div class="dashboard-container">
-      <div class="dashboard-header">
-        <h2>Welcome, Admin!</h2>
-        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-      </div>
+    
+   <div class="dashboard-header">
+  <h2 class="dash-title">Welcome, Admin!</h2>
+
+  <div class="admin-actions">
+    <a href="{{ url_for('landing') }}" class="btn-ghost">
+      <!-- home icon -->
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"
+              stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+      </svg>
+      Home
+    </a>
+
+    <a href="{{ url_for('logout') }}" class="btn-danger">
+      <!-- logout icon -->
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M15 17l5-5-5-5M20 12H9" stroke="currentColor" stroke-width="1.6"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M13 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"
+              stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      Logout
+    </a>
+  </div>
+</div>
+
 
       <div class="tabs">
         <button class="tab-btn active" data-tab="users">Users</button>
