@@ -315,14 +315,14 @@
       </div>
 
       <div class="tabs">
-  <button class="tab-btn active" data-tab="users">Users</button>
-  <button class="tab-btn" data-tab="proposals">Project Proposals</button>
-  <button class="tab-btn" data-tab="ongoing">Ongoing Projects</button>
-  <button class="tab-btn" data-tab="completed">Completed Projects</button>
-  <button class="tab-btn" data-tab="resources">Resource Requests</button>
-  <button class="tab-btn" data-tab="events">Events Management</button>
-  <button class="tab-btn" data-tab="gallery">Gallery Management</button>
-</div>
+        <button class="tab-btn active" data-tab="users">Users</button>
+        <button class="tab-btn" data-tab="proposals">Project Proposals</button>
+        <button class="tab-btn" data-tab="ongoing">Ongoing Projects</button>
+        <button class="tab-btn" data-tab="completed">Completed Projects</button>
+        <button class="tab-btn" data-tab="resources">Resource Requests</button>
+        <button class="tab-btn" data-tab="events">Events Management</button>
+        <button class="tab-btn" data-tab="gallery">Gallery Management</button>
+      </div>
 
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %}
@@ -356,43 +356,76 @@
       {% endif %} {% endwith %}
 
       <!-- Users Tab -->
-<div class="tab-content active" id="users">
-  <h3>Users</h3>
-  <table>
-    <tr>
-      <th>ID</th>
-      <th>Username</th>
-      <th>Email</th>
-      <th>Role</th>
-      <th>Update Password</th>
-    </tr>
+      <div class="tab-content active" id="users">
+        <h3>Users</h3>
 
-    {% for u in users %}
-    <tr>
-      <td>{{ u.id }}</td>
-      <td>{{ u.username }}</td>
-      <td>{{ u.email }}</td>
-      <td>{{ u.role }}</td>
-      <td>
-        <form method="POST" action="{{ url_for('admin_update_user_password', user_id=u.id) }}" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-          <input type="password" name="new_password" placeholder="New password" required />
-          <input type="password" name="confirm_password" placeholder="Confirm" required />
-          <button type="submit" class="action-btn edit-btn">Update</button>
-        </form>
-      </td>
-    </tr>
-    {% endfor %}
-  </table>
-</div>
+        <table>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Actions</th>
+          </tr>
 
+          {% for u in users %}
+          <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td>{{ u.role }}</td>
+            <td>
+              <button
+                class="action-btn edit-btn"
+                onclick="openUpdatePassword({{ u.id }}, '{{ u.username|e }}')"
+              >
+                Update Password
+              </button>
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
 
+      <!-- Update Password Modal -->
+      <div class="modal" id="modal-update-password">
+        <div class="modal-content">
+          <span class="close-btn" onclick="closeModal('modal-update-password')"
+            >&times;</span
+          >
+          <h3 id="up-title">Update Password</h3>
 
+          <!-- The action gets set dynamically when a row button is clicked -->
+          <form id="form-update-password" method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
+            <div class="form-group">
+              <label>New password</label>
+              <input
+                type="password"
+                name="new_password"
+                placeholder="New password"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Confirm password</label>
+              <input
+                type="password"
+                name="confirm_password"
+                placeholder="Confirm"
+                required
+              />
+            </div>
+
+            <button type="submit" class="action-btn edit-btn">Update</button>
+          </form>
+        </div>
+      </div>
 
       <!-- Project Proposals Tab -->
       <div class="tab-content" id="proposals">
-
         <h3>Project Proposals</h3>
         <table>
           <tr>
@@ -541,22 +574,29 @@
               project.completion_date else 'N/A' }}
             </td>
             <td>
-              {% if project.poster_path %}
-              {# Completed Projects actions #}
-              
-                {# Poster is public under /static — just link to static to view or download #}
-                <a href="{{ url_for('static', filename=project.poster_path[7:]) }}" class="download-btn" target="_blank">Poster</a>
+              {% if project.poster_path %} {# Completed Projects actions #} {#
+              Poster is public under /static — just link to static to view or
+              download #}
+              <a
+                href="{{ url_for('static', filename=project.poster_path[7:]) }}"
+                class="download-btn"
+                target="_blank"
+                >Poster</a
+              >
+              {% endif %} {% if project.video_path %}
+              <a
+                href="{{ url_for('download_completed_file', project_id=project.id, kind='video') }}"
+                class="download-btn"
+                >Video</a
+              >
+              {% endif %} {% if project.report_path %}
+              <a
+                href="{{ url_for('download_completed_file', project_id=project.id, kind='report') }}"
+                class="download-btn"
+                >Report</a
+              >
               {% endif %}
 
-              {% if project.video_path %}
-                <a href="{{ url_for('download_completed_file', project_id=project.id, kind='video') }}" class="download-btn">Video</a>
-              {% endif %}
-
-              {% if project.report_path %}
-                <a href="{{ url_for('download_completed_file', project_id=project.id, kind='report') }}" class="download-btn">Report</a>
-              {% endif %}
-
-            
               <a
                 href="{{ url_for('edit_completed_project', project_id=project.id) }}"
                 class="action-btn edit-btn"
@@ -738,15 +778,21 @@
               'N/A' }}
             </td>
             <td>
-              {% if item.image_path %}
-              {% set img = item.image_path %}
-{% if img and img.startswith('static/') %}
-  <img src="{{ url_for('static', filename=img[7:]) }}" alt="{{ item.title }}" style="max-width:100px"loading="lazy">
-{% else %}
-  <img src="{{ img or '' }}" alt="{{ item.title }}" style="max-width:100px">
-{% endif %}
-
-              {% else %} No Image {% endif %}
+              {% if item.image_path %} {% set img = item.image_path %} {% if img
+              and img.startswith('static/') %}
+              <img
+                src="{{ url_for('static', filename=img[7:]) }}"
+                alt="{{ item.title }}"
+                style="max-width: 100px"
+                loading="lazy"
+              />
+              {% else %}
+              <img
+                src="{{ img or '' }}"
+                alt="{{ item.title }}"
+                style="max-width: 100px"
+              />
+              {% endif %} {% else %} No Image {% endif %}
             </td>
             <td>
               <button
@@ -836,9 +882,7 @@
             alert("Error processing request");
           });
       }
-    </script>
 
-    <script>
       // Tab functionality
       const tabBtns = document.querySelectorAll(".tab-btn");
       const tabContents = document.querySelectorAll(".tab-content");
@@ -857,9 +901,7 @@
           document.getElementById(tabId).classList.add("active");
         });
       });
-    </script>
 
-    <script>
       // Gallery Management
       document
         .getElementById("add-gallery-item-btn")
@@ -879,13 +921,13 @@
           const formData = new FormData(this);
 
           fetch("/admin/add_gallery_item", {
-  method: "POST",
-  headers: {
-    "X-CSRFToken": document.querySelector('meta[name="csrf-token"]').content,
-  },
-  body: formData,
-})
-
+            method: "POST",
+            headers: {
+              "X-CSRFToken": document.querySelector('meta[name="csrf-token"]')
+                .content,
+            },
+            body: formData,
+          })
             .then((response) => response.json())
             .then((data) => {
               if (data.success) {
@@ -925,9 +967,7 @@
             });
         }
       }
-    </script>
 
-    <script>
       // Auto-hide flash messages after 5 seconds
       document.addEventListener("DOMContentLoaded", function () {
         const flashMessages = document.querySelectorAll(".alert");
@@ -956,6 +996,24 @@
           });
         });
       });
+      function openUpdatePassword(userId, username) {
+        const form = document.getElementById("form-update-password");
+        form.action = `/admin/update_user_password/${userId}`; // <- your existing route
+        document.getElementById(
+          "up-title"
+        ).textContent = `Update Password — ${username}`;
+        document.getElementById("modal-update-password").style.display =
+          "block";
+      }
+
+      // You already have closeModal(id); reuse it for this modal.
+      // Optional: close when clicking the overlay
+      document
+        .getElementById("modal-update-password")
+        .addEventListener("click", (e) => {
+          if (e.target.id === "modal-update-password")
+            closeModal("modal-update-password");
+        });
     </script>
     {% include "_csrf_script.html" %}
   </body>

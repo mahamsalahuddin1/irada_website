@@ -756,36 +756,58 @@
             
             <h2 class="section-title animate__animated animate__fadeIn">Our Team</h2>
             <div class="team-grid">
-                <article class="team-card animate__animated animate__fadeInUp">
-                    <div class="team-photo">
-                        <img src="{{ url_for('static', filename='images/team/director.png') }}" alt="Dr. Hannah Al Ali">
-                    </div>
-                    <h3>Prof. Hannah Al Ali</h3>
-                    <p class="team-position">Director</p>
-                    <p class="team-bio">Associate Professor and Dean at EAU, Dr. Al Ali applies mathematical modelling and data science to solve aviation challenges and is an advocate for education through her academic leadership and board memberships.</p>
-                </article>
-                
-                <article class="team-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
-                    <div class="team-photo">
-                        <img src="{{ url_for('static', filename='images/team/manager.jpg') }}" alt="Dr. Deepudev Sahadevan">
-                    </div>
-                    <h3>Dr. Deepudev Sahadevan</h3>
-                    <p class="team-position">Program Manager</p>
-                    <p class="team-bio">An aviation-focused researcher and former Air Traffic Controller, Dr. Deepudev specializes in machine learning applications for air traffic management, with a decade of industry and ICAO advisory experience..</p>
-                </article>
-                
-                <article class="team-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
-                    <div class="team-photo">
-                        <img src="{{ url_for('static', filename='images/team/maham.jpeg') }}" alt="Maham Salahuddin">
-                    </div>
-                    <h3>Maham Salahuddin</h3>
-                    <p class="team-position">Lab Assistant</p>
-                    <p class="team-bio">
-A passionate data science researcher and software engineer, Maham focuses on applying analytics and predictive modeling to drive innovation in aviation and sustainability.</p>
-                </article>
-                
-                
-            </div>
+    <!-- 1) Director -->
+    <article class="team-card animate__animated animate__fadeInUp">
+        <div class="team-photo">
+            <img src="{{ url_for('static', filename='images/team/director.png') }}" alt="Dr. Hannah Al Ali">
+        </div>
+        <h3>Prof. Hannah Al Ali</h3>
+        <p class="team-position">Director</p>
+        <p class="team-bio">
+Associate Professor and Dean at EAU, Dr. Al Ali applies mathematical modelling and data science to solve aviation challenges and is an advocate for education through her academic leadership and board memberships at regional forums.        </p>
+    </article>
+
+    <!-- 2) NEW: Dr. Mostafa Kamil -->
+    <article class="team-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+        <div class="team-photo">
+  <img
+    src="{{ url_for('static', filename='images/team/drMostafa.png') }}"
+    alt="Dr. Mostafa Kamil"
+  >
+</div>
+
+        <h3>Dr. Mostafa Kamil</h3>
+        <p class="team-position">Faculty Advisor</p>
+        <p class="team-bio">
+            Assistant Professor and Programme Coordinator of Software Engineering at EAU’s Faculty of Mathematics and Data Science, Dr. Mostafa Kamil works across communications systems, IoT, artificial intelligence and data science and contributes to key academic committees.
+        </p>
+    </article>
+
+    <!-- 3) Program Manager (shifted from 0.2s to 0.4s) -->
+    <article class="team-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+        <div class="team-photo">
+            <img src="{{ url_for('static', filename='images/team/manager.jpg') }}" alt="Dr. Deepudev Sahadevan">
+        </div>
+        <h3>Dr. Deepudev Sahadevan</h3>
+        <p class="team-position">Program Manager</p>
+        <p class="team-bio">
+            An aviation-focused researcher and former Air Traffic Controller, Dr. Deepudev specializes in machine learning applications for air traffic management, with a decade of industry and ICAO advisory experience shaping policy and innovation in regional aviation.
+        </p>
+    </article>
+
+    <!-- 4) Lab Assistant (shifted from 0.4s to 0.6s) -->
+    <article class="team-card animate__animated animate__fadeInUp" style="animation-delay: 0.6s">
+        <div class="team-photo">
+            <img src="{{ url_for('static', filename='images/team/maham.jpeg') }}" alt="Maham Salahuddin">
+        </div>
+        <h3>Maham Salahuddin</h3>
+        <p class="team-position">Lab Assistant</p>
+        <p class="team-bio">
+            A passionate data science researcher and software engineer, Maham focuses on applying analytics and predictive modeling to drive innovation in aviation and sustainability through collaborative projects, research leadership and technology-driven problem solving across academic initiatives.
+        </p>
+    </article>
+</div>
+
         </section>
     
     </main>
