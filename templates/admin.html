@@ -315,15 +315,14 @@
       </div>
 
       <div class="tabs">
-        <button class="tab-btn active" data-tab="proposals">
-          Project Proposals
-        </button>
-        <button class="tab-btn" data-tab="ongoing">Ongoing Projects</button>
-        <button class="tab-btn" data-tab="completed">Completed Projects</button>
-        <button class="tab-btn" data-tab="resources">Resource Requests</button>
-        <button class="tab-btn" data-tab="events">Events Management</button>
-        <button class="tab-btn" data-tab="gallery">Gallery Management</button>
-      </div>
+  <button class="tab-btn active" data-tab="users">Users</button>
+  <button class="tab-btn" data-tab="proposals">Project Proposals</button>
+  <button class="tab-btn" data-tab="ongoing">Ongoing Projects</button>
+  <button class="tab-btn" data-tab="completed">Completed Projects</button>
+  <button class="tab-btn" data-tab="resources">Resource Requests</button>
+  <button class="tab-btn" data-tab="events">Events Management</button>
+  <button class="tab-btn" data-tab="gallery">Gallery Management</button>
+</div>
 
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %}
@@ -356,8 +355,44 @@
       </div>
       {% endif %} {% endwith %}
 
+      <!-- Users Tab -->
+<div class="tab-content active" id="users">
+  <h3>Users</h3>
+  <table>
+    <tr>
+      <th>ID</th>
+      <th>Username</th>
+      <th>Email</th>
+      <th>Role</th>
+      <th>Update Password</th>
+    </tr>
+
+    {% for u in users %}
+    <tr>
+      <td>{{ u.id }}</td>
+      <td>{{ u.username }}</td>
+      <td>{{ u.email }}</td>
+      <td>{{ u.role }}</td>
+      <td>
+        <form method="POST" action="{{ url_for('admin_update_user_password', user_id=u.id) }}" style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="password" name="new_password" placeholder="New password" required />
+          <input type="password" name="confirm_password" placeholder="Confirm" required />
+          <button type="submit" class="action-btn edit-btn">Update</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+
+
+
+
+
       <!-- Project Proposals Tab -->
-      <div class="tab-content active" id="proposals">
+      <div class="tab-content" id="proposals">
+
         <h3>Project Proposals</h3>
         <table>
           <tr>

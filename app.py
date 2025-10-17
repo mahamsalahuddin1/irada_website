@@ -735,6 +735,37 @@ def download_completed_file(project_id, kind):
     return send_file(abs_path, as_attachment=True)
 
 
+@app.route('/admin/update_user_password/<int:user_id>', methods=['POST'])
+@login_required('admin')
+@limiter.limit("5 per minute")  # throttling to avoid abuse
+def admin_update_user_password(user_id):
+    new_pw = (request.form.get('new_password') or '').strip()
+    confirm_pw = (request.form.get('confirm_password') or '').strip()
+
+    # Reuse your strong-password policy
+    if not new_pw or not confirm_pw:
+        flash('Both password fields are required.', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+    if new_pw != confirm_pw:
+        flash('Passwords do not match.', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+    if not password_strong(new_pw):
+        flash('Password must be 8–64 chars with upper, lower, and a number.', 'error')
+        return redirect(url_for('admin_dashboard'))
+
+    try:
+        pw_hash = generate_password_hash(new_pw, method='pbkdf2:sha256', salt_length=16)
+        m.update_user_password_hash(user_id, pw_hash)
+        flash('Password updated successfully.', 'success')
+    except Exception:
+        app.logger.exception("admin_update_user_password failed")
+        flash('Something went wrong. Please try again.', 'error')
+
+    return redirect(url_for('admin_dashboard'))
+
+
 @app.route('/admin/update_status/<int:proposal_id>/<status>', methods=['POST'])
 @login_required('admin')
 def update_status(proposal_id, status):
@@ -1064,6 +1095,7 @@ def admin_dashboard():
     all_requests = m.all_resource_requests_detailed()
     events = m.list_events_created_asc()
     gallery_items = m.list_gallery_items_created_asc()
+    users = m.list_users_ordered()
 
     statuses = [row['status'] for row in data]
     counts = [row['count'] for row in data]
@@ -1111,7 +1143,8 @@ def admin_dashboard():
                         pending_requests=_pending_requests,   # ✅ add this if template uses it
                         all_requests=all_requests,
                         events=events,
-                        gallery_items=gallery_items
+                        gallery_items=gallery_items,
+                        users=users, 
                     )
 
 @app.route('/events')

@@ -659,3 +659,15 @@ def list_gallery_items_desc_by_event_date() -> List[Dict[str, Any]]:
     finally:
         cursor.close()
         conn.close()
+
+
+def list_users_ordered() -> list:
+    """Return all users sorted by primary key ascending."""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT id, username, email, role FROM users ORDER BY id ASC")
+        return cur.fetchall()
+    finally:
+        cur.close()
+        conn.close()
