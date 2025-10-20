@@ -20,9 +20,7 @@
     />
   </head>
   <body>
-    <!-- Animated Background Particles -->
     <div id="particles-js"></div>
-    <!-- Flash Messages - Centered Beautiful Design -->
     {% with messages = get_flashed_messages(with_categories=true) %} {% if
     messages %}
     <div class="flash-container">
@@ -52,13 +50,8 @@
       </div>
       {% endfor %}
     </div>
-    {% endif %} {% endwith %}
+    {% endif %} {% endwith %} {% include "_navbar.html" %}
 
-    <!-- Navigation -->
-
-     {% include "_navbar.html" %}
-
-    <!-- Login Container -->
     <div class="auth-page">
       <div class="auth-container">
         <div class="auth-header">
@@ -87,7 +80,6 @@
           </div>
           {% endif %}
 
-          <!-- Forgot Password Alert (hidden by default) -->
           <div
             id="forgotPasswordAlert"
             class="alert alert-danger"
@@ -199,7 +191,6 @@
     </div>
 
     <style>
-      /* Add these styles to your existing CSS */
       .has-error label {
         color: #e74c3c;
       }
@@ -239,7 +230,6 @@
         text-decoration: underline;
       }
 
-      /* Beautiful Centered Flash Messages */
       .flash-container {
         position: fixed;
         top: 0;
@@ -291,7 +281,6 @@
         font-weight: 500;
       }
 
-      /* Color Variants */
       .flash-success {
         background: rgba(46, 125, 50, 0.9);
         color: white;
@@ -316,7 +305,6 @@
         border-left: 4px solid #90caf9;
       }
 
-      /* Animations */
       @keyframes flashEnter {
         to {
           transform: translateY(0);
@@ -331,7 +319,6 @@
         }
       }
 
-      /* Auto-dismiss animation */
       .flash-message {
         animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
       }
@@ -368,7 +355,6 @@
       });
     </script>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     <script>
@@ -383,7 +369,6 @@
           }, 5000);
         });
       });
-      // Add this to your existing JavaScript
       document.addEventListener("DOMContentLoaded", function () {
         const flashMessages = document.querySelectorAll(".flash-message");
 
@@ -395,7 +380,6 @@
             }
           });
 
-          // Optional: Allow manual dismissal
           message.addEventListener("click", () => {
             message.style.animation = "flashExit 0.4s forwards";
           });

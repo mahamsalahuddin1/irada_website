@@ -19,8 +19,6 @@
       href="{{ url_for('static', filename='css/style.css') }}"
     />
     <style>
-      /* Resource Hub Main Styles */
-      /* Beautiful Centered Flash Messages */
       .flash-container {
         position: fixed;
         top: 0;
@@ -72,7 +70,6 @@
         font-weight: 500;
       }
 
-      /* Color Variants */
       .flash-success {
         background: rgba(46, 125, 50, 0.9);
         color: white;
@@ -97,7 +94,6 @@
         border-left: 4px solid #90caf9;
       }
 
-      /* Animations */
       @keyframes flashEnter {
         to {
           transform: translateY(0);
@@ -112,7 +108,6 @@
         }
       }
 
-      /* Auto-dismiss animation */
       .flash-message {
         animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
       }
@@ -156,7 +151,6 @@
         margin: 0 auto 2rem;
       }
 
-      /* Tabs Navigation */
       .resource-tabs {
         display: flex;
         justify-content: center;
@@ -199,7 +193,6 @@
         color: white;
       }
 
-      /* Tab Content */
       .resource-tab-content {
         display: none;
         animation: fadeIn 0.5s ease;
@@ -209,7 +202,6 @@
         display: block;
       }
 
-      /* Request Form Styling */
       .request-form {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
@@ -288,7 +280,6 @@
         color: var(--primary);
       }
 
-      /* Form Controls */
       .form-label {
         display: flex;
         align-items: center;
@@ -347,7 +338,6 @@
         outline: none;
       }
 
-      /* Toggle Switches */
       .toggle-group {
         margin-bottom: 20px;
       }
@@ -403,7 +393,6 @@
         font-size: 0.95rem;
       }
 
-      /* Resource Options Grid */
       .resources-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -484,7 +473,6 @@
         color: var(--primary);
       }
 
-      /* Submit Button */
       .submit-btn {
         display: inline-flex;
         align-items: center;
@@ -514,13 +502,11 @@
         box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
       }
 
-      /* Hidden Sections */
       .hidden-section {
         display: none;
         animation: fadeIn 0.3s ease;
       }
 
-      /* Auth Prompt */
       .auth-prompt {
         text-align: center;
         padding: 30px;
@@ -547,7 +533,6 @@
         text-decoration: underline;
       }
 
-      /* Form Rows */
       .form-row {
         display: flex;
         gap: 20px;
@@ -558,7 +543,6 @@
         flex: 1;
       }
 
-      /* Table Styles */
       .table-container {
         width: 100%;
         overflow-x: auto;
@@ -595,7 +579,6 @@
         background: rgba(255, 255, 255, 0.03);
       }
 
-      /* Status Badges */
       .status-badge {
         display: inline-block;
         padding: 4px 8px;
@@ -619,7 +602,6 @@
         color: #ef4444;
       }
 
-      /* Admin Actions */
       .admin-actions {
         display: flex;
         gap: 10px;
@@ -649,7 +631,6 @@
         transform: translateY(-2px);
       }
 
-      /* Responsive Adjustments */
       @media (max-width: 768px) {
         .resource-container {
           padding: 60px 20px;
@@ -695,17 +676,11 @@
     </style>
   </head>
   <body>
-    <!-- Animated Background Particles -->
     <div id="particles-js"></div>
 
-    <!-- Navigation -->
-     {% include "_navbar.html" %}
+    {% include "_navbar.html" %}
 
-    <!-- Main Content -->
-
-    <!-- Add this right after the opening <main> tag in your resource_hub.html -->
     <main class="resource-container">
-      <!-- Flash Messages - Centered Beautiful Design -->
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %}
       <div class="flash-container">
@@ -737,7 +712,6 @@
       </div>
       {% endif %} {% endwith %}
 
-      <!-- Hero Section -->
       <section class="resource-hero animate__animated animate__fadeIn">
         <h1>Resource <span>Hub</span></h1>
         <p>
@@ -746,7 +720,6 @@
         </p>
       </section>
 
-      <!-- Tabs Navigation -->
       <div class="resource-tabs">
         <button class="resource-tab-btn active" data-tab="request">
           Request Resources
@@ -756,8 +729,6 @@
         </button>
       </div>
 
-      <!-- Request Resources Tab -->
-      <!-- Update the Request Resources Tab section with this code -->
       <div class="resource-tab-content active" id="request">
         <div class="request-form animate__animated animate__fadeIn">
           <div class="form-header">
@@ -794,7 +765,6 @@
           >
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
-            <!-- Project Information Section -->
             <div class="form-section">
               <div class="form-section-header">
                 <svg
@@ -880,7 +850,6 @@
               </div>
             </div>
 
-            <!-- Resource Details Section -->
             <div class="form-section">
               <div class="form-section-header">
                 <svg
@@ -963,12 +932,6 @@
                 </div>
               </div>
 
-              <!-- Hardware Options -->
-
-              <!-- Software Options -->
-              <!-- Hardware Options Section -->
-              <!-- Hardware Options Section -->
-              <!-- Hardware Options Section -->
               <div id="hardwareOptions" class="hidden-section">
                 <h4 class="sub-section-title">Hardware Resources</h4>
                 <div class="resources-grid">
@@ -1043,7 +1006,6 @@
                 </div>
               </div>
 
-              <!-- Software Options Section -->
               <div id="softwareOptions" class="hidden-section">
                 <h4 class="sub-section-title">Software Resources</h4>
                 <div class="resources-grid">
@@ -1116,7 +1078,6 @@
                 </div>
               </div>
 
-              <!-- Lab Options -->
               <div id="labOptions" class="hidden-section">
                 <div class="form-group">
                   <h4 class="sub-section-title">
@@ -1147,7 +1108,6 @@
               </div>
             </div>
 
-            <!-- Request Details Section -->
             <div class="form-section">
               <div class="form-section-header">
                 <svg
@@ -1312,8 +1272,6 @@
         </div>
       </div>
 
-      <!-- My Requests Tab -->
-      <!-- Update the My Requests tab content in resource_hub.html -->
       <div class="resource-tab-content" id="my-requests">
         {% if 'username' not in session %}
         <div class="request-form">
@@ -1386,11 +1344,9 @@
       </div>
     </main>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     <script>
-      // Tab functionality
       const tabBtns = document.querySelectorAll(".resource-tab-btn");
       const tabContents = document.querySelectorAll(".resource-tab-content");
 
@@ -1400,7 +1356,6 @@
           tabBtns.forEach((b) => b.classList.remove("active"));
           tabContents.forEach((c) => c.classList.remove("active"));
 
-          // Add active class to clicked button
           btn.classList.add("active");
 
           // Show corresponding content
@@ -1422,21 +1377,19 @@
           const purposeField = document.getElementById("purpose");
 
           if (this.checked) {
-            // Show project dropdown, hide purpose field
             projectSelect.style.display = "block";
             purposeContainer.style.display = "none";
             projectDropdown.disabled = false;
-            purposeField.disabled = true; // ✅ Disable it to bypass required
+            purposeField.disabled = true;
           } else {
             // Show purpose field, hide project dropdown
             projectSelect.style.display = "none";
             purposeContainer.style.display = "block";
-            projectDropdown.disabled = true; // ✅ Disable project field
+            projectDropdown.disabled = true;
             purposeField.disabled = false;
           }
         });
 
-      // Resource type selection
       // Resource type selection
       document
         .querySelectorAll('input[name="resource_types"]')
@@ -1626,7 +1579,6 @@
           }, 5000);
         });
       });
-      // Add this to your existing JavaScript
       document.addEventListener("DOMContentLoaded", function () {
         const flashMessages = document.querySelectorAll(".flash-message");
 
@@ -1638,7 +1590,6 @@
             }
           });
 
-          // Optional: Allow manual dismissal
           message.addEventListener("click", () => {
             message.style.animation = "flashExit 0.4s forwards";
           });
@@ -1646,7 +1597,6 @@
       });
     </script>
     <script>
-      // Add this to your existing JavaScript in resource_hub.html
       document.addEventListener("DOMContentLoaded", function () {
         // Project selection toggle
         document
@@ -1668,7 +1618,6 @@
             }
           });
 
-        // Function to load user's projects
         async function loadUserProjects() {
           try {
             const response = await fetch("/get_user_projects");

@@ -1,13 +1,9 @@
-# Controller (routes) - refactored to use models.py and db.py
-# NOTE: This file preserves your original logic and moves DB operations into models.py.
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_file, jsonify, make_response
 import os
 import pymysql
 from werkzeug.utils import secure_filename
 from datetime import datetime, date, timedelta
-
 from werkzeug.exceptions import abort
- 
 from functools import wraps
 import matplotlib
 matplotlib.use('Agg')
@@ -54,23 +50,17 @@ else:
     COOKIE_SECURE = IS_PROD
     SESSION_COOKIE_SECURE = IS_PROD
 
-# ---- Content Security Policy (minimal-change, safe-by-default) ----
 CSP = {
-    # Block everything by default
     "default-src": ["'self'"],
 
-    # Keep your current inline JS working (no template edits),
-    # while allowing only your site + common CDNs.
-    # If you don't use a CDN below, remove it.
     "script-src": [
         "'self'",
-        "'unsafe-inline'",           # <-- keeps existing inline scripts working
+        "'unsafe-inline'",           
         "https://cdn.jsdelivr.net",
         "https://cdnjs.cloudflare.com",
         "https://unpkg.com"
     ],
 
-    # Allow inline styles & common CSS CDNs + Google Fonts
     "style-src": [
         "'self'",
         "'unsafe-inline'",
@@ -79,11 +69,11 @@ CSP = {
         "https://cdnjs.cloudflare.com"
     ],
 
-    # Fonts & images (include data: for inlined svgs/base64 logos)
+    # Fonts & images 
     "font-src":  ["'self'", "https://fonts.gstatic.com", "data:"],
     "img-src":   ["'self'", "data:", "https:"],
 
-    # XHR/fetch/websocket destinations (tighten if you call APIs elsewhere)
+    # XHR/fetch/websocket destinations
     "connect-src": ["'self'"],
 
     # Clickjacking & legacy objects
@@ -118,7 +108,7 @@ app.logger.info("IS_PROD=%s  PREFERRED_URL_SCHEME=%s  SESSION_COOKIE_SECURE=%s",
                 IS_PROD, app.config.get("PREFERRED_URL_SCHEME"), app.config.get("SESSION_COOKIE_SECURE"))
 
 
-# --- Cookie/Sessions hardening ---
+#  Cookie/Sessions hardening 
 COOKIE_DOMAIN  = os.getenv("COOKIE_DOMAIN") or None
 COOKIE_NAME    = "access_token"
 
@@ -146,38 +136,22 @@ app.secret_key = os.getenv("SECRET_KEY", "change-me")
 JWT_SECRET = os.getenv("JWT_SECRET", "change-me")
 
 
-
-
-
-
-
 limiter = Limiter(
     key_func=get_remote_address,
-    app=app,  # attach here
-    storage_uri=os.getenv("RATELIMIT_STORAGE_URI", "memory://"),  # fine for local tests
-    #default_limits=["400 per day", "50 per hour"],  # global limits
+    app=app, 
+    storage_uri=os.getenv("RATELIMIT_STORAGE_URI", "memory://"), 
+    #default_limits=["400 per day", "50 per hour"],  
     default_limits=["5 per minute"],
     headers_enabled=True, 
 )
 
 
 
-# 20 MB default; override with env var MAX_CONTENT_MB if you want
 app.config['MAX_CONTENT_LENGTH'] = int(os.getenv("MAX_CONTENT_MB", 20)) * 1024 * 1024
 
-
-# Upload config
-# app.config['UPLOAD_FOLDER'] = 'static'
-# app.config['UPLOAD_FOLDER1'] = 'static/uploads/'
-#app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg', 'gif', 'mp4', 'mov', 'avi'}
-
-
-# ---- Upload roots ----
-# Private (non-web) storage for proposals/reports/videos
 PRIVATE_UPLOAD_ROOT = os.path.join(app.instance_path, "uploads")
 os.makedirs(PRIVATE_UPLOAD_ROOT, exist_ok=True)
 
-# Public images that must be embeddable on pages (gallery/event posters)
 PUBLIC_UPLOAD_ROOT = os.path.join(app.root_path, "static", "uploads")
 os.makedirs(PUBLIC_UPLOAD_ROOT, exist_ok=True)
 
@@ -192,38 +166,19 @@ ALLOWED_MIME_DOC = {
 ALLOWED_MIME_IMG = {"image/png", "image/jpeg", "image/gif"}
 ALLOWED_MIME_VIDEO = {"video/mp4", "video/quicktime", "video/x-msvideo"}
 
-
-
-
 @app.context_processor
 def inject_csrf():
     return {"csrf_token": generate_csrf}
-
-
-
-@app.route('/__diag')
-def __diag():
-    return jsonify({
-        "IS_PROD": IS_PROD,
-        "url": request.url,
-        "scheme": request.scheme,
-        "headers": {
-            "X-Forwarded-Proto": request.headers.get("X-Forwarded-Proto"),
-            "Strict-Transport-Security": request.headers.get("Strict-Transport-Security")
-        }
-    })
-
 
 # Security headers 
 @app.after_request
 def set_security_headers(resp):
     resp.headers['X-Content-Type-Options'] = 'nosniff'
-    # In dev: guarantee no HSTS leaks from anywhere (Flask, proxy, etc.)
     if not IS_PROD:
         resp.headers.pop('Strict-Transport-Security', None)
     return resp
 
-# ---------- Generic error responses (keep messages consistent) ----------
+#  Generic error responses
 def _wants_json():
     return (
         request.is_json
@@ -244,7 +199,6 @@ GENERIC_MSG = {
 }
 
 def _render_error(status_code, original_error=None):
-    # Log real problem, don't leak details to users
     if status_code >= 500:
         app.logger.exception("Unhandled server error", exc_info=original_error)
     else:
@@ -260,7 +214,7 @@ def _render_error(status_code, original_error=None):
 def handle_http_exception(e: HTTPException):
     return _render_error(e.code or 500, original_error=e)
 
-# Anything else -> 500
+# Anything else - 500
 @app.errorhandler(Exception)
 def handle_uncaught(e: Exception):
     return _render_error(500, original_error=e)
@@ -268,10 +222,6 @@ def handle_uncaught(e: Exception):
 @app.errorhandler(CSRFError)              
 def handle_csrf(e):
     return _render_error(403, original_error=e)
-
-
-#if not os.path.exists(app.config['UPLOAD_FOLDER']):
-#    os.makedirs(app.config['UPLOAD_FOLDER'])
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
@@ -281,7 +231,6 @@ def _randomized_name(original: str) -> str:
     return f"{uuid4().hex}_{base}"
 
 def _save_upload(file_storage, root_dir: str, allowed_mime: set, subdir: str = "") -> str:
-    # Quick MIME filter (add python-magic later if you want stronger checks)
     if file_storage.mimetype not in allowed_mime:
         raise ValueError("Invalid file type")
     target_dir = os.path.join(root_dir, subdir) if subdir else root_dir
@@ -289,7 +238,7 @@ def _save_upload(file_storage, root_dir: str, allowed_mime: set, subdir: str = "
     rand_name = _randomized_name(file_storage.filename)
     file_path = os.path.join(target_dir, rand_name)
     file_storage.save(file_path)
-    return file_path  # Full path on disk
+    return file_path 
 
 def _is_under(path: str, directory: str) -> bool:
     try:
@@ -304,13 +253,10 @@ def _to_static_rel(full_path: str) -> str:
         raise ValueError("Public path must resolve under /static")
     return rel
 
-
-
 def login_required(role=None):
     def wrapper(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            # 1) If not authenticated, try to restore from JWT cookie
             if 'user_id' not in session:
                 data = get_user_from_cookie()
                 if data:
@@ -318,13 +264,10 @@ def login_required(role=None):
                     session['username'] = data['username']
                     session['role'] = data['role']
                 else:
-                    # unauthenticated → go to login
                     session['next'] = request.path
                     return redirect(url_for('login'))
 
-            # 2) Authenticated: enforce role
             if role and session.get('role') != role:
-                # logged-in but not authorized → 403 (this is what the audit expects)
                 abort(403)
 
             return f(*args, **kwargs)
@@ -368,7 +311,7 @@ def signup():
             errors['confirm_password'] = 'Passwords do not match'
 
         if errors:
-            # <— SERVER-SIDE REJECTION (HTTP 400 proves enforcement)
+            # SERVER-SIDE REJECTION 
             return render_template('signup.html', errors=errors, form_data=request.form), 400
 
         try:
@@ -380,49 +323,13 @@ def signup():
             errors['username'] = 'Username already exists'
             return render_template('signup.html', errors=errors, form_data=request.form), 400
         except Exception:
-            # avoid leaking stack traces/messages to users
             flash('An unexpected error occurred. Please try again later.', 'error')
             return render_template('signup.html', errors=errors, form_data=request.form), 500
 
     return render_template('signup.html', errors=errors, form_data=request.form)
 
-# signup
-# @app.route('/signup', methods=['GET', 'POST'])
-# def signup():
-#     errors = {}
-#     if request.method == 'POST':
-#         username = request.form.get('username', '').strip()
-#         email = request.form.get('email', '').strip()
-#         password = request.form.get('password', '').strip()
-#         confirm_password = request.form.get('confirm_password', '').strip()
-
-#         if not username:
-#             errors['username'] = 'Username is required'
-#         elif len(username) < 4:
-#             errors['username'] = 'Username must be at least 4 characters'
-#         if not email:
-#             errors['email'] = 'Email is required'
-#         if not password:
-#             errors['password'] = 'Password is required'
-#         elif len(password) < 8:
-#             errors['password'] = 'Password must be at least 8 characters'
-#         if password != confirm_password:
-#             errors['confirm_password'] = 'Passwords do not match'
-
-#         if not errors:
-#             try:
-#                 password_hash = generate_password_hash(password, method="pbkdf2:sha256", salt_length=16)
-#                 m.create_user(username, email, password_hash)
-#                 return redirect(url_for('login'))
-#             except pymysql.IntegrityError:
-#                 errors['username'] = 'Username already exists'
-#             except Exception as e:
-#                 flash(f'An error occurred: {str(e)}', 'error')
-
-#     return render_template('signup.html', errors=errors, form_data=request.form)
 
 # login
-# UPDATED: secure login with hashed passwords + JWT cookie, with legacy migration
 #@limiter.limit("5 per minute; 20 per hour")
 @app.route('/login', methods=['GET', 'POST'])
 @limiter.limit("3 per minute; 20 per hour")
@@ -440,26 +347,20 @@ def login():
         if not errors:
             user = m.get_user_by_username(username)
 
-            # UPDATED: handle three cases
-            # 1) Hashed password present -> verify with check_password_hash
-            # 2) Legacy plain-text match -> migrate to hash once, then proceed
-            # 3) No match -> error
             if user:
                 ok = False
 
-                # Case 1: looks like a hash (very likely contains a colon for pbkdf2 spec)
                 if isinstance(user.get('password_hash'), str) and ':' in user['password_hash']:
                     ok = check_password_hash(user['password_hash'], password)  
 
                 elif user.get('password_hash') == password:
                     new_hash = generate_password_hash(password, method="pbkdf2:sha256", salt_length=16)  
-              
                
                     try:
-                        m.update_user_password_hash(user['id'], new_hash)  # UPDATED
+                        m.update_user_password_hash(user['id'], new_hash)  
                         ok = True
                     except Exception:
-                        ok = False  # fall back to invalid on any error
+                        ok = False  
 
                 if ok:
                   
@@ -475,9 +376,8 @@ def login():
                         "iat": int(time.time()),
                         "exp": int(time.time()) + 60*60*8  # 8 hours
                     }
-                    token = jwt.encode(payload, JWT_SECRET, algorithm="HS256")  # UPDATED
+                    token = jwt.encode(payload, JWT_SECRET, algorithm="HS256") 
 
-                    # UPDATED: set cookie and redirect as before
                     resp = redirect(url_for('admin_dashboard' if user['role'] == 'admin' else 'landing'))
                     resp.set_cookie(
                         COOKIE_NAME, token,
@@ -491,7 +391,6 @@ def login():
                     flash('Login successful!', 'success')
                     return resp
 
-            # If we get here, auth failed
             errors['auth'] = 'Invalid username or password'
 
         return render_template('login.html', errors=errors, username=username)
@@ -503,7 +402,7 @@ def create_jwt(user_id: int, username: str, role: str) -> str:
         'username': username,
         'role': role,
         'iat': datetime.utcnow(),
-        'exp': datetime.utcnow() + timedelta(hours=8)  # 8h session
+        'exp': datetime.utcnow() + timedelta(hours=8)  
     }
     return jwt.encode(payload, JWT_SECRET, algorithm='HS256')
 
@@ -522,44 +421,10 @@ def get_user_from_cookie():
     data = decode_jwt(token)
     return data
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     errors = {}
-#     if request.method == 'POST':
-#         username = request.form.get('username', '').strip()
-#         password = request.form.get('password', '').strip()
-
-#         if not username:
-#             errors['username'] = 'Username is required'
-#         if not password:
-#             errors['password'] = 'Password is required'
-
-#         if not errors:
-#             user = m.get_user_by_username(username)
-
-#             if user and user['password_hash'] == password:  # original logic
-#                 session['user_id'] = user['id']
-#                 session['username'] = user['username']
-#                 session['role'] = user['role']
-#                 flash('Login successful!', 'success')
-#                 if user['role'] == 'admin':
-#                     return redirect(url_for('admin_dashboard'))
-#                 return redirect(url_for('landing'))
-#             errors['auth'] = 'Invalid username or password'
-
-#         return render_template('login.html', errors=errors, username=username)
-#     return render_template('login.html', errors=errors)
-
-# @app.route('/logout')
-# def logout():
-#     session.clear()
-#     return redirect(url_for('login'))
-
 @app.route('/logout')
 def logout():
     session.clear()
     resp = make_response(redirect(url_for('login')))
-    # Delete the cookie
     resp.set_cookie(COOKIE_NAME, '', expires=0, path='/', domain=COOKIE_DOMAIN, samesite=COOKIE_SAMESITE, secure=COOKIE_SECURE, httponly=True)
     return resp
 
@@ -576,17 +441,14 @@ def submit_proposal():
         flash('No file selected', 'error')
         return redirect(url_for('projects'))
 
-    # Extension + MIME must both pass
     if not allowed_file(file.filename) or file.mimetype not in ALLOWED_MIME_DOC:
         flash('Invalid file type. Only PDF/DOC/DOCX allowed.', 'error')
         return redirect(url_for('projects'))
 
     try:
-        # Save OUTSIDE web root
         file_path = _save_upload(file, PRIVATE_UPLOAD_ROOT, ALLOWED_MIME_DOC, subdir="proposals")
-        db_path = file_path.replace("\\", "/")  # store full private path
+        db_path = file_path.replace("\\", "/") 
 
-        # ------- your existing form fields -------
         name = request.form.get("name")
         email = request.form.get("email")
         project_title = request.form.get("project_title")
@@ -610,7 +472,6 @@ def submit_proposal():
         resources_str = ', '.join(resources)
         team_members_str = ', '.join(team_members)
         submission_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        # ----------------------------------------
 
         m.insert_project_proposal((
             name,
@@ -620,16 +481,16 @@ def submit_proposal():
             team_members_str,
             domain,
             timeline,
-            needs_mentorship,   # ✅ here
+            needs_mentorship,  
             supervisor,
             faculty,
             programme,
             start_date,
             duration,
             resources_str,
-            db_path,            # ✅ file_path
+            db_path,            
             submission_date,
-            'Pending',          # ✅ status
+            'Pending',         
             session['user_id']
         ))
 
@@ -693,14 +554,11 @@ def legacy_download():
         flash('No file specified', 'error')
         return redirect(url_for('projects'))
 
-    # Normalize: allow both relative (e.g., "static/…") and absolute paths
     if os.path.isabs(raw):
         abs_path = os.path.abspath(raw)
     else:
-        # treat as relative to the app root (so old "static/..." continues to work)
         abs_path = os.path.abspath(os.path.join(app.root_path, raw.lstrip('/\\')))
 
-    # Allow old 'static/**', old 'static/uploads/**', and new private store
     allowed_roots = [
         PRIVATE_UPLOAD_ROOT,
         os.path.join(app.root_path, 'static'),
@@ -708,28 +566,13 @@ def legacy_download():
     ]
     if not any(_is_under(abs_path, root) for root in allowed_roots):
         app.logger.warning("Blocked download outside allowed roots: %s", abs_path)
-        return _render_error(404)  # stay consistent with your error handling
-
+        return _render_error(404)  
     if not os.path.exists(abs_path):
         return _render_error(404)
 
     return send_file(abs_path, as_attachment=True)
 
 
-# # before - maham
-# @app.route('/download_file')
-# @login_required()
-# def download_completed_file():
-#     file_path = request.args.get('path')
-#     if not file_path:
-#         flash('No file specified')
-#         return redirect(url_for('projects'))
-#     if not os.path.exists(file_path):
-#         flash('File not found')
-#         return redirect(url_for('projects'))
-#     return send_file(file_path, as_attachment=True)
-
-# after - maham
 @app.route('/download/<int:proposal_id>')
 @login_required('admin')
 def download_file(proposal_id):
@@ -741,7 +584,7 @@ def download_file(proposal_id):
         abort(404)
     return send_file(abs_path, as_attachment=True)
 
-# after - maham
+
 @app.route('/completed/<int:project_id>/download/<kind>')
 # @login_required('admin')
 @login_required()
@@ -764,12 +607,11 @@ def download_completed_file(project_id, kind):
 
 @app.route('/admin/update_user_password/<int:user_id>', methods=['POST'])
 @login_required('admin')
-@limiter.limit("5 per minute")  # throttling to avoid abuse
+@limiter.limit("5 per minute")  
 def admin_update_user_password(user_id):
     new_pw = (request.form.get('new_password') or '').strip()
     confirm_pw = (request.form.get('confirm_password') or '').strip()
 
-    # Reuse your strong-password policy
     if not new_pw or not confirm_pw:
         flash('Both password fields are required.', 'error')
         return redirect(url_for('admin_dashboard'))
@@ -819,25 +661,19 @@ def upload_completed_project():
         video_file = request.files.get('video')
         report_file = request.files.get('report')
 
-        poster_path = None   # public (static-relative)
-        video_path = None    # private (absolute)
-        report_path = None   # private (absolute)
-
+        poster_path = None   
+        video_path = None    
+        report_path = None   
         try:
-            # Poster (IMAGE) — must be embeddable on pages → save under static/uploads/posters/
             if poster_file and allowed_file(poster_file.filename):
                 p_fs = _save_upload(poster_file, PUBLIC_UPLOAD_ROOT, ALLOWED_MIME_IMG, subdir="posters")
-                poster_path = _to_static_rel(p_fs)  # e.g., 'static/uploads/posters/uuid_name.png'
+                poster_path = _to_static_rel(p_fs)  
 
-            # Video (PRIVATE) — sensitive → save under instance/uploads/videos/
             if video_file and allowed_file(video_file.filename):
                 video_path = _save_upload(video_file, PRIVATE_UPLOAD_ROOT, ALLOWED_MIME_VIDEO, subdir="videos")
-                # keep full absolute path in DB for private downloads
 
-            # Report (PRIVATE) — sensitive → save under instance/uploads/reports/
             if report_file and allowed_file(report_file.filename):
                 report_path = _save_upload(report_file, PRIVATE_UPLOAD_ROOT, ALLOWED_MIME_DOC, subdir="reports")
-                # keep full absolute path in DB for private downloads
 
             m.insert_completed_project((
                 project_title, domain, abstract, lead_researcher, supervisor,
@@ -846,7 +682,6 @@ def upload_completed_project():
             flash('Completed project uploaded successfully!', 'success')
 
         except ValueError:
-            # Raised by _save_upload when MIME is not allowed
             flash('Invalid file type', 'error')
         except Exception:
             app.logger.exception("Error uploading request")
@@ -865,7 +700,6 @@ def get_completed_projects():
         d = dict(project)
         if d.get('completion_date'):
             d['completion_date'] = d['completion_date'].strftime('%Y-%m-%d')
-        # Hide private paths; expose booleans instead
         d['has_video'] = bool(d.pop('video_path', None))
         d['has_report'] = bool(d.pop('report_path', None))
         result.append(d)
@@ -876,7 +710,6 @@ def get_completed_projects():
 
 
 def _fmt_month(val):
-    # Accept datetime/date → format; strings/None → return as-is
     if isinstance(val, (datetime, date)):
         return val.strftime('%B %Y')
     return val or None
@@ -886,7 +719,6 @@ def projects():
     completed_projects = m.list_completed_projects_ordered() or []
     ongoing_projects   = m.list_ongoing_projects_ordered() or []
 
-    # Safely format month labels
     for p in completed_projects:
         if 'completion_date' in p:
             p['completion_date'] = _fmt_month(p.get('completion_date'))
@@ -898,12 +730,10 @@ def projects():
         if 'created_at' in p:
             p['created_at'] = _fmt_month(p.get('created_at'))
 
-    # Load user proposals (if logged in)
     proposals = []
     if session.get('user_id'):
         try:
             proposals = m.get_user_proposals_brief(session['user_id']) or []
-            # Normalize submission_date so Jinja .strftime() won't crash
             for pr in proposals:
                 sd = pr.get('submission_date')
                 if isinstance(sd, str):
@@ -913,7 +743,6 @@ def projects():
                             break
                         except ValueError:
                             continue
-                # If sd is None, leave it; template should handle empty
         except Exception:
             app.logger.exception("get_user_proposals_brief failed")
             proposals = []
@@ -1030,7 +859,6 @@ def edit_completed_project(project_id):
             video_path  = current_files['video_path']  if current_files else None
             report_path = current_files['report_path'] if current_files else None
 
-            # Poster (public under static/)
             if poster_file and allowed_file(poster_file.filename):
                 base_posters = os.path.join(PUBLIC_UPLOAD_ROOT, "posters")
                 if poster_path:
@@ -1040,14 +868,12 @@ def edit_completed_project(project_id):
                 new_fs = _save_upload(poster_file, PUBLIC_UPLOAD_ROOT, ALLOWED_MIME_IMG, subdir="posters")
                 poster_path = _to_static_rel(new_fs)  # store 'static/...'
             
-            # Video (private)
             if video_file and allowed_file(video_file.filename):
                 base_videos = os.path.join(PRIVATE_UPLOAD_ROOT, "videos")
                 if video_path and _is_under(video_path, base_videos) and os.path.exists(video_path):
                     os.remove(video_path)
                 video_path = _save_upload(video_file, PRIVATE_UPLOAD_ROOT, ALLOWED_MIME_VIDEO, subdir="videos")
 
-            # Report (private)
             if report_file and allowed_file(report_file.filename):
                 base_reports = os.path.join(PRIVATE_UPLOAD_ROOT, "reports")
                 if report_path and _is_under(report_path, base_reports) and os.path.exists(report_path):
@@ -1098,7 +924,7 @@ def delete_completed_project(project_id):
                 except Exception:
                     app.logger.warning("Failed to remove file: %s", abs_p, exc_info=True)
 
-        # Limit each deletion to its expected root
+        
         _safe_delete(files.get('poster_path'), os.path.join(PUBLIC_UPLOAD_ROOT, "posters"))
         _safe_delete(files.get('video_path'),  os.path.join(PRIVATE_UPLOAD_ROOT, "videos"))
         _safe_delete(files.get('report_path'), os.path.join(PRIVATE_UPLOAD_ROOT, "reports"))
@@ -1127,23 +953,10 @@ def admin_dashboard():
     statuses = [row['status'] for row in data]
     counts = [row['count'] for row in data]
 
-    # plt.figure(figsize=(6, 4))
-    # sns.barplot(x=statuses, y=counts, hue=statuses, palette='crest', legend=False)
-    # plt.xlabel("Status")
-    # plt.ylabel("Count")
-    # plt.title("Proposals by Status")
-
-    # img = io.BytesIO()
-    # plt.savefig(img, format='png')
-    # img.seek(0)
-    # chart_url = base64.b64encode(img.getvalue()).decode()
-
-    # draw chart with seaborn if available, otherwise fallback to plain matplotlib
     img = io.BytesIO()
     try:
-        import seaborn as sns  # imported lazily so the app starts even if seaborn is missing
+        import seaborn as sns  
         plt.figure(figsize=(6, 4))
-        # Tip: dropping `palette='crest'` reduces chance of palette errors. Add it back if you really want it.
         sns.barplot(x=statuses, y=counts, hue=statuses, legend=False)
         plt.legend().remove() if plt.gca().get_legend() else None
     except Exception:
@@ -1157,7 +970,7 @@ def admin_dashboard():
     plt.tight_layout()
 
     plt.savefig(img, format='png')
-    plt.close()              # free the figure
+    plt.close()             
     img.seek(0)
     chart_url = base64.b64encode(img.getvalue()).decode()
 
@@ -1167,7 +980,7 @@ def admin_dashboard():
                         chart_url=f"data:image/png;base64,{chart_url}",
                         ongoing_projects=ongoing_projects,
                         completed_projects=completed_projects,
-                        pending_requests=_pending_requests,   # ✅ add this if template uses it
+                        pending_requests=_pending_requests,  
                         all_requests=all_requests,
                         events=events,
                         gallery_items=gallery_items,
@@ -1450,7 +1263,6 @@ def submit_event_form(event_id):
             if field['type'] == 'file':
                 file = request.files.get(field_name)
                 if file and allowed_file(file.filename):
-                    # allow all three families (doc/img/video)
                     allowed_all = ALLOWED_MIME_DOC | ALLOWED_MIME_IMG | ALLOWED_MIME_VIDEO
                     saved = _save_upload(
                         file,
@@ -1458,7 +1270,7 @@ def submit_event_form(event_id):
                         allowed_all,
                         subdir=f"event_submissions/{event_id}"
                     )
-                    submission_data[field_name] = saved  # absolute private path
+                    submission_data[field_name] = saved  
                 elif field.get('required'):
                     return jsonify({'success': False, 'message': f'{field_name} is required'}), 400
             else:
@@ -1511,13 +1323,12 @@ def view_event_submissions(event_id):
         except Exception:
             parsed = {}
 
-        # Build file links for any uploaded files saved privately
+    
         files = {}
         for k, v in list(parsed.items()):
             if isinstance(v, str) and v and (os.path.isabs(v) or v.startswith('static/')):
                 files[k] = url_for('legacy_download', path=v)
 
-        # Create a printable timestamp string (avoid .strftime in Jinja)
         created_at_display = ''
         ca = sub.get('created_at')
         if hasattr(ca, 'strftime'):
@@ -1620,3 +1431,4 @@ if __name__ == '__main__':
     debug = os.getenv("DEBUG", "False").lower() in ("1","true","yes","on")
 
     app.run(host=host, port=port, debug=debug)
+

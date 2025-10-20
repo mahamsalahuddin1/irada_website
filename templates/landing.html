@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 <style>
-/* Beautiful Centered Flash Messages */
 .flash-container {
     position: fixed;
     top: 0;
@@ -59,7 +58,6 @@
     font-weight: 500;
 }
 
-/* Color Variants */
 .flash-success {
     background: rgba(46, 125, 50, 0.9);
     color: white;
@@ -84,7 +82,6 @@
     border-left: 4px solid #90CAF9;
 }
 
-/* Animations */
 @keyframes flashEnter {
     to {
         transform: translateY(0);
@@ -99,7 +96,6 @@
     }
 }
 
-/* Auto-dismiss animation */
 .flash-message {
     animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
 }   
@@ -107,13 +103,10 @@
 </head>
 <body>
 
-    <!-- Animated Background Particles -->
     <div id="particles-js"></div>
     
-    <!-- Navigation -->
     {% include "_navbar.html" %}
     
-	<!-- Flash Messages - Centered Beautiful Design -->
 		{% with messages = get_flashed_messages(with_categories=true) %}
 			{% if messages %}
 				<div class="flash-container">
@@ -138,7 +131,6 @@
 		{% endwith %}
 		
 
-    <!-- Hero Section -->
     <section class="hero">
         <div class="container">
             <div class="hero-content">
@@ -166,12 +158,10 @@
         </div>
     </section>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 	<script>
          
-		// Auto-hide flash messages after 5 seconds
 		document.addEventListener('DOMContentLoaded', function() {
 		  const flashMessages = document.querySelectorAll('.alert');
 		  flashMessages.forEach(msg => {
@@ -182,19 +172,17 @@
 			}, 5000);
 		  });
 		});
-		// Add this to your existing JavaScript
+
 		document.addEventListener('DOMContentLoaded', function() {
 			const flashMessages = document.querySelectorAll('.flash-message');
 			
 			flashMessages.forEach(message => {
-				// Remove element after animation completes
 				message.addEventListener('animationend', function(e) {
 					if (e.animationName === 'flashExit') {
 						message.remove();
 					}
 				});
 				
-				// Optional: Allow manual dismissal
 				message.addEventListener('click', () => {
 					message.style.animation = 'flashExit 0.4s forwards';
 				});

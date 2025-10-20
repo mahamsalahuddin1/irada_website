@@ -19,7 +19,6 @@
       href="{{ url_for('static', filename='css/style.css') }}"
     />
     <style>
-      /* Beautiful Centered Flash Messages */
       .flash-container {
         position: fixed;
         top: 0;
@@ -71,7 +70,6 @@
         font-weight: 500;
       }
 
-      /* Color Variants */
       .flash-success {
         background: rgba(46, 125, 50, 0.9);
         color: white;
@@ -96,7 +94,6 @@
         border-left: 4px solid #90caf9;
       }
 
-      /* Animations */
       @keyframes flashEnter {
         to {
           transform: translateY(0);
@@ -111,7 +108,6 @@
         }
       }
 
-      /* Auto-dismiss animation */
       .flash-message {
         animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
       }
@@ -219,7 +215,6 @@
         margin: 0 auto;
       }
 
-      /* Hero Section */
       .projects-hero {
         text-align: center;
         margin-top: 40px;
@@ -251,7 +246,6 @@
         margin: 0 auto 2rem;
       }
 
-      /* Tabs Navigation */
       .projects-tabs {
         display: flex;
         justify-content: center;
@@ -305,7 +299,6 @@
       .tab-btn[data-tab="login-required"]::after {
         display: none;
       }
-      /* Tab Content */
       .tab-content {
         display: none;
         animation: fadeIn 0.5s ease;
@@ -315,7 +308,6 @@
         display: block;
       }
 
-      /* Projects Grid */
       .projects-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -383,7 +375,6 @@
       #completed .project-card {
         display: block;
       }
-      /* Filters */
       .filters {
         display: flex;
         gap: 15px;
@@ -414,7 +405,6 @@
         min-width: 180px;
       }
 
-      /* Completed Projects Specific */
       .project-links {
         display: flex;
         gap: 10px;
@@ -445,7 +435,6 @@
         fill: currentColor;
       }
 
-      /* Submission Form */
       .submission-form {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
@@ -603,41 +592,34 @@
         transform: translateY(-3px);
         box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
       }
-      /* Form download button width */
       .download-btn {
         width: 100%;
         text-align: center;
         justify-content: center;
       }
 
-      /* Form labels and text visibility */
       .form-label {
         color: white !important;
       }
 
-      /* Input text color */
       .form-control {
         color: white !important;
       }
 
-      /* Input placeholder color */
       .form-control::placeholder {
         color: rgba(255, 255, 255, 0.7) !important;
       }
 
-      /* Submit button styles */
       .submit-btn {
         width: 100%;
         display: block;
         margin: 20px auto 0;
       }
 
-      /* Filter functionality */
       .filter-select {
         cursor: pointer;
       }
 
-      /* Project links functionality */
       .project-link {
         transition: all 0.3s ease;
       }
@@ -645,7 +627,6 @@
         background: var(--primary) !important;
       }
 
-      /* Track project section */
       .track-project {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(10px);
@@ -665,7 +646,6 @@
         margin-top: 20px;
       }
 
-      /* Status message styles */
       .status-message {
         padding: 15px;
         border-radius: 8px;
@@ -770,7 +750,6 @@
         margin-top: 20px;
       }
 
-      /* Responsive Adjustments */
       @media (max-width: 768px) {
         .projects-container {
           padding: 60px 20px;
@@ -820,13 +799,10 @@
     </style>
   </head>
   <body>
-    <!-- Animated Background Particles -->
     <div id="particles-js"></div>
 
-    <!-- Navigation -->
      {% include "_navbar.html" %}
      
-    <!-- Main Content -->
     <main class="projects-container">
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %}
@@ -859,7 +835,6 @@
       </div>
       {% endif %} {% endwith %}
 
-      <!-- Hero Section -->
       <section class="projects-hero animate__animated animate__fadeIn">
         <h1>Projects <span>Portal</span></h1>
         <p>
@@ -868,7 +843,6 @@
         </p>
       </section>
 
-      <!-- Tabs Navigation -->
 
       <div class="projects-tabs">
         <button class="tab-btn active" data-tab="ongoing">
@@ -896,7 +870,6 @@
         {% endif %}
       </div>
 
-      <!-- Ongoing Projects Tab -->
       <div class="tab-content active" id="ongoing">
         <div class="filters">
           <div class="filter-group">
@@ -984,8 +957,6 @@
         </div>
       </div>
 
-      <!-- Completed Projects Tab -->
-      <!-- Completed Projects Tab -->
       <div class="tab-content" id="completed">
         <div class="filters">
           <div class="filter-group">
@@ -1109,7 +1080,6 @@
           {% endfor %}
         </div>
       </div>
-      <!-- Submit Project Tab -->
 
       <div class="tab-content" id="submit">
         {% if not logged_in %}
@@ -1275,7 +1245,6 @@
               </div>
             </div>
 
-            <!-- Faculty Dropdown -->
             <div class="form-section">
               <div class="form-group">
                 <label class="form-label" for="faculty">Faculty</label>
@@ -1322,7 +1291,6 @@
               </div>
             </div>
 
-            <!-- Programme Dropdown -->
             <div class="form-section">
               <div class="form-group">
                 <label class="form-label" for="programme">Programme</label>
@@ -1333,7 +1301,6 @@
                   onchange="checkOtherProgramme()"
                 >
                   <option value="">Select Faculty first</option>
-                  <!-- Options will be populated by JavaScript -->
                   <option value="Other">Other (Please specify)</option>
                 </select>
               </div>
@@ -1454,13 +1421,11 @@
             <button type="submit" class="submit-btn">Submit Proposal</button>
           </form>
 
-          <!-- Other resource input will be inserted here by JavaScript when needed -->
         </div>
 
         {% endif %}
       </div>
 
-      <!-- My Proposals Tab -->
 
       <div class="tab-content" id="my-proposals">
         {% if not logged_in %}
@@ -1542,11 +1507,9 @@
       </div>
     </main>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     <script>
-      // Tab functionality
       const tabBtns = document.querySelectorAll(".tab-btn");
       const tabContents = document.querySelectorAll(".tab-content");
 
@@ -1554,22 +1517,17 @@
         btn.addEventListener("click", () => {
           const tabId = btn.getAttribute("data-tab");
 
-          // Skip processing for login-required tabs (handled by onclick)
           if (tabId === "login-required") return;
 
-          // Remove active class from all buttons and contents
           tabBtns.forEach((b) => b.classList.remove("active"));
           tabContents.forEach((c) => c.classList.remove("active"));
 
-          // Add active class to clicked button
           btn.classList.add("active");
 
-          // Show corresponding content
           document.getElementById(tabId).classList.add("active");
         });
       });
 
-      // Filter functionality
       document.querySelectorAll(".filter-select").forEach((select) => {
         select.addEventListener("change", function () {
           const tab = this.closest(".tab-content").id;
@@ -1609,8 +1567,6 @@
         });
       });
 
-      // Filter functionality for both tabs
-      // Improved filter functionality
       function setupFilters(tabId) {
         const searchBtn = document.getElementById(`${tabId}-search`);
         if (!searchBtn) return;
@@ -1641,7 +1597,6 @@
               const domainMatch = !domainValue || domain.includes(domainValue);
               const yearMatch = !yearValue || year.toString() === yearValue;
 
-              // Supervisor matching
               let supervisorMatch = true;
               if (supervisorValue) {
                 const supervisorMap = {
@@ -1678,8 +1633,6 @@
         });
       }
 
-      // Update the filter functionality for ongoing projects
-      // Update the ongoing projects filter function
       function setupOngoingFilters() {
         const searchBtn = document.getElementById("ongoing-search");
         if (!searchBtn) return;
@@ -1736,7 +1689,6 @@
                 };
                 const expectedKey = supervisorMap[supervisorValue];
 
-                // Check if supervisor text contains the expected name
                 supervisorMatch =
                   expectedKey &&
                   supervisorText.includes(expectedKey.toLowerCase());
@@ -1751,14 +1703,12 @@
         });
       }
 
-      // Initialize filters when DOM loads
       document.addEventListener("DOMContentLoaded", function () {
         setupOngoingFilters();
         setupCompletedFilters();
         updateTeamMembers();
       });
 
-      // Update the filter functionality for completed projects
       function setupCompletedFilters() {
         const searchBtn = document.getElementById("completed-search");
         if (!searchBtn) return;
@@ -1882,7 +1832,6 @@
         }
       }
 
-      // Add this function to load ongoing projects
       async function loadOngoingProjects() {
         try {
           const response = await fetch("/get_ongoing_projects");
@@ -1933,12 +1882,10 @@
         }
       }
 
-      // Call this when the ongoing tab is clicked
       document
         .querySelector('[data-tab="ongoing"]')
         .addEventListener("click", loadOngoingProjects);
 
-      // Add this to the existing JavaScript in projects.html
       async function loadCompletedProjects() {
         try {
           const response = await fetch("/get_completed_projects");
@@ -1950,7 +1897,6 @@
           projectsGrid.innerHTML = "";
 
           projects.forEach((project) => {
-            // Format completion date as "Month Year"
             const completionDate = new Date(project.completion_date);
             const formattedDate = completionDate.toLocaleString("default", {
               month: "long",
@@ -2009,28 +1955,23 @@
             projectsGrid.appendChild(projectCard);
           });
 
-          // Initialize filters for the newly loaded projects
           setupFilters("completed");
         } catch (error) {
           // console.error("Error loading completed projects:", error);
         }
       }
 
-      // Call this function when the completed tab is clicked
       document
         .querySelector('[data-tab="completed"]')
         .addEventListener("click", loadCompletedProjects);
 
-      // Track project functionality
       
 
      
 
-      // Initialize team members on page load if needed
       document.addEventListener("DOMContentLoaded", function () {
         updateTeamMembers();
 
-        // Check for success/error messages in URL
         const urlParams = new URLSearchParams(window.location.search);
         const submissionStatus = urlParams.get("submission");
 
@@ -2054,7 +1995,6 @@
             "supervisorContainer"
           );
           if (this.checked) {
-            // Create new container after the checkbox if it doesn't exist
             if (!supervisorContainer) {
               const container = document.createElement("div");
               container.id = "supervisorContainer";
@@ -2190,24 +2130,19 @@
       }
 
       function viewProposalDetails(proposalId) {
-        // You can implement this to show a modal with full details
-        // or redirect to a detailed view page
         window.location.href = `/proposal_details/${proposalId}`;
       }
 
       function editProposal(proposalId) {
-        // Implement edit functionality
         window.location.href = `/edit_proposal/${proposalId}`;
       }
 
-      // Add event listener for the My Proposals tab
       document
         .querySelector('[data-tab="my-proposals"]')
         ?.addEventListener("click", loadUserProposals);
 
       function showLoginAlert() {
         alert("Please login to submit the project proposal.");
-        // Optional: redirect to login page with return URL
         window.location.href =
           "{{ url_for('login') }}?next=" +
           encodeURIComponent(window.location.pathname);
@@ -2215,7 +2150,6 @@
     </script>
 
     <script>
-      // Function to update programme options based on selected faculty
       function updateProgrammeOptions() {
         const facultySelect = document.getElementById("faculty");
         const programmeSelect = document.getElementById("programme");
@@ -2224,7 +2158,6 @@
         );
         const otherFacultyInput = document.getElementById("otherFacultyInput");
 
-        // Handle "Other" faculty selection
         if (facultySelect.value === "Other") {
           otherFacultyContainer.style.display = "block";
           otherFacultyInput.required = true;
@@ -2233,7 +2166,6 @@
           otherFacultyInput.required = false;
         }
 
-        // Clear existing options (except the "Other" option which we always want to keep)
         programmeSelect.innerHTML =
           '<option value="">Select Programme</option>';
 
@@ -2332,7 +2264,6 @@
           ],
         };
 
-        // Add the appropriate options based on selected faculty
         if (selectedFaculty && facultyProgrammes[selectedFaculty]) {
           facultyProgrammes[selectedFaculty].forEach((programme) => {
             const option = document.createElement("option");
@@ -2342,19 +2273,16 @@
           });
         }
 
-        // Always add the "Other" option at the end
         const otherOption = document.createElement("option");
         otherOption.value = "Other";
         otherOption.textContent = "Other (Please specify)";
         programmeSelect.appendChild(otherOption);
 
-        // Reset the "Other" programme input if faculty changes
         document.getElementById("otherProgrammeInput").value = "";
         document.getElementById("otherProgrammeContainer").style.display =
           "none";
       }
 
-      // Function to check if "Other" programme is selected
       function checkOtherProgramme() {
         const programmeSelect = document.getElementById("programme");
         const otherProgrammeContainer = document.getElementById(
@@ -2377,37 +2305,31 @@
       document.addEventListener("DOMContentLoaded", function () {
         updateProgrammeOptions();
 
-        // Add event listener for faculty change
         document
           .getElementById("faculty")
           .addEventListener("change", updateProgrammeOptions);
 
-        // Add event listener for programme change
         document
           .getElementById("programme")
           .addEventListener("change", checkOtherProgramme);
       });
 
-      // Add this to your existing JavaScript
       document.addEventListener("DOMContentLoaded", function () {
         const flashMessages = document.querySelectorAll(".flash-message");
 
         flashMessages.forEach((message) => {
-          // Remove element after animation completes
           message.addEventListener("animationend", function (e) {
             if (e.animationName === "flashExit") {
               message.remove();
             }
           });
 
-          // Optional: Allow manual dismissal
           message.addEventListener("click", () => {
             message.style.animation = "flashExit 0.4s forwards";
           });
         });
       });
 
-      // Function to get the final faculty value (either selected or other input)
       function getFacultyValue() {
         const facultySelect = document.getElementById("faculty");
         if (facultySelect.value === "Other") {
@@ -2416,7 +2338,6 @@
         return facultySelect.value;
       }
 
-      // Function to get the final programme value (either selected or other input)
       function getProgrammeValue() {
         const programmeSelect = document.getElementById("programme");
         if (programmeSelect.value === "Other") {

@@ -17,7 +17,6 @@
       href="{{ url_for('static', filename='css/style.css') }}"
     />
     <style>
-      /* Beautiful Centered Flash Messages */
       .flash-container {
         position: fixed;
         top: 0;
@@ -69,7 +68,6 @@
         font-weight: 500;
       }
 
-      /* Color Variants */
       .flash-success {
         background: rgba(46, 125, 50, 0.9);
         color: white;
@@ -94,7 +92,6 @@
         border-left: 4px solid #90caf9;
       }
 
-      /* Animations */
       @keyframes flashEnter {
         to {
           transform: translateY(0);
@@ -109,12 +106,10 @@
         }
       }
 
-      /* Auto-dismiss animation */
       .flash-message {
         animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
       }
 
-      /* Enhanced About Page Styles */
       .about-container {
         position: relative;
         z-index: 10;
@@ -128,8 +123,6 @@
         text-align: center;
         padding-top: 30px;
       }
-
-      /* Split About Section */
 
       .about-split {
         display: flex;
@@ -197,16 +190,6 @@
         padding-left: 0;
       }
 
-      /* .purpose-statement::before {
-            content: '"';
-            position: absolute;
-            left: 0;
-            top: -15px;
-            font-size: 3rem;
-            color: rgba(245, 158, 11, 0.5);
-        } */
-
-      /* Mission & Vision Section */
       .mission-vision {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -272,7 +255,6 @@
         font-size: 1 rem;
       }
 
-      /* Focus Areas Section */
       @keyframes floatAnimation {
         0% {
           transform: translateY(0px);
@@ -292,7 +274,6 @@
         align-items: center;
       }
 
-      /* Focus Image Section */
       .focus-image {
         border-radius: 0;
         overflow: visible;
@@ -307,14 +288,13 @@
         width: 100%;
         height: auto;
         object-fit: contain;
-        animation: floatAnimation 3s ease-in-out infinite 0.5s; /* Slight delay */
+        animation: floatAnimation 3s ease-in-out infinite 0.5s;
         will-change: transform;
       }
-      /* Add animation to the about-image as well */
       .about-image {
         flex: 1 1 350px;
         max-width: 500px;
-        overflow: visible; /* Remove any clipping */
+        overflow: visible;
       }
 
       .about-image img {
@@ -324,12 +304,9 @@
         object-fit: contain;
         display: block;
         margin: 0 auto;
-        /* Apply animation */
         animation: floatAnimation 3s ease-in-out infinite;
-        will-change: transform; /* Optimize animation performance */
+        will-change: transform;
       }
-
-      /* Remove the hover effect if you want continuous animation */
 
       .focus-areas {
         display: flex;
@@ -406,7 +383,6 @@
         border-radius: 2px;
       }
 
-      /* Team Section */
       .team-section {
         margin-top: 80px;
       }
@@ -473,7 +449,6 @@
         font-size: 0.95rem;
       }
 
-      /* Responsive Adjustments */
       @media (max-width: 992px) {
         .mission-vision {
           grid-template-columns: 1fr;
@@ -493,7 +468,6 @@
         }
       }
 
-      /* Responsive Adjustments */
       @media (max-width: 1200px) {
         .about-split {
           grid-template-columns: 1fr;
@@ -555,7 +529,6 @@
           height: 40px;
         }
 
-        /* New additions to fix image overlapping */
         .about-image,
         .focus-image {
           margin: 30px auto;
@@ -622,16 +595,11 @@
     </style>
   </head>
   <body>
-    <!-- Animated Background Particles -->
     <div id="particles-js"></div>
 
-    <!-- Navigation -->
     {% include "_navbar.html" %}
 
-    <!-- Main Content -->
     <main class="about-container">
-      <!-- Flash Messages -->
-      <!-- Flash Messages - Centered Beautiful Design -->
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %}
       <div class="flash-container">
@@ -706,7 +674,6 @@
         </div>
       </section>
 
-      <!-- Mission & Vision Section -->
       <section class="mission-vision">
         <article class="mission-card animate__animated animate__fadeInLeft">
           <h2>
@@ -745,7 +712,6 @@
         </article>
       </section>
 
-      <!-- Focus Areas Section -->
       <section class="focus-section">
         <h2 class="section-title animate__animated animate__fadeIn">
           Our Focus Areas
@@ -818,13 +784,11 @@
         </div>
       </section>
 
-      <!-- Team Section -->
       <section class="team-section">
         <h2 class="section-title animate__animated animate__fadeIn">
           Our Team
         </h2>
         <div class="team-grid">
-          <!-- 1) Director -->
           <article class="team-card animate__animated animate__fadeInUp">
             <div class="team-photo">
               <img
@@ -842,7 +806,6 @@
             </p>
           </article>
 
-          <!-- 2) NEW: Dr. Mostafa Kamil -->
           <article
             class="team-card animate__animated animate__fadeInUp"
             style="animation-delay: 0.2s"
@@ -865,7 +828,6 @@
             </p>
           </article>
 
-          <!-- 3) Program Manager (shifted from 0.2s to 0.4s) -->
           <article
             class="team-card animate__animated animate__fadeInUp"
             style="animation-delay: 0.4s"
@@ -886,7 +848,6 @@
             </p>
           </article>
 
-          <!-- 4) Lab Assistant (shifted from 0.4s to 0.6s) -->
           <article
             class="team-card animate__animated animate__fadeInUp"
             style="animation-delay: 0.6s"
@@ -911,11 +872,9 @@
       </section>
     </main>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
     <script>
-      // Auto-hide flash messages after 5 seconds
       document.addEventListener("DOMContentLoaded", function () {
         const flashMessages = document.querySelectorAll(".alert");
         flashMessages.forEach((msg) => {
@@ -926,19 +885,16 @@
           }, 5000);
         });
       });
-      // Add this to your existing JavaScript
       document.addEventListener("DOMContentLoaded", function () {
         const flashMessages = document.querySelectorAll(".flash-message");
 
         flashMessages.forEach((message) => {
-          // Remove element after animation completes
           message.addEventListener("animationend", function (e) {
             if (e.animationName === "flashExit") {
               message.remove();
             }
           });
 
-          // Optional: Allow manual dismissal
           message.addEventListener("click", () => {
             message.style.animation = "flashExit 0.4s forwards";
           });

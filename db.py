@@ -2,9 +2,8 @@ import os
 import pymysql
 from pymysql.cursors import DictCursor
 
-# Load .env if available (optional)
 try:
-    from dotenv import load_dotenv  # type: ignore
+    from dotenv import load_dotenv  
     load_dotenv()
 except Exception:
     pass

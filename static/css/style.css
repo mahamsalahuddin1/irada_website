@@ -1,4 +1,3 @@
-/* Modern CSS Reset */
 :root {
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
@@ -27,7 +26,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Particles Background */
 #particles-js {
   position: fixed;
   width: 100%;
@@ -37,7 +35,6 @@ body {
   z-index: 0;
   background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
 }
-/* Navigation bar adjustments */
 .nav-links {
   display: flex;
   align-items: center;
@@ -363,7 +360,6 @@ body {
   padding: 1rem 0;
 }
 
-/* Update the logo and nav-link colors for scrolled state */
 .navbar.scrolled .logo {
   color: var(--dark);
 }
@@ -381,7 +377,7 @@ body {
 }
 
 .navbar.scrolled .nav-link::after {
-  background-color: var(--primary); /* Underline color when hovered */
+  background-color: var(--primary); 
 }
 
 .navbar.scrolled .nav-link.active {
@@ -389,7 +385,6 @@ body {
   font-weight: 600;
 }
 
-/* Keep the logout button visible */
 .navbar.scrolled .logout-btn {
   background-color: var(--primary);
   color: white;
@@ -399,7 +394,6 @@ body {
   background-color: var(--primary-dark);
 }
 
-/* Mobile menu adjustments */
 @media (max-width: 768px) {
   .nav-links {
     background-color: var(--dark);
@@ -440,7 +434,6 @@ body {
   display: inline;
 }
 
-/* Small screens: stack chunks so it never overflows */
 @media (max-width: 600px) {
   .logo {
     font-size: clamp(16px, 6vw, 24px);
@@ -498,7 +491,6 @@ body {
   display: none;
 }
 
-/* Hero Section */
 .hero {
   min-height: 100vh;
   display: flex;
@@ -552,7 +544,6 @@ body {
   max-width: 500px;
 }
 
-/* CTA Buttons */
 .cta-buttons {
   display: flex;
   gap: 1rem;
@@ -613,7 +604,6 @@ body {
   transform: translateY(-5px);
 }
 
-/* Hero Image */
 .hero-image {
   position: absolute;
   right: 0;
@@ -641,7 +631,6 @@ body {
   }
 }
 
-/* Mobile Navigation */
 .hamburger {
   display: none;
   flex-direction: column;
@@ -660,7 +649,6 @@ body {
   transition: all 0.3s ease;
 }
 
-/* Responsive Design */
 @media (max-width: 992px) {
   .hero-image {
     display: none;
@@ -680,7 +668,6 @@ body {
     justify-content: center;
   }
 }
-/* Responsive Adjustments */
 
 @media (max-width: 768px) {
   .nav-links {
@@ -724,7 +711,6 @@ body {
     font-size: 1.8rem;
   }
 }
-/* === Research Section Styling === */
 .research-section {
   padding: 80px 20px;
   background: rgba(
@@ -732,7 +718,7 @@ body {
     255,
     255,
     0.05
-  ); /* Soft translucent background for particles.js */
+  ); 
   color: #fff;
   font-family: "Segoe UI", sans-serif;
 }
@@ -788,7 +774,6 @@ body {
 .research-area.bordered {
   border: 1.5px solid #fff;
 }
-/* About Page Styles */
 .about-hero {
   min-height: 40vh;
   display: flex;
@@ -1006,7 +991,6 @@ body {
   padding: 10px 20px;
   height: fit-content;
 }
-/* Responsive Adjustments */
 @media (max-width: 768px) {
   .about-section {
     flex-direction: column;
@@ -1027,9 +1011,7 @@ body {
   }
 }
 
-/* === Collapse-on-overflow navbar (no visual change unless crowded) === */
 
-/* Keep logo and nav items on ONE line when space allows */
 .logo,
 .nav-links,
 .nav-link {
@@ -1040,18 +1022,15 @@ body {
   flex-wrap: nowrap;
 }
 
-/* Default: hamburger hidden (you already have this, but reiterate for clarity) */
 .navbar .hamburger {
   display: none;
 }
 
-/* When JS detects overflow it adds .is-collapsed to .navbar */
 .navbar.is-collapsed .hamburger {
   display: flex;
 }
 
-/* Drawer menu style (same look as your existing mobile menu), 
-   but triggered by .is-collapsed instead of only by width */
+
 .navbar.is-collapsed .nav-links {
   position: fixed;
   top: 0;
@@ -1068,12 +1047,10 @@ body {
   z-index: 1200;
 }
 
-/* Open state for drawer */
 .navbar.is-collapsed .nav-links.active {
   right: 0;
 }
 
-/* Ensure white text inside the dark drawer (wins over scrolled state) */
 .navbar.is-collapsed .nav-link {
   color: #fff;
 }
@@ -1085,7 +1062,6 @@ body {
   color: #fff;
 }
 
-/* Prevent body from scrolling when drawer is open */
 body.menu-open {
   overflow: hidden;
 }

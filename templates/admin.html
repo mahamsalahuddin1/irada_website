@@ -1,4 +1,3 @@
-<!-- admin.html -->
 <!DOCTYPE html>
 <html>
   <head>
@@ -6,7 +5,6 @@
     {% include "_csrf_head.html" %}
 
     <style>
-      /* Gallery Tab Specific Styles */
       #gallery table img {
         border-radius: 5px;
         transition: transform 0.3s ease;
@@ -26,7 +24,6 @@
         padding: 5px 10px;
         font-size: 0.9rem;
       }
-      /* Modal Styles */
       .modal {
         display: none;
         position: fixed;
@@ -156,17 +153,17 @@
         display: inline-block;
       }
       .status-pending {
-        color: #ffa500; /* Orange */
+        color: #ffa500; 
         font-weight: 600;
       }
 
       .status-approved {
-        color: #4caf50; /* Green */
+        color: #4caf50; 
         font-weight: 600;
       }
 
       .status-rejected {
-        color: #f44336; /* Red */
+        color: #f44336; 
         font-weight: 600;
       }
 
@@ -209,7 +206,6 @@
         margin: 0;
       }
 
-      /* Beautiful Centered Flash Messages */
       .flash-container {
         position: fixed;
         top: 0;
@@ -261,7 +257,6 @@
         font-weight: 500;
       }
 
-      /* Color Variants */
       .flash-success {
         background: rgba(46, 125, 50, 0.9);
         color: white;
@@ -286,7 +281,6 @@
         border-left: 4px solid #90caf9;
       }
 
-      /* Animations */
       @keyframes flashEnter {
         to {
           transform: translateY(0);
@@ -301,12 +295,10 @@
         }
       }
 
-      /* Auto-dismiss animation */
       .flash-message {
         animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
       }
       
-/* --- Admin header layout --- */
 .dashboard-header{
   display:flex; align-items:center; justify-content:space-between;
   gap:16px; padding:16px 24px; background:#fff;
@@ -316,7 +308,6 @@
 
 .admin-actions{ display:flex; align-items:center; gap:12px; }
 
-/* --- Buttons (scoped to the header) --- */
 .dashboard-header .btn-ghost,
 .dashboard-header .btn-danger{
   display:inline-flex; align-items:center; gap:8px;
@@ -328,7 +319,6 @@
 .dashboard-header .btn-ghost svg,
 .dashboard-header .btn-danger svg{ pointer-events:none }
 
-/* Neutral “Home” */
 .dashboard-header .btn-ghost{
   background:#fff; color:#111827; border:1px solid #e5e7eb;
 }
@@ -337,7 +327,6 @@
   box-shadow:0 6px 18px rgba(2,6,23,.06);
 }
 
-/* Accent “Logout” */
 .dashboard-header .btn-danger{
   background:#ef4444; color:#fff; border:1px solid #ef4444;
 }
@@ -356,7 +345,6 @@
 
   <div class="admin-actions">
     <a href="{{ url_for('landing') }}" class="btn-ghost">
-      <!-- home icon -->
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"
               stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
@@ -365,7 +353,6 @@
     </a>
 
     <a href="{{ url_for('logout') }}" class="btn-danger">
-      <!-- logout icon -->
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M15 17l5-5-5-5M20 12H9" stroke="currentColor" stroke-width="1.6"
               stroke-linecap="round" stroke-linejoin="round"/>
@@ -419,7 +406,6 @@
       </div>
       {% endif %} {% endwith %}
 
-      <!-- Users Tab -->
       <div class="tab-content active" id="users">
         <h3>Users</h3>
 
@@ -451,7 +437,6 @@
         </table>
       </div>
 
-      <!-- Update Password Modal -->
       <div class="modal" id="modal-update-password">
         <div class="modal-content">
           <span class="close-btn" onclick="closeModal('modal-update-password')"
@@ -459,7 +444,6 @@
           >
           <h3 id="up-title">Update Password</h3>
 
-          <!-- The action gets set dynamically when a row button is clicked -->
           <form id="form-update-password" method="POST">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
@@ -488,7 +472,6 @@
         </div>
       </div>
 
-      <!-- Project Proposals Tab -->
       <div class="tab-content" id="proposals">
         <h3>Project Proposals</h3>
         <table>
@@ -502,7 +485,6 @@
             <th>Actions</th>
           </tr>
           {% for proposal in proposals %}
-          <!-- In the table row -->
           <tr>
             <td>{{ proposal.id }}</td>
             <td>{{ proposal.name }}</td>
@@ -553,7 +535,6 @@
         <img src="{{ chart_url }}" alt="Proposals Chart" />
       </div>
 
-      <!-- Ongoing Projects Tab -->
       <div class="tab-content" id="ongoing">
         <a href="{{ url_for('add_ongoing_project') }}" class="add-project-btn"
           >Add Ongoing Project</a
@@ -608,7 +589,6 @@
         </table>
       </div>
 
-      <!-- Completed Projects Tab -->
       <div class="tab-content" id="completed">
         <a
           href="{{ url_for('upload_completed_project') }}"
@@ -691,7 +671,6 @@
         </table>
       </div>
 
-      <!-- Add this tab content section -->
 
       <div class="tab-content" id="resources">
         <h3>Resource Requests</h3>
@@ -760,7 +739,6 @@
         </table>
       </div>
 
-      <!-- Event Management Tab -->
       <div class="tab-content" id="events">
         <a href="{{ url_for('add_event') }}" class="add-project-btn"
           >Add New Event</a
@@ -818,7 +796,6 @@
         </table>
       </div>
 
-      <!-- Gallery Management Tab -->
       <div class="tab-content" id="gallery">
         <a href="#" class="add-project-btn" id="add-gallery-item-btn"
           >Add Gallery Item</a
@@ -871,7 +848,6 @@
         </table>
       </div>
 
-      <!-- Add Gallery Item Modal -->
       <div class="modal" id="add-gallery-modal">
         <div class="modal-content">
           <span class="close-btn" onclick="closeModal('add-gallery-modal')"
@@ -917,7 +893,7 @@
           response = prompt(
             "Please provide a reason for rejection or suggest alternative time:"
           );
-          if (response === null) return; // User cancelled
+          if (response === null) return; 
         }
 
         fetch(`/admin/process_resource_request/${requestId}`, {
@@ -942,31 +918,25 @@
             }
           })
           .catch((error) => {
-            // console.error("Error:", error);
             alert("Error processing request");
           });
       }
 
-      // Tab functionality
       const tabBtns = document.querySelectorAll(".tab-btn");
       const tabContents = document.querySelectorAll(".tab-content");
 
       tabBtns.forEach((btn) => {
         btn.addEventListener("click", () => {
-          // Remove active class from all buttons and contents
           tabBtns.forEach((b) => b.classList.remove("active"));
           tabContents.forEach((c) => c.classList.remove("active"));
 
-          // Add active class to clicked button
           btn.classList.add("active");
 
-          // Show corresponding content
           const tabId = btn.getAttribute("data-tab");
           document.getElementById(tabId).classList.add("active");
         });
       });
 
-      // Gallery Management
       document
         .getElementById("add-gallery-item-btn")
         .addEventListener("click", function () {
@@ -1002,7 +972,6 @@
               }
             })
             .catch((error) => {
-              // console.error("Error:", error);
               alert("Error submitting form");
             });
         });
@@ -1026,13 +995,11 @@
               }
             })
             .catch((error) => {
-              // console.error("Error:", error);
               alert("Error deleting item");
             });
         }
       }
 
-      // Auto-hide flash messages after 5 seconds
       document.addEventListener("DOMContentLoaded", function () {
         const flashMessages = document.querySelectorAll(".alert");
         flashMessages.forEach((msg) => {
@@ -1048,7 +1015,6 @@
         const flashMessages = document.querySelectorAll(".flash-message");
 
         flashMessages.forEach((message) => {
-          // Remove element after animation completes
           message.addEventListener("animationend", function (e) {
             if (e.animationName === "flashExit") {
               message.remove();
@@ -1062,7 +1028,7 @@
       });
       function openUpdatePassword(userId, username) {
         const form = document.getElementById("form-update-password");
-        form.action = `/admin/update_user_password/${userId}`; // <- your existing route
+        form.action = `/admin/update_user_password/${userId}`; 
         document.getElementById(
           "up-title"
         ).textContent = `Update Password — ${username}`;
@@ -1070,8 +1036,6 @@
           "block";
       }
 
-      // You already have closeModal(id); reuse it for this modal.
-      // Optional: close when clicking the overlay
       document
         .getElementById("modal-update-password")
         .addEventListener("click", (e) => {

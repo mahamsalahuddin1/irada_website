@@ -2,7 +2,6 @@ from typing import Any, Dict, List, Optional, Tuple
 import json
 from db import get_db_connection
 
-# ---------- Users ----------
 def create_user(username: str, email: str, password_hash: str) -> None:
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -26,7 +25,6 @@ def get_user_by_username(username: str) -> Optional[Dict[str, Any]]:
         cursor.close()
         conn.close()
 
-# UPDATED: add this in models.py if missing
 def update_user_password_hash(user_id: int, new_hash: str) -> None:
     conn = get_db_connection(); cur = conn.cursor()
     try:
@@ -35,33 +33,6 @@ def update_user_password_hash(user_id: int, new_hash: str) -> None:
     finally:
         cur.close(); conn.close()
 
-
-# ---------- Proposals ----------
-
-# def insert_project_proposal(values: Tuple) -> None:
-#     conn = get_db_connection()
-#     cursor = conn.cursor()
-#     try:
-#         cursor.execute(
-#             """
-#             INSERT INTO project_proposals 
-#             (name, email, project_title, project_brief, team_members, domain, timeline, 
-#              supervisor, faculty, programme, status, file_path, submission_date,
-#              start_date, duration, resources_required, needs_mentorship, user_id)
-#             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-#             """,
-#             values
-#         )
-#         conn.commit()
-#     finally:
-#         cursor.close()
-#         conn.close()
-
-
-# new
-# models.py
-from db import get_db_connection  # or however you import your connection
-# from pymysql.cursors import DictCursor  # if you need DictCursor
 
 def insert_project_proposal(values):
     """
@@ -192,7 +163,6 @@ def get_user_proposals_brief(user_id: int) -> List[Dict[str, Any]]:
         cursor.close()
         conn.close()
 
-# ---------- Completed Projects ----------
 def insert_completed_project(values: Tuple) -> None:
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -283,7 +253,6 @@ def get_completed_project_by_id(project_id: int) -> Optional[Dict[str, Any]]:
         cursor.close()
         conn.close()
 
-# ---------- Ongoing Projects ----------
 def insert_ongoing_project(values: Tuple) -> None:
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -370,7 +339,6 @@ def list_ongoing_id_title() -> List[Dict[str, Any]]:
         cursor.close()
         conn.close()
 
-# ---------- Resource Requests ----------
 def insert_resource_request(values: Tuple) -> None:
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -469,7 +437,6 @@ def all_resource_requests_detailed() -> List[Dict[str, Any]]:
         cursor.close()
         conn.close()
 
-# ---------- Events ----------
 def insert_event(values: Tuple) -> None:
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -605,7 +572,6 @@ def get_event_submissions_with_user(event_id: int) -> List[Dict[str, Any]]:
         conn.close()
 
 
-# ---------- Gallery ----------
 def insert_gallery_item(title: str, event_date: str, image_path: str) -> None:
     conn = get_db_connection()
     cursor = conn.cursor()

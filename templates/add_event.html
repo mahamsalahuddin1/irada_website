@@ -163,7 +163,6 @@
           >
         </div>
 
-        <!-- Custom Form Fields Section -->
         <div class="form-section">
           <h3>Custom Form Fields</h3>
           <p>
@@ -171,9 +170,7 @@
             event
           </p>
 
-          <div id="form-fields-container">
-            <!-- Initial field will be added by JavaScript -->
-          </div>
+          <div id="form-fields-container"></div>
 
           <button type="button" id="add-field-btn">+ Add Field</button>
         </div>
@@ -187,15 +184,12 @@
         const container = document.getElementById("form-fields-container");
         let fieldCount = 0;
 
-        // Add initial field
         addField();
 
-        // Add field button handler
         document
           .getElementById("add-field-btn")
           .addEventListener("click", addField);
 
-        // Function to add a new field group
         function addField() {
           fieldCount++;
           const fieldId = "field-" + fieldCount;
@@ -218,7 +212,6 @@
           container.insertAdjacentHTML("beforeend", fieldHtml);
         }
 
-        // Form validation
         document
           .getElementById("event-form")
           .addEventListener("submit", function (e) {
@@ -229,7 +222,6 @@
               f.value.trim().toLowerCase()
             );
 
-            // Check for duplicate field names
             if (new Set(names).size !== names.length) {
               e.preventDefault();
               alert(
@@ -238,7 +230,6 @@
               return;
             }
 
-            // Check for empty field names
             for (let field of fieldNames) {
               if (!field.value.trim()) {
                 e.preventDefault();

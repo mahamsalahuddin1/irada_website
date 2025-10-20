@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock %}</title>
-    <!-- Add your CSS links here -->
     <style>
         .flash-messages {
             position: fixed;
@@ -42,7 +41,6 @@
     </style>
 </head>
 <body>
-    <!-- Flash messages display -->
     <div class="flash-messages">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
@@ -55,9 +53,7 @@
 
     {% block content %}{% endblock %}
 
-    <!-- Add your JavaScript links here -->
     <script>
-        // Auto-remove flash messages after 5 seconds
         setTimeout(() => {
             const messages = document.querySelectorAll('.flash-message');
             messages.forEach(msg => msg.remove());

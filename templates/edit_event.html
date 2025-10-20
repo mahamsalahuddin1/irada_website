@@ -149,7 +149,6 @@
                 <textarea id="details" name="details" rows="10">{{ event.details }}</textarea>
             </div>
             
-            <!-- Custom Form Fields Section -->
             <div class="form-section">
                 <h3>Custom Form Fields</h3>
                 <p>Add fields that attendees need to fill when registering for this event</p>
@@ -207,26 +206,22 @@
                 container.insertAdjacentHTML('beforeend', fieldHtml);
             });
             
-            // Remove field handler (delegated event)
             container.addEventListener('click', function(e) {
                 if (e.target.classList.contains('remove-field')) {
                     e.target.closest('.field-row').remove();
                 }
             });
             
-            // Form validation
             document.getElementById('event-form').addEventListener('submit', function(e) {
                 const fieldNames = document.querySelectorAll('input[name="field_name[]"]');
                 const names = Array.from(fieldNames).map(f => f.value.trim().toLowerCase());
                 
-                // Check for duplicate field names
                 if (new Set(names).size !== names.length) {
                     e.preventDefault();
                     alert('Field names must be unique. Please use different names for each field.');
                     return;
                 }
                 
-                // Check for empty field names
                 for (let field of fieldNames) {
                     if (!field.value.trim()) {
                         e.preventDefault();
