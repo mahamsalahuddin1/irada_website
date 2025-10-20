@@ -1,830 +1,949 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>About | IRADA Innovation Center</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Montserrat:wght@800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Montserrat:wght@800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
     <style>
-	
-        /* Beautiful Centered Flash Messages */
-.flash-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-    z-index: 1000;
-    padding: 20px;
-}
+      /* Beautiful Centered Flash Messages */
+      .flash-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+        z-index: 1000;
+        padding: 20px;
+      }
 
-.flash-message {
-    max-width: 500px;
-    width: 100%;
-    padding: 20px 25px;
-    margin: 10px 0;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    display: flex;
-    align-items: center;
-    transform: translateY(20px);
-    opacity: 0;
-    animation: flashEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.1);
-}
-
-.flash-content {
-    display: flex;
-    align-items: center;
-    width: 100%;
-}
-
-.flash-icon {
-    width: 24px;
-    height: 24px;
-    margin-right: 15px;
-    flex-shrink: 0;
-}
-
-.flash-text {
-    font-size: 1rem;
-    line-height: 1.5;
-    font-weight: 500;
-}
-
-/* Color Variants */
-.flash-success {
-    background: rgba(46, 125, 50, 0.9);
-    color: white;
-    border-left: 4px solid #81C784;
-}
-
-.flash-error {
-    background: rgba(198, 40, 40, 0.9);
-    color: white;
-    border-left: 4px solid #EF9A9A;
-}
-
-.flash-warning {
-    background: rgba(237, 108, 2, 0.9);
-    color: white;
-    border-left: 4px solid #FFCC80;
-}
-
-.flash-info {
-    background: rgba(30, 136, 229, 0.9);
-    color: white;
-    border-left: 4px solid #90CAF9;
-}
-
-/* Animations */
-@keyframes flashEnter {
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-@keyframes flashExit {
-    to {
-        transform: translateY(-20px);
+      .flash-message {
+        max-width: 500px;
+        width: 100%;
+        padding: 20px 25px;
+        margin: 10px 0;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        transform: translateY(20px);
         opacity: 0;
-    }
-}
+        animation: flashEnter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)
+          forwards;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
 
-/* Auto-dismiss animation */
-.flash-message {
-    animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
-}   
-   
-        /* Enhanced About Page Styles */
-        .about-container {
-            position: relative;
-            z-index: 10;
-            padding: 80px 5%;
-            color: white;
-            max-width: 1400px;
-            margin: 0 auto;
-			
+      .flash-content {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+
+      .flash-icon {
+        width: 24px;
+        height: 24px;
+        margin-right: 15px;
+        flex-shrink: 0;
+      }
+
+      .flash-text {
+        font-size: 1rem;
+        line-height: 1.5;
+        font-weight: 500;
+      }
+
+      /* Color Variants */
+      .flash-success {
+        background: rgba(46, 125, 50, 0.9);
+        color: white;
+        border-left: 4px solid #81c784;
+      }
+
+      .flash-error {
+        background: rgba(198, 40, 40, 0.9);
+        color: white;
+        border-left: 4px solid #ef9a9a;
+      }
+
+      .flash-warning {
+        background: rgba(237, 108, 2, 0.9);
+        color: white;
+        border-left: 4px solid #ffcc80;
+      }
+
+      .flash-info {
+        background: rgba(30, 136, 229, 0.9);
+        color: white;
+        border-left: 4px solid #90caf9;
+      }
+
+      /* Animations */
+      @keyframes flashEnter {
+        to {
+          transform: translateY(0);
+          opacity: 1;
         }
+      }
 
-        /* Split About Section */
-        
-.about-split {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 50px;
-    margin-bottom: 80px;
-    flex-wrap: wrap;
-}
-
-.about-text {
-    flex: 1 1 500px;
-    font-size: 1.1rem;
-    line-height: 1.8;
-    color: rgba(255, 255, 255, 0.9);
-
-    max-width: 600px;
-
-
-}
-
-.about-text h2.section-title {
-    font-size: 2.5rem;
-    margin-bottom: 20px;
-    color: #ffa500;
-    border-bottom: 3px solid #ffa500;
-    display: inline-block;
-}
-
-.about-image {
-    flex: 1 1 350px;
-    max-width: 500px;
-}
-
-.about-image img {
-    width: 100%;
-    max-width: 380px;
-    height: auto;
-    object-fit: contain;
-    display: block;
-    margin: 0 auto;
-}
-
-
-        .about-split h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            margin-bottom: 30px;
-            background: linear-gradient(to right, white, #a5b4fc);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+      @keyframes flashExit {
+        to {
+          transform: translateY(-20px);
+          opacity: 0;
         }
+      }
 
-        .about-split p {
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.8;
-            margin-bottom: 25px;
-        }
+      /* Auto-dismiss animation */
+      .flash-message {
+        animation: flashEnter 0.4s forwards, flashExit 0.4s forwards 4s;
+      }
 
-        .purpose-statement {
-    font-size: 1.4rem;
-    color: #fbbf24;
-    margin-top: 30px;
-    font-style: italic;
-    padding-left: 0;
-}
+      /* Enhanced About Page Styles */
+      .about-container {
+        position: relative;
+        z-index: 10;
+        padding: 80px 5%;
+        color: white;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
 
+      .about-heading {
+        text-align: center;
+        padding-top: 30px;
+      }
 
-        .purpose-statement::before {
+      /* Split About Section */
+
+      .about-split {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 50px;
+        margin-bottom: 80px;
+        flex-wrap: wrap;
+      }
+
+      .about-text {
+        flex: 1 1 500px;
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: rgba(255, 255, 255, 0.9);
+
+        max-width: 600px;
+      }
+
+      .about-text h2.section-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+        color: #ffa500;
+        border-bottom: 3px solid #ffa500;
+        display: inline-block;
+      }
+
+      .about-image {
+        flex: 1 1 350px;
+        max-width: 500px;
+      }
+
+      .about-image img {
+        width: 100%;
+        max-width: 380px;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .about-split h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 30px;
+        background: linear-gradient(to right, white, #a5b4fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .about-split p {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.8;
+        margin-bottom: 25px;
+      }
+
+      .purpose-statement {
+        font-size: 1.4rem;
+        color: #fbbf24;
+        margin-top: 30px;
+        font-style: italic;
+        padding-left: 0;
+      }
+
+      /* .purpose-statement::before {
             content: '"';
             position: absolute;
             left: 0;
             top: -15px;
             font-size: 3rem;
             color: rgba(245, 158, 11, 0.5);
-        }
+        } */
 
-                /* Mission & Vision Section */
+      /* Mission & Vision Section */
+      .mission-vision {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 40px;
+        margin-bottom: 80px;
+      }
+
+      .mission-card,
+      .vision-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 40px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .mission-card:hover,
+      .vision-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      }
+
+      .mission-card::before,
+      .vision-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+      }
+
+      .mission-card::before {
+        background: linear-gradient(90deg, #3b82f6, #6366f1);
+      }
+
+      .vision-card::before {
+        background: linear-gradient(90deg, #f59e0b, #f97316);
+      }
+
+      .mission-card h2,
+      .vision-card h2 {
+        font-size: 2rem;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .mission-card h2 svg,
+      .vision-card h2 svg {
+        width: 32px;
+        height: 32px;
+      }
+
+      .mission-card p,
+      .vision-card p {
+        color: rgba(255, 255, 255, 0.9);
+        line-height: 1.8;
+        font-size: 1 rem;
+      }
+
+      /* Focus Areas Section */
+      @keyframes floatAnimation {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-15px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+      .focus-section {
+        margin-bottom: 100px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        align-items: center;
+      }
+
+      /* Focus Image Section */
+      .focus-image {
+        border-radius: 0;
+        overflow: visible;
+        box-shadow: none;
+        height: auto;
+        display: flex;
+        align-items: center;
+        background: transparent;
+      }
+
+      .focus-image img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        animation: floatAnimation 3s ease-in-out infinite 0.5s; /* Slight delay */
+        will-change: transform;
+      }
+      /* Add animation to the about-image as well */
+      .about-image {
+        flex: 1 1 350px;
+        max-width: 500px;
+        overflow: visible; /* Remove any clipping */
+      }
+
+      .about-image img {
+        width: 100%;
+        max-width: 380px;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+        /* Apply animation */
+        animation: floatAnimation 3s ease-in-out infinite;
+        will-change: transform; /* Optimize animation performance */
+      }
+
+      /* Remove the hover effect if you want continuous animation */
+
+      .focus-areas {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .focus-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s ease;
+      }
+
+      .focus-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      }
+
+      .focus-card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .focus-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        font-weight: 700;
+        margin-right: 15px;
+        font-size: 1.2rem;
+      }
+
+      .focus-card h3 {
+        font-size: 1.4rem;
+        background: linear-gradient(to right, white, #a5b4fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .focus-card p {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.7;
+        padding-left: 55px;
+      }
+
+      .section-title {
+        font-size: 2.5rem;
+        text-align: center;
+        margin-bottom: 60px;
+        position: relative;
+        grid-column: 1 / -1;
+      }
+
+      .section-title::after {
+        content: "";
+        position: absolute;
+        bottom: -15px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: var(--secondary);
+        border-radius: 2px;
+      }
+
+      /* Team Section */
+      .team-section {
+        margin-top: 80px;
+      }
+
+      .team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 30px;
+      }
+
+      .team-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 30px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .team-card:hover {
+        transform: translateY(-10px) scale(1.03);
+        background: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      }
+
+      .team-photo {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin: 0 auto 20px;
+        border: 3px solid var(--secondary);
+        transition: all 0.3s ease;
+      }
+
+      .team-card:hover .team-photo {
+        transform: scale(1.1);
+        box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+      }
+
+      .team-photo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .team-card h3 {
+        font-size: 1.4rem;
+        margin-bottom: 5px;
+        color: white;
+      }
+
+      .team-position {
+        color: var(--secondary);
+        font-weight: 600;
+        margin-bottom: 15px;
+        font-size: 0.9rem;
+      }
+
+      .team-bio {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        font-size: 0.95rem;
+      }
+
+      /* Responsive Adjustments */
+      @media (max-width: 992px) {
         .mission-vision {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 40px;
-            margin-bottom: 80px;
+          grid-template-columns: 1fr;
         }
 
-        .mission-card, .vision-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-            overflow: hidden;
+        .about-intro h1 {
+          font-size: 2.8rem;
         }
 
-        .mission-card:hover, .vision-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .mission-card::before, .vision-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-        }
-
-        .mission-card::before {
-            background: linear-gradient(90deg, #3b82f6, #6366f1);
-        }
-
-        .vision-card::before {
-            background: linear-gradient(90deg, #f59e0b, #f97316);
-        }
-
-        .mission-card h2, .vision-card h2 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .mission-card h2 svg, .vision-card h2 svg {
-            width: 32px;
-            height: 32px;
-        }
-
-        .mission-card p, .vision-card p {
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.8;
-            font-size: 1 rem;
-        }
-
-        /* Focus Areas Section */
-		@keyframes floatAnimation {
-        0% { transform: translateY(0px); }
-        50% { transform: translateY(-15px); }
-        100% { transform: translateY(0px); }
-    }
         .focus-section {
-            margin-bottom: 100px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            align-items: center;
+          grid-template-columns: 1fr;
         }
 
-            /* Focus Image Section */
-.focus-image {
-    border-radius: 0;
-    overflow: visible;
-    box-shadow: none;
-    height: auto;
-    display: flex;
-    align-items: center;
-    background: transparent;
-}
+        .focus-image {
+          max-height: 400px;
+          order: -1;
+        }
+      }
 
-.focus-image img {
-    width: 100%;
-    height: auto;
-    object-fit: contain;
-    animation: floatAnimation 3s ease-in-out infinite 0.5s; /* Slight delay */
-    will-change: transform;
-}
-/* Add animation to the about-image as well */
-    .about-image {
-    flex: 1 1 350px;
-    max-width: 500px;
-    overflow: visible; /* Remove any clipping */
-}
-
-.about-image img {
-    width: 100%;
-    max-width: 380px;
-    height: auto;
-    object-fit: contain;
-    display: block;
-    margin: 0 auto;
-    /* Apply animation */
-    animation: floatAnimation 3s ease-in-out infinite;
-    will-change: transform; /* Optimize animation performance */
-}
-
-	/* Remove the hover effect if you want continuous animation */
-    
-
-        .focus-areas {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+      /* Responsive Adjustments */
+      @media (max-width: 1200px) {
+        .about-split {
+          grid-template-columns: 1fr;
         }
 
-        .focus-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.4s ease;
+        .about-image {
+          order: -1;
+          max-height: 500px;
+          min-height: auto;
         }
 
-        .focus-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        .about-text {
+          padding-right: 0;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .about-split {
+          flex-direction: column;
+          align-items: center;
         }
 
-        .focus-card-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
+        .about-text {
+          text-align: center;
         }
 
-        .focus-number {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            background: var(--primary);
-            color: white;
-            border-radius: 50%;
-            font-weight: 700;
-            margin-right: 15px;
-            font-size: 1.2rem;
+        .about-container {
+          padding: 60px 20px;
         }
 
-        .focus-card h3 {
-            font-size: 1.4rem;
-            background: linear-gradient(to right, white, #a5b4fc);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .about-split h1 {
+          font-size: 2.5rem;
         }
 
-        .focus-card p {
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.7;
-            padding-left: 55px;
+        .purpose-statement {
+          font-size: 1.3rem;
+          padding-left: 30px;
+        }
+
+        .mission-card,
+        .vision-card {
+          padding: 30px;
         }
 
         .section-title {
-            font-size: 2.5rem;
-            text-align: center;
-            margin-bottom: 60px;
-            position: relative;
-            grid-column: 1 / -1;
+          font-size: 2rem;
+          text-align: center !important;
+          width: 100%;
+          padding: 0 15px;
+          box-sizing: border-box;
+        }
+        .about-split h1,
+        .section-title {
+          margin-left: auto;
+          margin-right: auto;
         }
 
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background: var(--secondary);
-            border-radius: 2px;
+        .spacer {
+          height: 40px;
         }
 
-        /* Team Section */
-        .team-section {
-            margin-top: 80px;
+        /* New additions to fix image overlapping */
+        .about-image,
+        .focus-image {
+          margin: 30px auto;
+          max-width: 300px;
+          width: 100%;
         }
 
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
+        .focus-section {
+          display: flex;
+          flex-direction: column;
+          gap: 30px;
         }
 
-        .team-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 30px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        .focus-image {
+          order: -1;
+          margin-bottom: 20px;
+          text-align: center;
         }
 
-        .team-card:hover {
-            transform: translateY(-10px) scale(1.03);
-            background: rgba(255, 255, 255, 0.1);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+        .about-image img,
+        .focus-image img {
+          max-width: 100%;
+          height: auto;
+          display: block;
+          margin: 0 auto;
         }
 
-        .team-photo {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin: 0 auto 20px;
-            border: 3px solid var(--secondary);
-            transition: all 0.3s ease;
+        .focus-card p {
+          padding-left: 0;
+          margin-top: 10px;
         }
 
-        .team-card:hover .team-photo {
-            transform: scale(1.1);
-            box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+        .focus-card-header {
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
         }
 
-        .team-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .focus-number {
+          margin-bottom: 10px;
+          margin-right: 0;
+        }
+      }
+      @media (max-width: 480px) {
+        .about-image,
+        .focus-image {
+          max-width: 250px;
         }
 
-        .team-card h3 {
-            font-size: 1.4rem;
-            margin-bottom: 5px;
-            color: white;
+        .focus-card p {
+          padding-left: 0;
+          margin-top: 10px;
         }
 
-        .team-position {
-            color: var(--secondary);
-            font-weight: 600;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
+        .focus-card-header {
+          flex-direction: column;
+          align-items: center;
         }
 
-        .team-bio {
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.6;
-            font-size: 0.95rem;
+        .focus-number {
+          margin-bottom: 10px;
         }
-
-        /* Responsive Adjustments */
-        @media (max-width: 992px) {
-            .mission-vision {
-                grid-template-columns: 1fr;
-            }
-            
-            .about-intro h1 {
-                font-size: 2.8rem;
-            }
-
-            .focus-section {
-                grid-template-columns: 1fr;
-            }
-
-            .focus-image {
-                max-height: 400px;
-                order: -1;
-            }
-        }
-
-       
-
-
-        /* Responsive Adjustments */
-        @media (max-width: 1200px) {
-            .about-split {
-                grid-template-columns: 1fr;
-            }
-            
-            .about-image {
-                order: -1;
-                max-height: 500px;
-                min-height: auto;
-            }
-            
-            .about-text {
-                padding-right: 0;
-            }
-        }
-
-        @media (max-width: 768px) {
-    .about-split {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .about-text {
-        text-align: center;
-    }
-    
-    .about-container {
-        padding: 60px 20px;
-    }
-    
-    .about-split h1 {
-        font-size: 2.5rem;
-    }
-    
-    .purpose-statement {
-        font-size: 1.3rem;
-        padding-left: 30px;
-    }
-    
-    .mission-card, .vision-card {
-        padding: 30px;
-    }
-    
-    .section-title {
-        font-size: 2rem;
-		text-align: center !important;
-        width: 100%;
-        padding: 0 15px;
-        box-sizing: border-box;
-    }
-	.about-split h1,
-    .section-title {
-        margin-left: auto;
-        margin-right: auto;
-    }
-    
-    .spacer {
-        height: 40px;
-    }
-    
-    /* New additions to fix image overlapping */
-    .about-image, .focus-image {
-        margin: 30px auto;
-        max-width: 300px;
-        width: 100%;
-    }
-    
-    .focus-section {
-        display: flex;
-        flex-direction: column;
-        gap: 30px;
-    }
-    
-    .focus-image {
-        order: -1;
-        margin-bottom: 20px;
-        text-align: center;
-    }
-    
-    .about-image img, .focus-image img {
-        max-width: 100%;
-        height: auto;
-        display: block;
-        margin: 0 auto;
-    }
-    
-    .focus-card p {
-        padding-left: 0;
-        margin-top: 10px;
-    }
-    
-    .focus-card-header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-    
-    .focus-number {
-        margin-bottom: 10px;
-        margin-right: 0;
-    }
-}
-		@media (max-width: 480px) {
-			.about-image, .focus-image {
-				max-width: 250px;
-			}
-		
-			.focus-card p {
-				padding-left: 0;
-				margin-top: 10px;
-			}
-			
-			.focus-card-header {
-				flex-direction: column;
-				align-items: center;
-			}
-			
-			.focus-number {
-				margin-bottom: 10px;
-			}
-}
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Animated Background Particles -->
     <div id="particles-js"></div>
-    
+
     <!-- Navigation -->
     {% include "_navbar.html" %}
 
     <!-- Main Content -->
     <main class="about-container">
-	<!-- Flash Messages -->
-<!-- Flash Messages - Centered Beautiful Design -->
-		{% with messages = get_flashed_messages(with_categories=true) %}
-			{% if messages %}
-				<div class="flash-container">
-					{% for category, message in messages %}
-						<div class="flash-message flash-{{ category }}">
-							<div class="flash-content">
-								<svg class="flash-icon" viewBox="0 0 24 24">
-									{% if category == 'success' %}
-										<path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"/>
-									{% elif category == 'error' %}
-										<path fill="currentColor" d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>
-									{% else %}
-										<path fill="currentColor" d="M13,13H11V7H13M13,17H11V15H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/>
-									{% endif %}
-								</svg>
-								<span class="flash-text">{{ message }}</span>
-							</div>
-						</div>
-					{% endfor %}
-				</div>
-			{% endif %}
-		{% endwith %}
-		
-	<h2 class="section-title animate__animated animate__fadeIn">About IRADA</h2>
-	<section class="about-split animate__animated animate__fadeIn">
-            <div class="about-text">
-                
-				
-                <p>The Centre for Innovation in Robotics, Artificial Intelligence, Data Science, and Aviation (IRADA) is a multidisciplinary hub driving research, innovation, and real-world impact under the Faculty of Mathematics and Data Science at Emirates Aviation University. IRADA serves as a catalyst for academic and industry collaboration, bringing together students, faculty, and experts to solve pressing challenges at the intersection of technology and aviation.</p>
-                
-                <p>With a mission to foster advanced skills, ethical research, and industry-aligned solutions, IRADA provides state-of-the-art facilities, hands-on training, and access to emerging technologies in AI, robotics, and data science. The center supports a vibrant ecosystem of innovation through cross-disciplinary projects, professional workshops, and partnerships that transform knowledge into practical, future-ready applications.</p>
-                
-                <div class="purpose-statement animate__animated animate__fadeIn animate__delay-1s">
-                    Where cutting-edge technology meets aviation innovation to shape the future of flight
-                </div>
-            </div>
-            
-            <div class="about-image">
-                <img src="{{ url_for('static', filename='images/pepper4.png') }}" alt="IRADA Innovation Hub">
-            </div>
-        </section>
-		
-		
-
-
-
-
-        <!-- Mission & Vision Section -->
-        <section class="mission-vision">
-            <article class="mission-card animate__animated animate__fadeInLeft">
-                <h2>
-                    <svg viewBox="0 0 24 24">
-                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-                    </svg>
-                    Our Mission
-                </h2>
-                <p>To empower interdisciplinary collaboration by providing state-of-the-art resources, expert mentorship, and a dynamic platform where students and researchers can develop transformative solutions for the aviation industry. We commit to nurturing talent, accelerating innovation, and delivering practical technologies that address real-world aviation challenges.</p>
-            </article>
-            
-            <article class="vision-card animate__animated animate__fadeInRight">
-                <h2>
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 2L3 12l9 10 9-10-9-10zm0 18L5 12l7-7 7 7-7 7z"/>
-                        <path d="M12 6l-4 4 4 4 4-4-4-4zm0 6l-2-2-2 2 2 2 2-2z"/>
-                    </svg>
-                    Our Vision
-                </h2>
-                <p>To establish a world-class research hub that bridges the gap between academic theory and practical aviation applications, fostering an ecosystem where groundbreaking ideas in AI and robotics transform the future of flight. We envision a center that becomes the global benchmark for aviation innovation by 2030.</p>
-            </article>
-        </section>
-
-        <!-- Focus Areas Section -->
-        <section class="focus-section">
-            <h2 class="section-title animate__animated animate__fadeIn">Our Focus Areas</h2>
-            
-            <div class="focus-image animate__animated animate__fadeInLeft">
-                <img src="{{ url_for('static', filename='images/pepper3.png') }}" alt="IRADA Focus Areas">
-				
-            </div>
-            
-            <div class="focus-areas">
-                <article class="focus-card animate__animated animate__fadeInUp">
-                    <div class="focus-card-header">
-                        <span class="focus-number">01</span>
-                        <h3>AI & Machine Learning</h3>
-                    </div>
-                    <p>Developing intelligent systems that can implement multi-purpose projects across aviation applications, from predictive maintenance to autonomous flight systems.</p>
-                </article>
-                
-                <article class="focus-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
-                    <div class="focus-card-header">
-                        <span class="focus-number">02</span>
-                        <h3>Robotics & Automation</h3>
-                    </div>
-                    <p>Building autonomous robotic systems for aviation maintenance, inspection, and operations with unprecedented precision and efficiency.</p>
-                </article>
-                
-                <article class="focus-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
-                    <div class="focus-card-header">
-                        <span class="focus-number">03</span>
-                        <h3>Data Science & Analytics</h3>
-                    </div>
-                    <p>Extracting actionable insights from vast aviation datasets to optimize operations, enhance safety protocols, and improve decision-making processes.</p>
-                </article>
-                
-                <article class="focus-card animate__animated animate__fadeInUp" style="animation-delay: 0.6s">
-                    <div class="focus-card-header">
-                        <span class="focus-number">04</span>
-                        <h3>Aviation Innovation</h3>
-                    </div>
-                    <p>Pioneering next-generation aviation technologies including sustainable propulsion, advanced materials, and revolutionary air traffic solutions.</p>
-                </article>
-            </div>
-        </section>
-
-        <!-- Team Section -->
-        <section class="team-section">
-            
-            
-            <h2 class="section-title animate__animated animate__fadeIn">Our Team</h2>
-            <div class="team-grid">
-    <!-- 1) Director -->
-    <article class="team-card animate__animated animate__fadeInUp">
-        <div class="team-photo">
-            <img src="{{ url_for('static', filename='images/team/director.png') }}" alt="Dr. Hannah Al Ali">
+      <!-- Flash Messages -->
+      <!-- Flash Messages - Centered Beautiful Design -->
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="flash-container">
+        {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+          <div class="flash-content">
+            <svg class="flash-icon" viewBox="0 0 24 24">
+              {% if category == 'success' %}
+              <path
+                fill="currentColor"
+                d="M12 2C6.5 2 2 6.5 2 12S6.5 22 12 22 22 17.5 22 12 17.5 2 12 2M10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z"
+              />
+              {% elif category == 'error' %}
+              <path
+                fill="currentColor"
+                d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"
+              />
+              {% else %}
+              <path
+                fill="currentColor"
+                d="M13,13H11V7H13M13,17H11V15H13M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"
+              />
+              {% endif %}
+            </svg>
+            <span class="flash-text">{{ message }}</span>
+          </div>
         </div>
-        <h3>Prof. Hannah Al Ali</h3>
-        <p class="team-position">Director</p>
-        <p class="team-bio">
-Associate Professor and Dean at EAU, Dr. Al Ali applies mathematical modelling and data science to solve aviation challenges and is an advocate for education through her academic leadership and board memberships at regional forums.        </p>
-    </article>
+        {% endfor %}
+      </div>
+      {% endif %} {% endwith %}
 
-    <!-- 2) NEW: Dr. Mostafa Kamil -->
-    <article class="team-card animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
-        <div class="team-photo">
-  <img
-    src="{{ url_for('static', filename='images/team/drMostafa.png') }}"
-    alt="Dr. Mostafa Kamil"
-  >
-</div>
+      <div class="about-heading">
+        <h2 class="section-title animate__animated animate__fadeIn">
+          About IRADA
+        </h2>
+      </div>
+      <section class="about-split animate__animated animate__fadeIn">
+        <div class="about-text">
+          <p>
+            The Centre for Innovation in Robotics, Artificial Intelligence, Data
+            Science, and Aviation (IRADA) is a multidisciplinary hub driving
+            research, innovation, and real-world impact under the Faculty of
+            Mathematics and Data Science at Emirates Aviation University. IRADA
+            serves as a catalyst for academic and industry collaboration,
+            bringing together students, faculty, and experts to solve pressing
+            challenges at the intersection of technology and aviation.
+          </p>
 
-        <h3>Dr. Mostafa Kamil</h3>
-        <p class="team-position">Faculty Advisor</p>
-        <p class="team-bio">
-            Assistant Professor and Programme Coordinator of Software Engineering at EAU’s Faculty of Mathematics and Data Science, Dr. Mostafa Kamil works across communications systems, IoT, artificial intelligence and data science and contributes to key academic committees.
-        </p>
-    </article>
+          <p>
+            With a mission to foster advanced skills, ethical research, and
+            industry-aligned solutions, IRADA provides state-of-the-art
+            facilities, hands-on training, and access to emerging technologies
+            in AI, robotics, and data science. The center supports a vibrant
+            ecosystem of innovation through cross-disciplinary projects,
+            professional workshops, and partnerships that transform knowledge
+            into practical, future-ready applications.
+          </p>
 
-    <!-- 3) Program Manager (shifted from 0.2s to 0.4s) -->
-    <article class="team-card animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
-        <div class="team-photo">
-            <img src="{{ url_for('static', filename='images/team/manager.jpg') }}" alt="Dr. Deepudev Sahadevan">
+          <div
+            class="purpose-statement animate__animated animate__fadeIn animate__delay-1s"
+          >
+            Where cutting-edge technology meets aviation innovation to shape the
+            future of flight
+          </div>
         </div>
-        <h3>Dr. Deepudev Sahadevan</h3>
-        <p class="team-position">Program Manager</p>
-        <p class="team-bio">
-            An aviation-focused researcher and former Air Traffic Controller, Dr. Deepudev specializes in machine learning applications for air traffic management, with a decade of industry and ICAO advisory experience shaping policy and innovation in regional aviation.
-        </p>
-    </article>
 
-    <!-- 4) Lab Assistant (shifted from 0.4s to 0.6s) -->
-    <article class="team-card animate__animated animate__fadeInUp" style="animation-delay: 0.6s">
-        <div class="team-photo">
-            <img src="{{ url_for('static', filename='images/team/maham.jpeg') }}" alt="Maham Salahuddin">
+        <div class="about-image">
+          <img
+            src="{{ url_for('static', filename='images/pepper4.png') }}"
+            alt="IRADA Innovation Hub"
+          />
         </div>
-        <h3>Maham Salahuddin</h3>
-        <p class="team-position">Lab Assistant</p>
-        <p class="team-bio">
-            A passionate data science researcher and software engineer, Maham focuses on applying analytics and predictive modeling to drive innovation in aviation and sustainability through collaborative projects, research leadership and technology-driven problem solving across academic initiatives.
-        </p>
-    </article>
-</div>
+      </section>
 
-        </section>
-    
+      <!-- Mission & Vision Section -->
+      <section class="mission-vision">
+        <article class="mission-card animate__animated animate__fadeInLeft">
+          <h2>
+            <svg viewBox="0 0 24 24">
+              <path
+                d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"
+              />
+            </svg>
+            Our Mission
+          </h2>
+          <p>
+            To empower interdisciplinary collaboration by providing
+            state-of-the-art resources, expert mentorship, and a dynamic
+            platform where students and researchers can develop transformative
+            solutions for the aviation industry. We commit to nurturing talent,
+            accelerating innovation, and delivering practical technologies that
+            address real-world aviation challenges.
+          </p>
+        </article>
+
+        <article class="vision-card animate__animated animate__fadeInRight">
+          <h2>
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2L3 12l9 10 9-10-9-10zm0 18L5 12l7-7 7 7-7 7z" />
+              <path d="M12 6l-4 4 4 4 4-4-4-4zm0 6l-2-2-2 2 2 2 2-2z" />
+            </svg>
+            Our Vision
+          </h2>
+          <p>
+            To establish a world-class research hub that bridges the gap between
+            academic theory and practical aviation applications, fostering an
+            ecosystem where groundbreaking ideas in AI and robotics transform
+            the future of flight. We envision a center that becomes the global
+            benchmark for aviation innovation by 2030.
+          </p>
+        </article>
+      </section>
+
+      <!-- Focus Areas Section -->
+      <section class="focus-section">
+        <h2 class="section-title animate__animated animate__fadeIn">
+          Our Focus Areas
+        </h2>
+
+        <div class="focus-image animate__animated animate__fadeInLeft">
+          <img
+            src="{{ url_for('static', filename='images/pepper3.png') }}"
+            alt="IRADA Focus Areas"
+          />
+        </div>
+
+        <div class="focus-areas">
+          <article class="focus-card animate__animated animate__fadeInUp">
+            <div class="focus-card-header">
+              <span class="focus-number">01</span>
+              <h3>AI & Machine Learning</h3>
+            </div>
+            <p>
+              Developing intelligent systems that can implement multi-purpose
+              projects across aviation applications, from predictive maintenance
+              to autonomous flight systems.
+            </p>
+          </article>
+
+          <article
+            class="focus-card animate__animated animate__fadeInUp"
+            style="animation-delay: 0.2s"
+          >
+            <div class="focus-card-header">
+              <span class="focus-number">02</span>
+              <h3>Robotics & Automation</h3>
+            </div>
+            <p>
+              Building autonomous robotic systems for aviation maintenance,
+              inspection, and operations with unprecedented precision and
+              efficiency.
+            </p>
+          </article>
+
+          <article
+            class="focus-card animate__animated animate__fadeInUp"
+            style="animation-delay: 0.4s"
+          >
+            <div class="focus-card-header">
+              <span class="focus-number">03</span>
+              <h3>Data Science & Analytics</h3>
+            </div>
+            <p>
+              Extracting actionable insights from vast aviation datasets to
+              optimize operations, enhance safety protocols, and improve
+              decision-making processes.
+            </p>
+          </article>
+
+          <article
+            class="focus-card animate__animated animate__fadeInUp"
+            style="animation-delay: 0.6s"
+          >
+            <div class="focus-card-header">
+              <span class="focus-number">04</span>
+              <h3>Aviation Innovation</h3>
+            </div>
+            <p>
+              Pioneering next-generation aviation technologies including
+              sustainable propulsion, advanced materials, and revolutionary air
+              traffic solutions.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Team Section -->
+      <section class="team-section">
+        <h2 class="section-title animate__animated animate__fadeIn">
+          Our Team
+        </h2>
+        <div class="team-grid">
+          <!-- 1) Director -->
+          <article class="team-card animate__animated animate__fadeInUp">
+            <div class="team-photo">
+              <img
+                src="{{ url_for('static', filename='images/team/director.png') }}"
+                alt="Dr. Hannah Al Ali"
+              />
+            </div>
+            <h3>Prof. Hannah Al Ali</h3>
+            <p class="team-position">Director</p>
+            <p class="team-bio">
+              Associate Professor and Dean at EAU, Dr. Al Ali applies
+              mathematical modelling and data science to solve aviation
+              challenges and is an advocate for education through her academic
+              leadership and board memberships at regional forums.
+            </p>
+          </article>
+
+          <!-- 2) NEW: Dr. Mostafa Kamil -->
+          <article
+            class="team-card animate__animated animate__fadeInUp"
+            style="animation-delay: 0.2s"
+          >
+            <div class="team-photo">
+              <img
+                src="{{ url_for('static', filename='images/team/drMostafa.png') }}"
+                alt="Dr. Mostafa Kamil"
+              />
+            </div>
+
+            <h3>Dr. Mostafa Kamil</h3>
+            <p class="team-position">Faculty Advisor</p>
+            <p class="team-bio">
+              Assistant Professor and Programme Coordinator of Software
+              Engineering at EAU’s Faculty of Mathematics and Data Science, Dr.
+              Mostafa Kamil works across communications systems, IoT, artificial
+              intelligence and data science and contributes to key academic
+              committees.
+            </p>
+          </article>
+
+          <!-- 3) Program Manager (shifted from 0.2s to 0.4s) -->
+          <article
+            class="team-card animate__animated animate__fadeInUp"
+            style="animation-delay: 0.4s"
+          >
+            <div class="team-photo">
+              <img
+                src="{{ url_for('static', filename='images/team/manager.jpg') }}"
+                alt="Dr. Deepudev Sahadevan"
+              />
+            </div>
+            <h3>Dr. Deepudev Sahadevan</h3>
+            <p class="team-position">Program Manager</p>
+            <p class="team-bio">
+              An aviation-focused researcher and former Air Traffic Controller,
+              Dr. Deepudev specializes in machine learning applications for air
+              traffic management, with a decade of industry and ICAO advisory
+              experience shaping policy and innovation in regional aviation.
+            </p>
+          </article>
+
+          <!-- 4) Lab Assistant (shifted from 0.4s to 0.6s) -->
+          <article
+            class="team-card animate__animated animate__fadeInUp"
+            style="animation-delay: 0.6s"
+          >
+            <div class="team-photo">
+              <img
+                src="{{ url_for('static', filename='images/team/maham.jpeg') }}"
+                alt="Maham Salahuddin"
+              />
+            </div>
+            <h3>Maham Salahuddin</h3>
+            <p class="team-position">Lab Assistant</p>
+            <p class="team-bio">
+              A passionate data science researcher and software engineer, Maham
+              focuses on applying analytics and predictive modeling to drive
+              innovation in aviation and sustainability through collaborative
+              projects, research leadership and technology-driven problem
+              solving across academic initiatives.
+            </p>
+          </article>
+        </div>
+      </section>
     </main>
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-	<script>
-         
-		// Auto-hide flash messages after 5 seconds
-		document.addEventListener('DOMContentLoaded', function() {
-		  const flashMessages = document.querySelectorAll('.alert');
-		  flashMessages.forEach(msg => {
-			setTimeout(() => {
-			  msg.style.transition = 'opacity 1s';
-			  msg.style.opacity = '0';
-			  setTimeout(() => msg.remove(), 1000);
-			}, 5000);
-		  });
-		});
-		// Add this to your existing JavaScript
-		document.addEventListener('DOMContentLoaded', function() {
-			const flashMessages = document.querySelectorAll('.flash-message');
-			
-			flashMessages.forEach(message => {
-				// Remove element after animation completes
-				message.addEventListener('animationend', function(e) {
-					if (e.animationName === 'flashExit') {
-						message.remove();
-					}
-				});
-				
-				// Optional: Allow manual dismissal
-				message.addEventListener('click', () => {
-					message.style.animation = 'flashExit 0.4s forwards';
-				});
-			});
-		});
+    <script>
+      // Auto-hide flash messages after 5 seconds
+      document.addEventListener("DOMContentLoaded", function () {
+        const flashMessages = document.querySelectorAll(".alert");
+        flashMessages.forEach((msg) => {
+          setTimeout(() => {
+            msg.style.transition = "opacity 1s";
+            msg.style.opacity = "0";
+            setTimeout(() => msg.remove(), 1000);
+          }, 5000);
+        });
+      });
+      // Add this to your existing JavaScript
+      document.addEventListener("DOMContentLoaded", function () {
+        const flashMessages = document.querySelectorAll(".flash-message");
+
+        flashMessages.forEach((message) => {
+          // Remove element after animation completes
+          message.addEventListener("animationend", function (e) {
+            if (e.animationName === "flashExit") {
+              message.remove();
+            }
+          });
+
+          // Optional: Allow manual dismissal
+          message.addEventListener("click", () => {
+            message.style.animation = "flashExit 0.4s forwards";
+          });
+        });
+      });
     </script>
-</body>
+  </body>
 </html>
-
-
-

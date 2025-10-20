@@ -30,10 +30,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const centerY = rect.height / 2;
             const deltaX = (x - centerX) / centerX * 10;
             const deltaY = (y - centerY) / centerY * 10;
-            
+
             button.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
         });
-        
+
         button.addEventListener('mouseleave', () => {
             button.style.transform = '';
         });
@@ -41,20 +41,97 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Navbar Scroll Effect
     window.addEventListener('scroll', () => {
-        const navbar = document.querySelector('.navbar');
+        const navbarEl = document.querySelector('.navbar');
+        if (!navbarEl) return;
         if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
+            navbarEl.classList.add('scrolled');
         } else {
-            navbar.classList.remove('scrolled');
+            navbarEl.classList.remove('scrolled');
         }
     });
 
-    // Mobile Menu Toggle
+    // ===========================
+    // Responsive Navbar (NEW)
+    // ===========================
+
+    // Elements we need
+    const navbar = document.querySelector('.navbar');
+    const container = document.querySelector('.navbar .container');
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
-    
+    const logo = container ? container.querySelector('.logo') : null;
+
+    // Bail out if markup isn't present on this page
+    if (!navbar || !container || !hamburger || !navLinks || !logo) return;
+
+    // Collapse when items would wrap onto two lines
+    function updateNavbarLayout() {
+        // Remember if we were collapsed before measuring
+        const wasCollapsed = navbar.classList.contains('is-collapsed');
+
+        // Reset to expanded state to measure true widths
+        navbar.classList.remove('is-collapsed');
+        navLinks.classList.remove('active');
+        document.body.classList.remove('menu-open');
+
+        // Calculate required width: logo + nav items + small gutter
+        var gutter = 24;
+        var logoWidth = Math.ceil(logo.getBoundingClientRect().width);
+        var navWidth = Math.ceil(navLinks.scrollWidth);
+        var used = logoWidth + navWidth + gutter;
+
+        // If used space exceeds container width, collapse
+        if (used > container.clientWidth) {
+            navbar.classList.add('is-collapsed');
+        } else if (wasCollapsed) {
+            // Ensure hamburger visuals reset when expanding back
+            hamburger.classList.remove('active');
+            hamburger.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    // Debounce helper for resize
+    function debounce(fn, delay) {
+        let t;
+        return function() {
+            clearTimeout(t);
+            const args = arguments;
+            const ctx = this;
+            t = setTimeout(function(){ fn.apply(ctx, args); }, delay);
+        };
+    }
+
+    // Call once fonts are ready (widths change when webfonts load)
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(updateNavbarLayout);
+    }
+    // Fallback immediate call
+    setTimeout(updateNavbarLayout, 0);
+
+    // Re-check on resize / orientation change
+    window.addEventListener('resize', debounce(updateNavbarLayout, 150));
+    window.addEventListener('orientationchange', updateNavbarLayout);
+
+    // Hamburger toggle (only acts in collapsed mode)
     hamburger.addEventListener('click', () => {
+        if (!navbar.classList.contains('is-collapsed')) return;
+
         hamburger.classList.toggle('active');
         navLinks.classList.toggle('active');
+
+        const open = navLinks.classList.contains('active');
+        hamburger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        document.body.classList.toggle('menu-open', open);
+    });
+
+    // Optional: close drawer when a nav link is clicked (good UX)
+    navLinks.addEventListener('click', (e) => {
+        if (!navbar.classList.contains('is-collapsed')) return;
+        if (e.target.closest('a')) {
+            navLinks.classList.remove('active');
+            hamburger.classList.remove('active');
+            hamburger.setAttribute('aria-expanded', 'false');
+            document.body.classList.remove('menu-open');
+        }
     });
 });

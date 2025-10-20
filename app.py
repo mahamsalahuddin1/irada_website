@@ -43,6 +43,16 @@ load_dotenv()
 app = Flask(__name__, static_folder='static')
 
 IS_PROD = os.getenv("ENV", "development").lower() in ("prod", "production", "live")
+USE_DEV_SSL = os.getenv("DEV_SSL", "0").lower() in ("1","true","yes","on")
+
+if USE_DEV_SSL and not IS_PROD:
+    PREFERRED_SCHEME = "https"
+    COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+else:
+    PREFERRED_SCHEME = "http"
+    COOKIE_SECURE = IS_PROD
+    SESSION_COOKIE_SECURE = IS_PROD
 
 # ---- Content Security Policy (minimal-change, safe-by-default) ----
 CSP = {
@@ -85,14 +95,16 @@ CSP = {
     "form-action": "'self'",
 }
 
+IS_PROD = os.getenv("ENV", "development").lower() in ("prod","production","live")
+
 Talisman(
     app,
     content_security_policy=CSP,
     frame_options='DENY',
     referrer_policy='strict-origin-when-cross-origin',
     permissions_policy="geolocation=(), microphone=(), camera=(), payment=(), usb=(), browsing-topics=()",
-    force_https=IS_PROD,
-    #force_https=IS_PROD,  # True in prod, False in local/dev
+    force_https=IS_PROD,                 # False in dev
+    strict_transport_security=IS_PROD    # turn off HSTS in dev
 )
 
 
@@ -102,6 +114,8 @@ csrf.init_app(app)
 app.config["RATELIMIT_HEADERS_ENABLED"] = True
 
 # IS_PROD = os.getenv("ENV", "production").lower() in ("prod", "production", "live")
+app.logger.info("IS_PROD=%s  PREFERRED_URL_SCHEME=%s  SESSION_COOKIE_SECURE=%s",
+                IS_PROD, app.config.get("PREFERRED_URL_SCHEME"), app.config.get("SESSION_COOKIE_SECURE"))
 
 
 # --- Cookie/Sessions hardening ---
@@ -114,15 +128,15 @@ COOKIE_SAMESITE = os.getenv("COOKIE_SAMESITE", "Lax")
 
 
 app.config.update(
-    DEBUG=False,                   
-    TESTING=False,
-    PROPAGATE_EXCEPTIONS=False,    
-    TRAP_HTTP_EXCEPTIONS=False,    
-
-    # Cookies (use your computed values)
+    PREFERRED_URL_SCHEME=PREFERRED_SCHEME,
+    SESSION_COOKIE_SECURE=SESSION_COOKIE_SECURE,
     SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SAMESITE=COOKIE_SAMESITE,  
-    SESSION_COOKIE_SECURE=COOKIE_SECURE,     
+    SESSION_COOKIE_SAMESITE=os.getenv("COOKIE_SAMESITE", "Lax"),
+    SEND_FILE_MAX_AGE_DEFAULT=0,
+    DEBUG=False,
+    TESTING=False,
+    PROPAGATE_EXCEPTIONS=False,
+    TRAP_HTTP_EXCEPTIONS=False,
 )
 
 
@@ -187,13 +201,26 @@ def inject_csrf():
 
 
 
+@app.route('/__diag')
+def __diag():
+    return jsonify({
+        "IS_PROD": IS_PROD,
+        "url": request.url,
+        "scheme": request.scheme,
+        "headers": {
+            "X-Forwarded-Proto": request.headers.get("X-Forwarded-Proto"),
+            "Strict-Transport-Security": request.headers.get("Strict-Transport-Security")
+        }
+    })
 
 
 # Security headers 
 @app.after_request
 def set_security_headers(resp):
     resp.headers['X-Content-Type-Options'] = 'nosniff'
-    #resp.headers['Permissions-Policy'] = "geolocation=(), microphone=(), camera=(), payment=(), usb=()"
+    # In dev: guarantee no HSTS leaks from anywhere (Flask, proxy, etc.)
+    if not IS_PROD:
+        resp.headers.pop('Strict-Transport-Security', None)
     return resp
 
 # ---------- Generic error responses (keep messages consistent) ----------

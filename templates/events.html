@@ -32,6 +32,7 @@
       /* Hero Section */
       .events-hero {
         text-align: center;
+        margin-top: 40px;
         margin-bottom: 80px;
       }
 
@@ -846,24 +847,26 @@
         }
       }
       /* Keep cards uniform without squishing */
-.media-thumbnail {
-  width: 100%;
-  aspect-ratio: 16 / 9;   /* add this if you don't already have an aspect */
-  overflow: hidden;       /* ensures image crops cleanly */
-  border-radius: 12px;    /* match your current style */
-}
+      .media-thumbnail {
+        width: 100%;
+        aspect-ratio: 16 / 9; /* add this if you don't already have an aspect */
+        overflow: hidden; /* ensures image crops cleanly */
+        border-radius: 12px; /* match your current style */
+      }
 
-/* Let images fill their frame */
-.media-thumb {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
+      /* Let images fill their frame */
+      .media-thumb {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+      }
 
-/* If any old inline widths slipped in, make sure they don't win */
-.media-thumb[style] { width: 100% !important; height: 100% !important; }
-
+      /* If any old inline widths slipped in, make sure they don't win */
+      .media-thumb[style] {
+        width: 100% !important;
+        height: 100% !important;
+      }
     </style>
   </head>
   <body>
@@ -871,7 +874,7 @@
     <div id="particles-js"></div>
 
     <!-- Navigation -->
-     {% include "_navbar.html" %}
+    {% include "_navbar.html" %}
 
     <!-- Main Content -->
     <main class="events-container">
@@ -982,13 +985,23 @@
             style="animation-delay: {{ loop.index0 * 0.1 }}s"
           >
             <div class="media-thumbnail">
-  {% set img = item.image_path %}
-  {% if img and img.startswith('static/') %}
-    <img class="media-thumb" src="{{ url_for('static', filename=img[7:]) }}" alt="{{ item.title }}" loading="lazy">
-  {% else %}
-    <img class="media-thumb" src="{{ img or '' }}" alt="{{ item.title }}" loading="lazy">
-  {% endif %}
-</div>
+              {% set img = item.image_path %} {% if img and
+              img.startswith('static/') %}
+              <img
+                class="media-thumb"
+                src="{{ url_for('static', filename=img[7:]) }}"
+                alt="{{ item.title }}"
+                loading="lazy"
+              />
+              {% else %}
+              <img
+                class="media-thumb"
+                src="{{ img or '' }}"
+                alt="{{ item.title }}"
+                loading="lazy"
+              />
+              {% endif %}
+            </div>
 
             <div class="media-info">
               <h3 class="media-title">{{ item.title }}</h3>
